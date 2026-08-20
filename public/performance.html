@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | Student Performance Management</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout-root">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap">
+            <span class="sms-logo-text">i-SMS</span>
+          </div>
+          <div class="sms-dv-badge">
+            <span class="sms-dv-by">by</span>
+            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="students.html" class="sidebar-link">Student Directory</a>
+        <a href="performance.html" class="sidebar-link is-active">Performance Metrics</a>
+        <a href="relationship.html" class="sidebar-link">Relationship Logs</a>
+        <a href="srm-dashboard.html" class="sidebar-link">SRM Analytics</a>
+        <a href="reports.html" class="sidebar-link">Reports Portal</a>
+        <a href="analytics.html" class="sidebar-link">Advanced Analytics</a>
+      </nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>Student Performance & Assessments</h1>
+          <p>Monitor module scorecards, assignment statuses, attendance records, and exam results.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <circle cx="12" cy="12" r="4.5"></circle>
+                  <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+                </svg>
+              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
+                </svg>
+              </span>
+            </span>
+            <span class="theme-toggle__label" data-theme-label>Light</span>
+          </button>
+          <div class="topbar-profile"></div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-container">
+        <!-- Control buttons -->
+        <section style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <button class="btn-primary" id="bulkSyncBtn" style="padding:8px 14px; font-size:12px; border-radius:var(--radius-sm); cursor:pointer;">
+              Sync External Test Report
+            </button>
+          </div>
+          <div>
+            <button class="btn-secondary" id="exportPerformance" style="padding:8px 14px; font-size:12px; border-radius:var(--radius-sm); cursor:pointer;">
+              Export Performance (CSV)
+            </button>
+          </div>
+        </section>
+
+        <!-- Filters Bar -->
+        <section class="filter-bar">
+          <div class="filter-group">
+            <label for="perfSearch">Search Student</label>
+            <input type="search" id="perfSearch" class="filter-input" placeholder="Search by name, ID...">
+          </div>
+          <div class="filter-group">
+            <label for="perfBatch">Filter Batch</label>
+            <select id="perfBatch" class="filter-select">
+              <option value="All">All Batches</option>
+              <option value="B-2026-A">B-2026-A</option>
+              <option value="B-2026-B">B-2026-B</option>
+              <option value="B-2026-C">B-2026-C</option>
+              <option value="B-2026-D">B-2026-D</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Performance Matrix Table -->
+        <section class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Full Name</th>
+                <th>Batch</th>
+                <th>Attendance %</th>
+                <th>Assignment Done %</th>
+                <th>MCQ Exam</th>
+                <th>Practical Exam</th>
+                <th>Paper Exam</th>
+                <th>Overall Score</th>
+                <th>Grade</th>
+                <th>Remarks</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="performanceTableBody">
+              <tr><td colspan="12">Loading academic cards...</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Edit Scorecard Modal -->
+  <div class="modal-backdrop" id="editScorecardModal">
+    <div class="modal" style="max-width: 650px;">
+      <div class="modal-head">
+        <h3>Update Student Scorecard</h3>
+        <button class="drawer-close" id="closeScorecardModal">&times;</button>
+      </div>
+      <form id="editScorecardForm">
+        <div class="modal-body" style="max-height: 60vh;">
+          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Attendance & Core</h4>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div class="form-group">
+              <label for="scoreAttendance">Attendance %</label>
+              <input type="number" id="scoreAttendance" class="form-control" min="0" max="100" required>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <span style="font-size:12px; font-weight:600; color:var(--text-muted);">Assignments (Session 1-5)</span>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
+                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
+                  <input type="checkbox" id="assign1"> S1
+                </label>
+                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
+                  <input type="checkbox" id="assign2"> S2
+                </label>
+                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
+                  <input type="checkbox" id="assign3"> S3
+                </label>
+                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
+                  <input type="checkbox" id="assign4"> S4
+                </label>
+                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
+                  <input type="checkbox" id="assign5"> S5
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Exams & Assessments</h4>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div class="form-group">
+              <label for="examMcq">MCQ Score (%)</label>
+              <input type="number" id="examMcq" class="form-control" min="0" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="examPractical">Practical Score (%)</label>
+              <input type="number" id="examPractical" class="form-control" min="0" max="100" required>
+            </div>
+            <div class="form-group">
+              <label for="examHardpaper">Hard Paper Score (%)</label>
+              <input type="number" id="examHardpaper" class="form-control" min="0" max="100" required>
+            </div>
+          </div>
+
+          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Module Academics Score (0-100)</h4>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;" id="modulesInputGrid">
+            <!-- Render modules input fields here dynamically -->
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" id="cancelScorecardModal">Cancel</button>
+          <button type="submit" class="btn-primary">Update Scorecard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { apiFetch } from './app.js';
+
+    let currentStudentId = null;
+    let cachedPerformanceList = [];
+
+    async function loadPerformance() {
+      try {
+        cachedPerformanceList = await apiFetch('/api/performance');
+        renderPerformanceList();
+      } catch (err) {
+        console.error("Failed to load performance metrics:", err);
+      }
+    }
+
+    function renderPerformanceList() {
+      const search = document.getElementById("perfSearch").value.toLowerCase();
+      const batch = document.getElementById("perfBatch").value;
+      const tbody = document.getElementById("performanceTableBody");
+
+      let filtered = cachedPerformanceList;
+      if (search) {
+        filtered = filtered.filter(s => s.id.toLowerCase().includes(search) || s.name.toLowerCase().includes(search));
+      }
+      if (batch && batch !== 'All') {
+        filtered = filtered.filter(s => s.batch === batch);
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12">No performance scorecard matches search constraints.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(s => {
+        // Calculate Grade
+        let grade = "F";
+        if (s.overallScore >= 90) grade = "A+";
+        else if (s.overallScore >= 80) grade = "A";
+        else if (s.overallScore >= 70) grade = "B";
+        else if (s.overallScore >= 50) grade = "C";
+
+        // Attendance badge style
+        const attStyle = s.attendance < 75 ? 'color:var(--danger);font-weight:700;' : 'font-weight:600;';
+        
+        return `
+          <tr>
+            <td style="font-weight:700;">${s.id}</td>
+            <td style="font-weight:600; text-align:left; color:var(--heading);">${s.name}</td>
+            <td><span class="badge" style="background:var(--primary-soft); color:var(--primary); font-weight:700;">${s.batch}</span></td>
+            <td style="${attStyle}">${s.attendance}%</td>
+            <td>${s.assignmentCompletion}%</td>
+            <td>${s.assessments.mcq}%</td>
+            <td>${s.assessments.practical}%</td>
+            <td>${s.assessments.hardpaper}%</td>
+            <td style="font-weight:700; color:var(--primary);">${s.overallScore}%</td>
+            <td style="font-weight:800;">${grade}</td>
+            <td style="font-size:11px; font-weight:600; color:var(--text-muted);">${s.remarks}</td>
+            <td>
+              <button class="btn-primary btn-edit-scores" data-id="${s.id}" style="padding:3px 8px; font-size:11px; border-radius:var(--radius-sm); cursor:pointer;">Update Scores</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll(".btn-edit-scores").forEach(btn => {
+        btn.addEventListener("click", () => openScorecardModal(btn.dataset.id));
+      });
+    }
+
+    async function openScorecardModal(studentId) {
+      currentStudentId = studentId;
+      try {
+        const student = await apiFetch(`/api/students/${studentId}`);
+        
+        document.getElementById("scoreAttendance").value = student.attendance;
+        
+        // Checklist
+        document.getElementById("assign1").checked = student.assignments.session1 === 'Completed';
+        document.getElementById("assign2").checked = student.assignments.session2 === 'Completed';
+        document.getElementById("assign3").checked = student.assignments.session3 === 'Completed';
+        document.getElementById("assign4").checked = student.assignments.session4 === 'Completed';
+        document.getElementById("assign5").checked = student.assignments.session5 === 'Completed';
+
+        // Assessments
+        document.getElementById("examMcq").value = student.assessments.mcq;
+        document.getElementById("examPractical").value = student.assessments.practical;
+        document.getElementById("examHardpaper").value = student.assessments.hardpaper;
+
+        // Render dynamic input fields for all course modules
+        const modGrid = document.getElementById("modulesInputGrid");
+        const modules = Object.keys(student.academicScores);
+        modGrid.innerHTML = modules.map(m => `
+          <div class="form-group">
+            <label for="mod_${m}" style="text-transform:uppercase;">${m}</label>
+            <input type="number" id="mod_${m}" class="form-control module-score-input" data-module="${m}" min="0" max="100" value="${student.academicScores[m]}" required>
+          </div>
+        `).join('');
+
+        document.getElementById("editScorecardModal").classList.add("is-open");
+
+      } catch (err) {
+        console.error("Failed to load student for scorecard edit:", err);
+      }
+    }
+
+    // Submit scores update
+    document.getElementById("editScorecardForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Collect module scores
+      const scores = {};
+      document.querySelectorAll(".module-score-input").forEach(input => {
+        scores[input.dataset.module] = parseInt(input.value);
+      });
+
+      const payload = {
+        attendance: document.getElementById("scoreAttendance").value,
+        assignments: {
+          session1: document.getElementById("assign1").checked ? 'Completed' : 'Pending',
+          session2: document.getElementById("assign2").checked ? 'Completed' : 'Pending',
+          session3: document.getElementById("assign3").checked ? 'Completed' : 'Pending',
+          session4: document.getElementById("assign4").checked ? 'Completed' : 'Pending',
+          session5: document.getElementById("assign5").checked ? 'Completed' : 'Pending'
+        },
+        assessments: {
+          mcq: parseInt(document.getElementById("examMcq").value),
+          practical: parseInt(document.getElementById("examPractical").value),
+          hardpaper: parseInt(document.getElementById("examHardpaper").value)
+        },
+        scores
+      };
+
+      try {
+        await apiFetch(`/api/performance/${currentStudentId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        
+        // Reset and close
+        document.getElementById("editScorecardModal").classList.remove("is-open");
+        loadPerformance();
+      } catch (err) {
+        console.error("Failed to save student scores:", err);
+      }
+    });
+
+    // Bulk Synchronize excel
+    document.getElementById("bulkSyncBtn").addEventListener("click", async () => {
+      if (confirm("This will simulate synchronizing student exam matrices from an external grading tool sheet. Proceed?")) {
+        try {
+          const res = await apiFetch('/api/performance/bulk-import', { method: 'POST' });
+          alert(res.message);
+          loadPerformance();
+        } catch (err) {
+          console.error("Failed to synchronize scores:", err);
+        }
+      }
+    });
+
+    // Mock CSV Export
+    document.getElementById("exportPerformance").addEventListener("click", () => {
+      let csvContent = "data:text/csv;charset=utf-8,Student ID,Name,Batch,Attendance %,Assignment %,MCQ Exam,Practical Exam,Paper Exam,Overall Score\n";
+      cachedPerformanceList.forEach(s => {
+        csvContent += `${s.id},${s.name},${s.batch},${s.attendance},${s.assignmentCompletion},${s.assessments.mcq},${s.assessments.practical},${s.assessments.hardpaper},${s.overallScore}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "student_performance_records.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Modal close
+    const closeModal = () => {
+      document.getElementById("editScorecardModal").classList.remove("is-open");
+      currentStudentId = null;
+    };
+
+    document.getElementById("closeScorecardModal").addEventListener("click", closeModal);
+    document.getElementById("cancelScorecardModal").addEventListener("click", closeModal);
+
+    // Filter triggers
+    document.getElementById("perfSearch").addEventListener("input", renderPerformanceList);
+    document.getElementById("perfBatch").addEventListener("change", renderPerformanceList);
+
+    loadPerformance();
+  </script>
+</body>
+</html>

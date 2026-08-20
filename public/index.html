@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS Platform | Welcome</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Hero Section (replicated from i-cms style layout) -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-toolbar">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+          <span class="theme-toggle__stack" aria-hidden="true">
+            <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                <circle cx="12" cy="12" r="4.5"></circle>
+                <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+              </svg>
+            </span>
+            <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
+              </svg>
+            </span>
+          </span>
+          <span class="theme-toggle__label" data-theme-label>Light</span>
+        </button>
+      </div>
+
+      <!-- Centered Stacked Logo -->
+      <div class="hero-logo">
+        <div class="sms-logo-wrap sms-logo--brand">
+          <div class="sms-text-wrap">
+            <span class="sms-logo-text">i-SMS</span>
+          </div>
+          <div class="sms-dv-badge">
+            <span class="sms-dv-by">by</span>
+            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
+          </div>
+        </div>
+      </div>
+
+      <h1 class="hero-title">Welcome to i-SMS Portal</h1>
+      <p class="hero-subtitle">Student Management & Analytics Suite</p>
+      
+      <div class="hero-description">
+        <p>A comprehensive platform designed for student performance mapping, academic scorecards, counselor review diaries, and real-time cohort analytics.</p>
+      </div>
+      
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="btnAccessPortal">Access Portal</button>
+        <button class="btn btn-secondary" id="btnReportIssue">Report Issue</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal-backdrop">
+    <div class="modal-overlay" id="loginOverlay"></div>
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Student Portal Login</h3>
+        <button class="modal-close" id="closeLoginModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username *</label>
+            <input type="text" id="username" class="form-control" placeholder="e.g. admin or counselor" required autocomplete="username">
+          </div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="password">Password *</label>
+            <input type="password" id="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn-primary form-control" style="cursor:pointer; font-weight:700;">Sign In</button>
+        </form>
+
+        <div class="modal-footer-hints">
+          <strong>Credentials Hint:</strong><br>
+          Admin: <code>admin</code> / <code>admin</code><br>
+          Counselor: <code>counselor</code> / <code>counselor</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Issue Report Modal -->
+  <div id="issueModal" class="modal-backdrop">
+    <div class="modal-overlay" id="issueOverlay"></div>
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Report Portal Issue</h3>
+        <button class="modal-close" id="closeIssueModal">&times;</button>
+      </div>
+      <form id="issueForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="issueEmail">Your Email *</label>
+            <input type="email" id="issueEmail" class="form-control" required placeholder="name@example.com">
+          </div>
+          <div class="form-group">
+            <label for="issueMessage">Issue Description *</label>
+            <textarea id="issueMessage" class="form-control" rows="4" placeholder="Detail the error you encountered..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" id="cancelIssueBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Submit Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initThemeSystem } from './theme.js';
+    import { apiFetch } from './app.js';
+    
+    // Modal controls
+    const loginModal = document.getElementById("loginModal");
+    const issueModal = document.getElementById("issueModal");
+
+    const openLogin = () => loginModal.classList.add("is-open");
+    const closeLogin = () => loginModal.classList.remove("is-open");
+    const openIssue = () => issueModal.classList.add("is-open");
+    const closeIssue = () => issueModal.classList.remove("is-open");
+
+    document.getElementById("btnAccessPortal").addEventListener("click", openLogin);
+    document.getElementById("closeLoginModal").addEventListener("click", closeLogin);
+    document.getElementById("loginOverlay").addEventListener("click", closeLogin);
+
+    document.getElementById("btnReportIssue").addEventListener("click", openIssue);
+    document.getElementById("closeIssueModal").addEventListener("click", closeIssue);
+    document.getElementById("issueOverlay").addEventListener("click", closeIssue);
+    document.getElementById("cancelIssueBtn").addEventListener("click", closeIssue);
+
+    // Bind login form
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      try {
+        const data = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username, password })
+        });
+        
+        localStorage.setItem("smsUser", JSON.stringify(data.user));
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        // apiFetch handles standard errors
+      }
+    });
+
+    // Bind issue form
+    document.getElementById("issueForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      alert("Portal Issue Submitted. Our technical support team will analyze your report.");
+      closeIssue();
+      document.getElementById("issueForm").reset();
+    });
+
+    // Initialize theme system
+    initThemeSystem();
+  </script>
+</body>
+</html>

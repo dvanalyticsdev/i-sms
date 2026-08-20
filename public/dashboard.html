@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | Student Dashboard</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="layout-root">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap">
+            <span class="sms-logo-text">i-SMS</span>
+          </div>
+          <div class="sms-dv-badge">
+            <span class="sms-dv-by">by</span>
+            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link is-active">Dashboard</a>
+        <a href="students.html" class="sidebar-link">Student Directory</a>
+        <a href="performance.html" class="sidebar-link">Performance Metrics</a>
+        <a href="relationship.html" class="sidebar-link">Relationship Logs</a>
+        <a href="srm-dashboard.html" class="sidebar-link">SRM Analytics</a>
+        <a href="reports.html" class="sidebar-link">Reports Portal</a>
+        <a href="analytics.html" class="sidebar-link">Advanced Analytics</a>
+      </nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>SMS Dashboard</h1>
+          <p>Academic performance, attendance trends, and action item highlights.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <circle cx="12" cy="12" r="4.5"></circle>
+                  <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+                </svg>
+              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
+                </svg>
+              </span>
+            </span>
+            <span class="theme-toggle__label" data-theme-label>Light</span>
+          </button>
+          <div class="topbar-profile"></div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-container">
+        <!-- KPI Metrics Grid -->
+        <section class="kpi-grid">
+          <article class="card kpi-card">
+            <p>Total Students</p>
+            <h2 id="totalStudents">0</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Active Students</p>
+            <h2 id="activeStudents">0</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Active Batches</p>
+            <h2 id="activeBatches">0</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Avg Attendance</p>
+            <h2 id="attendanceRate">0%</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Avg Assignment</p>
+            <h2 id="assignmentCompletionRate">0%</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Avg Score</p>
+            <h2 id="overallPerformance">0%</h2>
+          </article>
+        </section>
+
+        <!-- Main Dashboard Split Layout -->
+        <div class="dashboard-layout">
+          <!-- Left Main Area (Charts) -->
+          <div style="display:flex; flex-direction:column; gap:18px;">
+            <!-- Trends Grid -->
+            <section class="chart-grid">
+              <article class="card chart-card">
+                <div class="card-head">
+                  <h3>Attendance & Assignment Trends</h3>
+                  <p>Aggregated weekly metrics across all active programs</p>
+                </div>
+                <div style="position:relative; flex-grow:1; min-height:220px;">
+                  <canvas id="trendsChart" aria-label="Attendance and assignment trends chart"></canvas>
+                </div>
+              </article>
+              <article class="card chart-card">
+                <div class="card-head">
+                  <h3>Academic Score Distribution</h3>
+                  <p>Count of students falling into specific grade ranges</p>
+                </div>
+                <div style="position:relative; flex-grow:1; min-height:220px;">
+                  <canvas id="scoresChart" aria-label="Academic score distribution chart"></canvas>
+                </div>
+              </article>
+            </section>
+
+            <!-- Upcoming Classes Grid -->
+            <article class="card">
+              <div class="card-head">
+                <h3>Today's Classes Schedule</h3>
+                <p>Allocated faculty and batch tracks for today</p>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Time Slot</th>
+                      <th>Course Program</th>
+                      <th>Class Topic</th>
+                      <th>Batch Code</th>
+                      <th>Faculty In Charge</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scheduleTable">
+                    <tr><td colspan="5">Loading classes...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <!-- Right Sidebar Widgets (Top & Weak Students) -->
+          <div style="display:flex; flex-direction:column; gap:18px;">
+            <!-- Top Performers -->
+            <article class="card" style="padding:14px;">
+              <div class="card-head" style="margin-bottom:10px; padding-bottom:8px;">
+                <h3>Top Performers</h3>
+              </div>
+              <div id="topPerformersList" style="display:flex; flex-direction:column; gap:10px;">
+                <div style="font-size:12px; color:var(--text-muted);">Loading performers...</div>
+              </div>
+            </article>
+
+            <!-- Weak Students -->
+            <article class="card" style="padding:14px;">
+              <div class="card-head" style="margin-bottom:10px; padding-bottom:8px;">
+                <h3>Weak Performers</h3>
+              </div>
+              <div id="weakPerformersList" style="display:flex; flex-direction:column; gap:10px;">
+                <div style="font-size:12px; color:var(--text-muted);">Loading warnings...</div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { apiFetch } from './app.js';
+    import { readThemePalette } from './theme.js';
+
+    let trendsChartInstance = null;
+    let scoresChartInstance = null;
+
+    async function initDashboard() {
+      try {
+        const data = await apiFetch('/api/dashboard/sms');
+        const stats = data.stats;
+        
+        // Populate KPIs
+        document.getElementById("totalStudents").textContent = stats.totalStudents;
+        document.getElementById("activeStudents").textContent = stats.activeStudents;
+        document.getElementById("activeBatches").textContent = stats.activeBatches;
+        document.getElementById("attendanceRate").textContent = `${stats.attendanceRate}%`;
+        document.getElementById("assignmentCompletionRate").textContent = `${stats.assignmentCompletionRate}%`;
+        document.getElementById("overallPerformance").textContent = `${stats.overallPerformance}%`;
+
+        // Render Today's Classes Schedule
+        const scheduleTable = document.getElementById("scheduleTable");
+        scheduleTable.innerHTML = data.upcomingClasses.map(c => `
+          <tr>
+            <td style="font-weight:700;">${c.time}</td>
+            <td>${c.course}</td>
+            <td>${c.topic}</td>
+            <td><span class="badge" style="background:var(--primary-soft); color:var(--primary); font-weight:700;">${c.batch}</span></td>
+            <td>${c.faculty}</td>
+          </tr>
+        `).join('');
+
+        // Render Top Performers
+        const topList = document.getElementById("topPerformersList");
+        topList.innerHTML = stats.topPerformers.length === 0 
+          ? '<div style="font-size:12px;color:var(--text-muted);">None found</div>'
+          : stats.topPerformers.map(s => `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
+              <div>
+                <a href="students.html?id=${s.id}" style="font-weight:700; color:var(--heading); font-size:12px; text-decoration:none;">${s.name}</a>
+                <div style="font-size:10px; color:var(--text-muted);">${s.batch}</div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge badge-active" style="font-size:10px;">${s.performance}% Score</span>
+                <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${s.attendance}%</div>
+              </div>
+            </div>
+          `).join('');
+
+        // Render Weak Performers
+        const weakList = document.getElementById("weakPerformersList");
+        weakList.innerHTML = stats.weakStudents.length === 0
+          ? '<div style="font-size:12px;color:var(--text-muted); text-align:center; padding:10px;">All students in good standing!</div>'
+          : stats.weakStudents.map(s => `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
+              <div>
+                <a href="students.html?id=${s.id}" style="font-weight:700; color:var(--heading); font-size:12px; text-decoration:none;">${s.name}</a>
+                <div style="font-size:10px; color:var(--text-muted);">${s.batch}</div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge badge-dropped" style="font-size:10px;">${s.performance}% Score</span>
+                <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${s.attendance}%</div>
+              </div>
+            </div>
+          `).join('');
+
+        // Initialize Charts
+        renderCharts();
+
+      } catch (err) {
+        console.error("Dashboard initialization failed:", err);
+      }
+    }
+
+    function renderCharts() {
+      const palette = readThemePalette();
+      
+      // Destroy existing charts to redraw on theme change
+      if (trendsChartInstance) trendsChartInstance.destroy();
+      if (scoresChartInstance) scoresChartInstance.destroy();
+
+      // Chart 1: Attendance & Assignments
+      const ctxTrends = document.getElementById("trendsChart").getContext("2d");
+      trendsChartInstance = new Chart(ctxTrends, {
+        type: 'line',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+          datasets: [
+            {
+              label: 'Attendance Rate',
+              data: [82, 85, 84, 88, 89],
+              borderColor: palette.chartSeries[1], // Blue
+              backgroundColor: 'transparent',
+              tension: 0.2,
+              borderWidth: 2
+            },
+            {
+              label: 'Assignment Completion',
+              data: [70, 72, 75, 78, 81],
+              borderColor: palette.chartSeries[0], // Orange
+              backgroundColor: palette.chartFill,
+              fill: true,
+              tension: 0.2,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: palette.chartGrid.includes('232') ? '#333' : '#cbd5e1',
+                font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 50,
+              max: 100,
+              grid: { color: palette.chartGrid },
+              ticks: { color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
+            }
+          }
+        }
+      });
+
+      // Chart 2: Scores Distribution
+      const ctxScores = document.getElementById("scoresChart").getContext("2d");
+      scoresChartInstance = new Chart(ctxScores, {
+        type: 'bar',
+        data: {
+          labels: ['<50% (Fail)', '50-69% (Grade C)', '70-85% (Grade B)', '86-100% (Grade A)'],
+          datasets: [{
+            label: 'Students Count',
+            data: [1, 2, 3, 2],
+            backgroundColor: palette.chartSeries.slice(0, 4),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' },
+              grid: { color: palette.chartGrid }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
+            }
+          }
+        }
+      });
+    }
+
+    // Redraw charts when theme changes
+    document.addEventListener("dv-theme-change", () => {
+      renderCharts();
+    });
+
+    initDashboard();
+  </script>
+</body>
+</html>

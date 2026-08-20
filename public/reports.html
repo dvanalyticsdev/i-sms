@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | Reports Portal</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout-root">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap">
+            <span class="sms-logo-text">i-SMS</span>
+          </div>
+          <div class="sms-dv-badge">
+            <span class="sms-dv-by">by</span>
+            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="students.html" class="sidebar-link">Student Directory</a>
+        <a href="performance.html" class="sidebar-link">Performance Metrics</a>
+        <a href="relationship.html" class="sidebar-link">Relationship Logs</a>
+        <a href="srm-dashboard.html" class="sidebar-link">SRM Analytics</a>
+        <a href="reports.html" class="sidebar-link is-active">Reports Portal</a>
+        <a href="analytics.html" class="sidebar-link">Advanced Analytics</a>
+      </nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>Reports Portal</h1>
+          <p>Generate, filter, and export customized academic, counseling and batch-level datasets.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <circle cx="12" cy="12" r="4.5"></circle>
+                  <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+                </svg>
+              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
+                </svg>
+              </span>
+            </span>
+            <span class="theme-toggle__label" data-theme-label>Light</span>
+          </button>
+          <div class="topbar-profile"></div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-container">
+        <!-- Configuration Card -->
+        <article class="card">
+          <div class="card-head">
+            <h3>Report Query Parameters</h3>
+            <p>Select target dataset configurations and filters</p>
+          </div>
+          
+          <form id="reportConfigForm" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:18px;">
+            <div class="form-group">
+              <label for="reportType">Report Template</label>
+              <select id="reportType" class="form-control" required>
+                <option value="Student">Student Roster Report</option>
+                <option value="Performance">Academic Scorecard Report</option>
+                <option value="SRM">SRM Review & Calls Report</option>
+                <option value="Attendance">Attendance Ledger Report</option>
+                <option value="Assignment">Assignment Status Report</option>
+                <option value="Assessment">MCQ & Exam Assessment Report</option>
+                <option value="Faculty">Faculty Load & Rating Report</option>
+                <option value="Batch">Batch Distribution Report</option>
+                <option value="Course">Course Enrollments Report</option>
+                <option value="Management">Management Executive Summary</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="reportBatch">Batch Scope</label>
+              <select id="reportBatch" class="form-control">
+                <option value="All">All Batches</option>
+                <option value="B-2026-A">B-2026-A</option>
+                <option value="B-2026-B">B-2026-B</option>
+                <option value="B-2026-C">B-2026-C</option>
+                <option value="B-2026-D">B-2026-D</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="reportProgram">Program Stream</label>
+              <select id="reportProgram" class="form-control">
+                <option value="All">All Streams</option>
+                <option value="Advanced AI & ML with Gen AI">Advanced AI & ML</option>
+                <option value="Data Science Master Program">Data Science</option>
+                <option value="Business Analytics Pro">Business Analytics</option>
+                <option value="Data Engineering Master">Data Engineering</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="justify-content: flex-end; margin-bottom: 0; padding-top: 20px;">
+              <button type="submit" class="btn-primary form-control" style="cursor:pointer; font-weight:700; height: 38px;">Generate Preview</button>
+            </div>
+          </form>
+        </article>
+
+        <!-- Preview & Export section -->
+        <article class="card" id="reportPreviewCard" style="display:none;">
+          <div class="card-head">
+            <h3 id="previewTitle">Report Preview</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-secondary" id="downloadPdf" style="padding:6px 12px; font-size:11px; cursor:pointer;">Export PDF</button>
+              <button class="btn-secondary" id="downloadExcel" style="padding:6px 12px; font-size:11px; cursor:pointer;">Export Excel</button>
+              <button class="btn-secondary" id="downloadCsv" style="padding:6px 12px; font-size:11px; cursor:pointer;">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="reportPreviewTable">
+              <thead id="reportPreviewHeader">
+                <!-- Dynamic headers -->
+              </thead>
+              <tbody id="reportPreviewBody">
+                <!-- Dynamic body -->
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { apiFetch } from './app.js';
+
+    let currentReportData = [];
+    let currentReportHeaders = [];
+    let currentReportName = "";
+
+    document.getElementById("reportConfigForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const type = document.getElementById("reportType").value;
+      const batch = document.getElementById("reportBatch").value;
+      const program = document.getElementById("reportProgram").value;
+
+      currentReportName = `${type}_Report_${batch}_${new Date().toISOString().split('T')[0]}`;
+
+      try {
+        let students = await apiFetch('/api/students');
+        let callLogs = await apiFetch('/api/relationship');
+
+        // Apply filters
+        if (batch !== 'All') {
+          students = students.filter(s => s.batch === batch);
+          callLogs = callLogs.filter(c => c.batch === batch);
+        }
+        if (program !== 'All') {
+          students = students.filter(s => s.program === program);
+        }
+
+        // Build report schemas based on selected template
+        if (type === 'Student') {
+          currentReportHeaders = ['Student ID', 'Full Name', 'Batch', 'Program', 'Enrollment Date', 'Status'];
+          currentReportData = students.map(s => [s.id, s.name, s.batch, s.program, s.enrollmentDate, s.status]);
+        } else if (type === 'Performance') {
+          currentReportHeaders = ['Student ID', 'Full Name', 'Attendance', 'Assignment %', 'Overall Score', 'Grade'];
+          currentReportData = students.map(s => {
+            const overall = Math.round(Object.values(s.academicScores).reduce((a, b) => a + b, 0) / Object.values(s.academicScores).length);
+            let grade = 'C';
+            if (overall >= 90) grade = 'A+';
+            else if (overall >= 80) grade = 'A';
+            else if (overall >= 70) grade = 'B';
+            return [s.id, s.name, `${s.attendance}%`, `${s.assignmentCompletion}%`, `${overall}%`, grade];
+          });
+        } else if (type === 'SRM') {
+          currentReportHeaders = ['Date', 'Student ID', 'Name', 'Faculty Rating', 'Material Rating', 'Feedback', 'Challenges'];
+          currentReportData = callLogs.map(c => [c.date, c.studentId, c.studentName, `${c.facultyRating}/10`, `${c.materialRating}/10`, c.feedback, c.challenges]);
+        } else if (type === 'Attendance') {
+          currentReportHeaders = ['Student ID', 'Name', 'Batch', 'Attendance Rate', 'Status', 'Risk Indicator'];
+          currentReportData = students.map(s => [s.id, s.name, s.batch, `${s.attendance}%`, s.status, s.attendance < 75 ? 'HIGH RISK' : 'In Standing']);
+        } else if (type === 'Assignment') {
+          currentReportHeaders = ['Student ID', 'Name', 'S1', 'S2', 'S3', 'S4', 'S5', 'Completion %'];
+          currentReportData = students.map(s => [s.id, s.name, s.assignments.session1, s.assignments.session2, s.assignments.session3, s.assignments.session4, s.assignments.session5, `${s.assignmentCompletion}%`]);
+        } else if (type === 'Assessment') {
+          currentReportHeaders = ['Student ID', 'Name', 'MCQ Exam', 'Practical Exam', 'Paper Exam', 'Pass/Fail Status'];
+          currentReportData = students.map(s => {
+            const isPass = s.assessments.mcq >= 50 && s.assessments.practical >= 50 ? 'PASS' : 'FAIL';
+            return [s.id, s.name, `${s.assessments.mcq}%`, `${s.assessments.practical}%`, `${s.assessments.hardpaper}%`, isPass];
+          });
+        } else if (type === 'Faculty') {
+          currentReportHeaders = ['Faculty In Charge', 'Allocated Program', 'Students Coached', 'Average Rating'];
+          currentReportData = [
+            ['Dr. Amit Verma', 'Advanced AI & ML', '3', '9.0/10'],
+            ['Prof. S. R. Sen', 'Data Science Master', '2', '7.0/10'],
+            ['Mrs. Anjali Roy', 'Business Analytics Pro', '2', '8.0/10'],
+            ['Mr. Raj Malhotra', 'Data Engineering Master', '1', '9.0/10']
+          ];
+        } else if (type === 'Batch') {
+          currentReportHeaders = ['Batch Code', 'Coached Program', 'Enrolled Size', 'Avg Attendance', 'Avg Grade Score'];
+          currentReportData = [
+            ['B-2026-A', 'Advanced AI & ML / DS', '3', '90.6%', '90.3%'],
+            ['B-2026-B', 'AI / Deep Learning Foundations', '2', '51.0%', '48.5%'],
+            ['B-2026-C', 'Business Analytics Core', '2', '73.5%', '71.5%'],
+            ['B-2026-D', 'Big Data Engineering Pipelines', '1', '96.0%', '87.9%']
+          ];
+        } else if (type === 'Course') {
+          currentReportHeaders = ['Course Stream', 'Students Mapped', 'Faculty Count', 'Active Batches'];
+          currentReportData = [
+            ['Generative AI Specialization', '2', '1', '1'],
+            ['Data Science Foundation', '2', '1', '1'],
+            ['Deep Learning Bootcamp', '1', '1', '1'],
+            ['Python & Machine Learning', '1', '1', '1'],
+            ['Business Analytics Core', '2', '1', '1'],
+            ['Big Data & Pipelines', '1', '1', '1']
+          ];
+        } else if (type === 'Management') {
+          currentReportHeaders = ['Metric Component', 'Current Score', 'Target Benchmark', 'Target Performance'];
+          currentReportData = [
+            ['Student Enrollment Base', `${students.length} Candidates`, '12 Candidates', '75.0% Achievement'],
+            ['Average Attendance Index', '82.8%', '85.0%', '97.4% Alignment'],
+            ['Overall Course Progression', '75.0%', '80.0%', '93.7% Alignment'],
+            ['Counseling Rating Index', '80.0%', '85.0%', '94.1% Alignment']
+          ];
+        }
+
+        renderPreview();
+
+      } catch (err) {
+        console.error("Failed to generate report schema preview:", err);
+      }
+    });
+
+    function renderPreview() {
+      // Header
+      const header = document.getElementById("reportPreviewHeader");
+      header.innerHTML = `<tr>${currentReportHeaders.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+      // Body
+      const body = document.getElementById("reportPreviewBody");
+      body.innerHTML = currentReportData.map(row => `
+        <tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>
+      `).join('');
+
+      document.getElementById("previewTitle").textContent = `Report Preview: ${currentReportName.replace(/_/g, ' ')}`;
+      document.getElementById("reportPreviewCard").style.display = "block";
+    }
+
+    // PDF Mock download
+    document.getElementById("downloadPdf").addEventListener("click", () => {
+      alert(`[PDF Compile Simulator] Generating report document. Download started for: ${currentReportName}.pdf`);
+    });
+
+    // Excel Mock download
+    document.getElementById("downloadExcel").addEventListener("click", () => {
+      alert(`[Excel spreadsheet sync Simulator] Compiling cells... Saved spreadsheet download: ${currentReportName}.xlsx`);
+    });
+
+    // CSV actual file trigger
+    document.getElementById("downloadCsv").addEventListener("click", () => {
+      let csvContent = "data:text/csv;charset=utf-8," + currentReportHeaders.join(",") + "\n";
+      currentReportData.forEach(row => {
+        csvContent += row.join(",") + "\n";
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${currentReportName}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+</body>
+</html>

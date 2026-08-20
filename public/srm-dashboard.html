@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | SRM Analytics Dashboard</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="layout-root">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap">
+            <span class="sms-logo-text">i-SMS</span>
+          </div>
+          <div class="sms-dv-badge">
+            <span class="sms-dv-by">by</span>
+            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="students.html" class="sidebar-link">Student Directory</a>
+        <a href="performance.html" class="sidebar-link">Performance Metrics</a>
+        <a href="relationship.html" class="sidebar-link">Relationship Logs</a>
+        <a href="srm-dashboard.html" class="sidebar-link is-active">SRM Analytics</a>
+        <a href="reports.html" class="sidebar-link">Reports Portal</a>
+        <a href="analytics.html" class="sidebar-link">Advanced Analytics</a>
+      </nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>SRM Feedback & Calls Analytics</h1>
+          <p>Analyze counselor calling stats, student satisfaction indexes, and feedback trends.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <circle cx="12" cy="12" r="4.5"></circle>
+                  <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+                </svg>
+              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
+                </svg>
+              </span>
+            </span>
+            <span class="theme-toggle__label" data-theme-label>Light</span>
+          </button>
+          <div class="topbar-profile"></div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-container">
+        <!-- KPI Metrics Grid -->
+        <section class="kpi-grid">
+          <article class="card kpi-card">
+            <p>Students Contacted</p>
+            <h2 id="studentsCalled">0</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Total Calls Logged</p>
+            <h2 id="totalCalls">0</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Calls / Student Ratio</p>
+            <h2 id="callsRatio">0.0</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Avg Faculty Score</p>
+            <h2 id="avgFacultyRating">0.0 / 10</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Avg Material Score</p>
+            <h2 id="avgMaterialRating">0.0 / 10</h2>
+          </article>
+          <article class="card kpi-card">
+            <p>Satisfaction Index</p>
+            <h2 id="satisfactionPercent" style="color:var(--success);">0%</h2>
+          </article>
+        </section>
+
+        <!-- Charts Grid -->
+        <section class="chart-grid">
+          <article class="card chart-card">
+            <div class="card-head">
+              <h3>Student Satisfaction Index</h3>
+              <p>Breakdown of feedback categories (Satisfactory / Neutral / Unsatisfied)</p>
+            </div>
+            <div style="position:relative; flex-grow:1; min-height:220px; display:flex; align-items:center; justify-content:center;">
+              <canvas id="satisfactionPieChart" aria-label="Satisfaction feedback donut chart"></canvas>
+            </div>
+          </article>
+          
+          <article class="card chart-card">
+            <div class="card-head">
+              <h3>Call Volume Trend</h3>
+              <p>Recent counselor call logs count over time</p>
+            </div>
+            <div style="position:relative; flex-grow:1; min-height:220px;">
+              <canvas id="callVolumeChart" aria-label="Call volume bar chart"></canvas>
+            </div>
+          </article>
+        </section>
+
+        <section class="chart-grid" style="grid-template-columns: 1fr 1fr;">
+          <article class="card chart-card">
+            <div class="card-head">
+              <h3>Reported Student Challenges</h3>
+              <p>Top obstacles voiced during counselor reviews</p>
+            </div>
+            <div style="position:relative; flex-grow:1; min-height:220px;">
+              <canvas id="challengesChart" aria-label="Challenges distribution bar chart"></canvas>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h3>Follow-up Status Distribution</h3>
+              <p>Outstanding tasks for the counseling team</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:6px;">
+                <span style="font-weight:600; font-size:13px; color:var(--text);">Pending Follow-ups</span>
+                <span class="badge badge-pending" id="pendingFollowupsBadge">0</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:6px;">
+                <span style="font-weight:600; font-size:13px; color:var(--text);">Overdue Calls</span>
+                <span class="badge badge-overdue" id="overdueFollowupsBadge">0</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:6px;">
+                <span style="font-weight:600; font-size:13px; color:var(--text);">Completed Follow-ups</span>
+                <span class="badge badge-active" id="completedFollowupsBadge">0</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-bottom:6px;">
+                <span style="font-weight:600; font-size:13px; color:var(--text);">Missed Follow-ups</span>
+                <span class="badge badge-dropped" id="missedFollowupsBadge">0</span>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { apiFetch } from './app.js';
+    import { readThemePalette } from './theme.js';
+
+    let satisfactionChart = null;
+    let callVolumeChart = null;
+    let challengesChart = null;
+    let currentStats = null;
+
+    async function initSrmDashboard() {
+      try {
+        const data = await apiFetch('/api/dashboard/srm');
+        currentStats = data.stats;
+
+        // Populate metrics
+        document.getElementById("studentsCalled").textContent = currentStats.studentsCalled;
+        document.getElementById("totalCalls").textContent = currentStats.totalCalls;
+        document.getElementById("callsRatio").textContent = currentStats.callsPerStudent;
+        document.getElementById("avgFacultyRating").textContent = `${currentStats.avgFacultyRating} / 10`;
+        document.getElementById("avgMaterialRating").textContent = `${currentStats.avgMaterialRating} / 10`;
+        document.getElementById("satisfactionPercent").textContent = `${currentStats.satisfiedPercent}%`;
+
+        // Follow-ups list
+        document.getElementById("pendingFollowupsBadge").textContent = currentStats.pendingFollowups;
+        document.getElementById("overdueFollowupsBadge").textContent = currentStats.overdueFollowups;
+        document.getElementById("completedFollowupsBadge").textContent = currentStats.completedFollowups;
+        document.getElementById("missedFollowupsBadge").textContent = currentStats.missedFollowups;
+
+        renderCharts();
+
+      } catch (err) {
+        console.error("Failed to load SRM Dashboard:", err);
+      }
+    }
+
+    function renderCharts() {
+      if (!currentStats) return;
+      const palette = readThemePalette();
+
+      if (satisfactionChart) satisfactionChart.destroy();
+      if (callVolumeChart) callVolumeChart.destroy();
+      if (challengesChart) challengesChart.destroy();
+
+      // Donut Chart: Satisfaction
+      const ctxSat = document.getElementById("satisfactionPieChart").getContext("2d");
+      satisfactionChart = new Chart(ctxSat, {
+        type: 'doughnut',
+        data: {
+          labels: ['Satisfactory', 'Neutral', 'Unsatisfied'],
+          datasets: [{
+            data: [currentStats.satisfied, currentStats.neutral, currentStats.unsatisfied],
+            backgroundColor: [palette.chartSeries[2], palette.chartSeries[1], palette.chartSeries[4]],
+            borderWidth: 1,
+            borderColor: palette.chartGrid.includes('232') ? '#fff' : '#191c24'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: palette.chartGrid.includes('232') ? '#333' : '#cbd5e1',
+                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
+              }
+            }
+          }
+        }
+      });
+
+      // Line/Bar Chart: Call Volume
+      const ctxVol = document.getElementById("callVolumeChart").getContext("2d");
+      callVolumeChart = new Chart(ctxVol, {
+        type: 'bar',
+        data: {
+          labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          datasets: [{
+            label: 'Calls Attempted',
+            data: [1, 2, 0, 1, 1],
+            backgroundColor: palette.chartSeries[0],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' },
+              grid: { color: palette.chartGrid }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
+            }
+          }
+        }
+      });
+
+      // Bar Chart: Challenges Distribution
+      const ctxChal = document.getElementById("challengesChart").getContext("2d");
+      challengesChart = new Chart(ctxChal, {
+        type: 'bar',
+        data: {
+          labels: ['Health Leave', 'Coding Difficulties', 'Work Relocation', 'No Issues'],
+          datasets: [{
+            label: 'Students Affected',
+            data: [2, 1, 1, 2],
+            backgroundColor: palette.chartSeries[3],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' },
+              grid: { color: palette.chartGrid }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
+            }
+          }
+        }
+      });
+    }
+
+    document.addEventListener("dv-theme-change", renderCharts);
+
+    initSrmDashboard();
+  </script>
+</body>
+</html>
