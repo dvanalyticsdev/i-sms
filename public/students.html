@@ -101,10 +101,12 @@
             <label for="filterBatch">Batch</label>
             <select id="filterBatch" class="filter-select">
               <option value="All">All Batches</option>
-              <option value="B-2026-A">B-2026-A</option>
-              <option value="B-2026-B">B-2026-B</option>
-              <option value="B-2026-C">B-2026-C</option>
-              <option value="B-2026-D">B-2026-D</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterSession">Session</label>
+            <select id="filterSession" class="filter-select">
+              <option value="All">All Sessions</option>
             </select>
           </div>
           <div class="filter-group">
@@ -126,17 +128,18 @@
               <tr>
                 <th>Student ID</th>
                 <th>Full Name</th>
-                <th>Mobile Number</th>
-                <th>Email Address</th>
                 <th>Batch</th>
-                <th>Assigned Counselor</th>
-                <th>Enrollment Date</th>
+                <th>Session</th>
+                <th>Attendance</th>
+                <th>Assignments</th>
+                <th>LMS Score %</th>
+                <th>Counselor</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="studentTableBody">
-              <tr><td colspan="9">Loading student records...</td></tr>
+              <tr><td colspan="10">Loading student records...</td></tr>
             </tbody>
           </table>
         </section>
@@ -157,24 +160,27 @@
       
       <!-- Drawer Navigation Tabs -->
       <div class="tablist" style="padding:0 24px;">
-        <button class="tab is-active" data-tab-target="tabDetails">Profile Info</button>
-        <button class="tab" data-tab-target="tabAcademic">Academics</button>
+        <button class="tab is-active" data-tab-target="tabDetails">Profile & Scores</button>
+        <button class="tab" data-tab-target="tabAcademic">Academics View</button>
         <button class="tab" data-tab-target="tabSRM">Counseling Logs</button>
         <button class="tab" data-tab-target="tabTimeline">Timeline</button>
       </div>
 
       <div class="drawer-body">
-        <!-- Tab 1: Details -->
+        <!-- Tab 1: Details & Performance Edit -->
         <div class="tabpanel is-active" id="tabDetails">
           <form id="drawerUpdateForm">
-            <div class="form-group">
-              <label for="editMobile">Mobile</label>
-              <input type="text" id="editMobile" class="form-control" required>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="editMobile">Mobile</label>
+                <input type="text" id="editMobile" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" class="form-control" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="editEmail">Email</label>
-              <input type="email" id="editEmail" class="form-control" required>
-            </div>
+
             <div class="form-group">
               <label for="editProgram">Program</label>
               <select id="editProgram" class="form-control">
@@ -184,55 +190,104 @@
                 <option value="Data Engineering Master">Data Engineering Master</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="editBatch">Batch Allocation</label>
-              <input type="text" id="editBatch" class="form-control" required>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="editBatch">Batch Allocation</label>
+                <select id="editBatch" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label for="editSession">Session Allocation</label>
+                <select id="editSession" class="form-control" required></select>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="editFaculty">Faculty Allocation</label>
-              <input type="text" id="editFaculty" class="form-control" required>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="editFaculty">Faculty Allocation</label>
+                <input type="text" id="editFaculty" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="editCounselor">Counselor Allocation</label>
+                <input type="text" id="editCounselor" class="form-control" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="editCounselor">Counselor Allocation</label>
-              <input type="text" id="editCounselor" class="form-control" required>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="editStatus">Status</label>
+                <select id="editStatus" class="form-control">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Dropped">Dropped</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="editAttendance">Attendance (%)</label>
+                <input type="number" id="editAttendance" class="form-control" min="0" max="100" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="editStatus">Status</label>
-              <select id="editStatus" class="form-control">
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="Completed">Completed</option>
-                <option value="Dropped">Dropped</option>
-              </select>
+
+            <!-- Performance & Assessments Update Section -->
+            <div style="background:var(--surface-muted); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; margin-top:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h4 style="margin:0; font-size:11px; text-transform:uppercase; font-weight:700;">4-Pillar Assessments (%)</h4>
+                <span class="badge badge-completed" id="drawerLiveLmsScore" style="font-size:11px;">LMS: 0%</span>
+              </div>
+              
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div class="form-group" style="margin:0;">
+                  <label for="editMcq" style="font-size:11px;">MCQ Score (%)</label>
+                  <input type="number" id="editMcq" class="form-control edit-assessment-field" min="0" max="100" required>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label for="editPractical" style="font-size:11px;">Practical Score (%)</label>
+                  <input type="number" id="editPractical" class="form-control edit-assessment-field" min="0" max="100" required>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label for="editHardpaper" style="font-size:11px;">Paper Test (%)</label>
+                  <input type="number" id="editHardpaper" class="form-control edit-assessment-field" min="0" max="100" required>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label for="editMock" style="font-size:11px;">Mock Interview (%)</label>
+                  <input type="number" id="editMock" class="form-control edit-assessment-field" min="0" max="100" required>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:8px; margin-bottom:0;">
+                <label for="editAssignmentCompletion" style="font-size:11px;">Assignment Completion (%)</label>
+                <input type="number" id="editAssignmentCompletion" class="form-control" min="0" max="100" required>
+              </div>
             </div>
-            <div class="form-group">
+
+            <div class="form-group" style="margin-top:10px;">
               <label for="editNotes">General Notes</label>
-              <textarea id="editNotes" class="form-control" rows="3"></textarea>
+              <textarea id="editNotes" class="form-control" rows="2"></textarea>
             </div>
-            <button type="submit" class="btn-primary form-control" style="cursor:pointer; font-weight:700; margin-top:10px;">Save Profile Changes</button>
+            <button type="submit" class="btn-primary form-control" style="cursor:pointer; font-weight:700; margin-top:6px; height:38px;">Save Profile & Performance</button>
           </form>
         </div>
 
-        <!-- Tab 2: Academics -->
+        <!-- Tab 2: Academics View -->
         <div class="tabpanel" id="tabAcademic">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px;">
+            <div style="background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); text-align:center;">
               <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:var(--text-muted);">Attendance</div>
-              <div style="font-size:18px; font-weight:800; color:var(--primary);" id="academicAttendance">0%</div>
+              <div style="font-size:20px; font-weight:800; color:var(--primary);" id="academicAttendance">0%</div>
             </div>
-            <div>
-              <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:var(--text-muted);">Assignment Completion</div>
-              <div style="font-size:18px; font-weight:800; color:var(--primary);" id="academicAssignments">0%</div>
+            <div style="background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); text-align:center;">
+              <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:var(--text-muted);">Assignments</div>
+              <div style="font-size:20px; font-weight:800; color:var(--primary);" id="academicAssignments">0%</div>
+            </div>
+            <div style="background:var(--primary-soft); padding:10px; border-radius:var(--radius-sm); text-align:center; border:1px solid rgba(224,83,34,0.2);">
+              <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:var(--primary);">LMS Score %</div>
+              <div style="font-size:20px; font-weight:800; color:var(--primary);" id="academicLmsScore">0%</div>
             </div>
           </div>
           
-          <h4 style="margin-top:10px; font-size:12px; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:4px;">Module Grades (0-100)</h4>
-          <div class="matrix-container" id="academicScoresGrid">
-            <!-- Dynamic academic modules -->
-          </div>
-
-          <h4 style="margin-top:18px; font-size:12px; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:4px;">Assessments & Exams</h4>
-          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:6px;">
+          <h4 style="margin-top:14px; font-size:12px; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:4px;">Assessments Breakdown (4 Pillars)</h4>
+          <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin-top:8px;">
             <div class="matrix-item">
               <div class="matrix-label">MCQ</div>
               <div class="matrix-value" id="academicMcq">0%</div>
@@ -242,9 +297,18 @@
               <div class="matrix-value" id="academicPractical">0%</div>
             </div>
             <div class="matrix-item">
-              <div class="matrix-label">Paper</div>
+              <div class="matrix-label">Hard Paper</div>
               <div class="matrix-value" id="academicHardpaper">0%</div>
             </div>
+            <div class="matrix-item">
+              <div class="matrix-label">Mock Interview</div>
+              <div class="matrix-value" id="academicMock">0%</div>
+            </div>
+          </div>
+
+          <h4 style="margin-top:18px; font-size:12px; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:4px;">Module Grades (0-100)</h4>
+          <div class="matrix-container" id="academicScoresGrid" style="margin-top:8px;">
+            <!-- Dynamic academic modules -->
           </div>
         </div>
 
@@ -271,44 +335,85 @@
 
   <!-- Add Student Modal -->
   <div class="modal-backdrop" id="addStudentModal">
-    <div class="modal">
+    <div class="modal modal-lg modal-resizable" id="addStudentModalCard" style="width: 740px; height: 480px;">
       <div class="modal-head">
-        <h3>Register New Candidate</h3>
-        <button class="drawer-close" id="closeAddModal">&times;</button>
+        <h3>Register New Student</h3>
+        <div class="modal-head-actions">
+          <button type="button" class="modal-action-btn" id="btnToggleMaximizeAddStudent" title="Maximize / Restore Size">
+            <svg id="iconMaxAddStudent" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            <svg id="iconRestoreAddStudent" style="width:14px;height:14px;display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+            </svg>
+          </button>
+          <button class="drawer-close" id="closeAddModal">&times;</button>
+        </div>
       </div>
-      <form id="addStudentForm">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="addName">Full Name</label>
-            <input type="text" id="addName" class="form-control" required placeholder="Aarav Sharma">
+      <form id="addStudentForm" style="display:flex; flex-direction:column; flex:1 1 auto; min-height:0;">
+        <div class="modal-body" style="flex:1 1 auto; overflow-y:auto;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label for="addName">Full Name</label>
+              <input type="text" id="addName" class="form-control" required placeholder="Aarav Sharma">
+            </div>
+            <div class="form-group">
+              <label for="addMobile">Mobile Number</label>
+              <input type="text" id="addMobile" class="form-control" required placeholder="+91 98765 43210">
+            </div>
           </div>
-          <div class="form-group">
-            <label for="addMobile">Mobile Number</label>
-            <input type="text" id="addMobile" class="form-control" required placeholder="+91 XXXXX XXXXX">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label for="addEmail">Email Address</label>
+              <input type="email" id="addEmail" class="form-control" required placeholder="student@example.com">
+            </div>
+            <div class="form-group">
+              <label for="addProgram">Academic Program</label>
+              <select id="addProgram" class="form-control">
+                <option value="Advanced AI & ML with Gen AI">Advanced AI & ML with Gen AI</option>
+                <option value="Data Science Master Program">Data Science Master Program</option>
+                <option value="Business Analytics Pro">Business Analytics Pro</option>
+                <option value="Data Engineering Master">Data Engineering Master</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="addEmail">Email Address</label>
-            <input type="email" id="addEmail" class="form-control" required placeholder="student@example.com">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label for="addBatch">Batch Allocation</label>
+              <select id="addBatch" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label for="addSession">Session Allocation</label>
+              <select id="addSession" class="form-control" required></select>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="addProgram">Academic Program</label>
-            <select id="addProgram" class="form-control">
-              <option value="Advanced AI & ML with Gen AI">Advanced AI & ML with Gen AI</option>
-              <option value="Data Science Master Program">Data Science Master Program</option>
-              <option value="Business Analytics Pro">Business Analytics Pro</option>
-              <option value="Data Engineering Master">Data Engineering Master</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="addBatch">Batch Allocation</label>
-            <input type="text" id="addBatch" class="form-control" required value="B-2026-A">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:8px;">
+            <div class="form-group">
+              <label for="addAttendance" style="font-size:11px;">Attendance (%)</label>
+              <input type="number" id="addAttendance" class="form-control" min="0" max="100" value="100" required>
+            </div>
+            <div class="form-group">
+              <label for="addCounselor" style="font-size:11px;">Counselor</label>
+              <input type="text" id="addCounselor" class="form-control" value="Rohan Das" required>
+            </div>
+            <div class="form-group">
+              <label for="addFaculty" style="font-size:11px;">Faculty</label>
+              <input type="text" id="addFaculty" class="form-control" value="Dr. Amit Verma" required>
+            </div>
           </div>
         </div>
         <div class="modal-foot">
           <button type="button" class="btn-secondary" id="cancelAddModal">Cancel</button>
-          <button type="submit" class="btn-primary">Add Student</button>
+          <button type="submit" class="btn-primary">Register Student</button>
         </div>
       </form>
+      <div class="modal-resize-grip" title="Drag corner to adjust size">
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <circle cx="8.5" cy="8.5" r="1.2"/>
+          <circle cx="8.5" cy="4.5" r="1.2"/>
+          <circle cx="4.5" cy="8.5" r="1.2"/>
+        </svg>
+      </div>
     </div>
   </div>
 
@@ -342,25 +447,99 @@
     import { apiFetch } from './app.js';
 
     let currentSelectedStudentId = null;
+    let cachedBatches = [];
+    let cachedSessions = [];
+
+    // Initialize batches and sessions dropdowns
+    async function initBatchesAndSessions() {
+      const [batches, sessions] = await Promise.all([
+        apiFetch('/api/batches'),
+        apiFetch('/api/sessions')
+      ]);
+      cachedBatches = batches;
+      cachedSessions = sessions;
+
+      // Filter bar batches
+      const filterBatch = document.getElementById("filterBatch");
+      filterBatch.innerHTML = `<option value="All">All Batches</option>` +
+        batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
+
+      // Add Modal batches
+      const addBatch = document.getElementById("addBatch");
+      addBatch.innerHTML = batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
+
+      // Drawer Edit batches
+      const editBatch = document.getElementById("editBatch");
+      editBatch.innerHTML = batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
+
+      updateSessionSelects();
+    }
+
+    function updateSessionSelects() {
+      // Filter bar sessions
+      const selectedFilterBatch = document.getElementById("filterBatch").value;
+      const filteredFilterSessions = selectedFilterBatch === "All"
+        ? cachedSessions
+        : cachedSessions.filter(s => s.batchCode === selectedFilterBatch);
+      const distinctNames = [...new Set(filteredFilterSessions.map(s => s.name))];
+      document.getElementById("filterSession").innerHTML = `<option value="All">All Sessions</option>` +
+        distinctNames.map(n => `<option value="${n}">${n}</option>`).join('');
+
+      // Add Modal sessions
+      const selectedAddBatch = document.getElementById("addBatch").value;
+      const addSessions = cachedSessions.filter(s => s.batchCode === selectedAddBatch);
+      document.getElementById("addSession").innerHTML = (addSessions.length ? addSessions : [{ name: 'Session 1' }])
+        .map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+
+      // Drawer sessions
+      const selectedEditBatch = document.getElementById("editBatch").value;
+      const editSessions = cachedSessions.filter(s => s.batchCode === selectedEditBatch);
+      document.getElementById("editSession").innerHTML = (editSessions.length ? editSessions : [{ name: 'Session 1' }])
+        .map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    }
+
+    document.getElementById("filterBatch").addEventListener("change", () => {
+      updateSessionSelects();
+      loadDirectory();
+    });
+    document.getElementById("filterSession").addEventListener("change", loadDirectory);
+    document.getElementById("addBatch").addEventListener("change", updateSessionSelects);
+    document.getElementById("editBatch").addEventListener("change", updateSessionSelects);
+
+    // Live LMS score preview in drawer
+    function updateLiveDrawerLmsScore() {
+      const mcq = parseInt(document.getElementById("editMcq").value) || 0;
+      const practical = parseInt(document.getElementById("editPractical").value) || 0;
+      const hardpaper = parseInt(document.getElementById("editHardpaper").value) || 0;
+      const mock = parseInt(document.getElementById("editMock").value) || 0;
+      const avg = Math.round((mcq + practical + hardpaper + mock) / 4);
+      document.getElementById("drawerLiveLmsScore").textContent = `LMS: ${avg}%`;
+    }
+
+    document.querySelectorAll(".edit-assessment-field").forEach(input => {
+      input.addEventListener("input", updateLiveDrawerLmsScore);
+    });
 
     // Fetch and render directory
     async function loadDirectory() {
       const search = document.getElementById("searchBar").value;
       const status = document.getElementById("filterStatus").value;
       const batch = document.getElementById("filterBatch").value;
+      const session = document.getElementById("filterSession").value;
       const program = document.getElementById("filterProgram").value;
 
       let url = `/api/students?`;
       if (search) url += `search=${encodeURIComponent(search)}&`;
       if (status) url += `status=${status}&`;
       if (batch) url += `batch=${batch}&`;
+      if (session) url += `session=${session}&`;
       if (program) url += `program=${encodeURIComponent(program)}`;
 
       try {
         const data = await apiFetch(url);
         const tbody = document.getElementById("studentTableBody");
         if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9">No students matching the current filters.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="10">No students matching the current filters.</td></tr>';
           return;
         }
 
@@ -368,11 +547,12 @@
           <tr>
             <td style="font-weight:700;">${s.id}</td>
             <td style="font-weight:600; text-align:left; color:var(--heading);">${s.name}</td>
-            <td>${s.mobile}</td>
-            <td style="font-size:12px; color:var(--text-muted);">${s.email}</td>
-            <td><span class="badge" style="background:var(--primary-soft); color:var(--primary);">${s.batch}</span></td>
+            <td><span class="badge" style="background:var(--primary-soft); color:var(--primary); font-weight:700;">${s.batch}</span></td>
+            <td style="font-size:12px; color:var(--text-muted);">${s.session || 'Session 1'}</td>
+            <td style="font-weight:700;">${s.attendance}%</td>
+            <td>${s.assignmentCompletion}%</td>
+            <td><strong style="color:var(--primary); font-size:13px;">${s.lmsScore || 0}%</strong></td>
             <td>${s.counselor}</td>
-            <td>${s.enrollmentDate}</td>
             <td><span class="badge badge-${s.status.toLowerCase()}">${s.status}</span></td>
             <td>
               <button class="btn-primary btn-view-profile" data-id="${s.id}" style="padding:3px 8px; font-size:11px; border-radius:var(--radius-sm); cursor:pointer;">View 360</button>
@@ -380,7 +560,6 @@
           </tr>
         `).join('');
 
-        // Attach details triggers
         document.querySelectorAll(".btn-view-profile").forEach(btn => {
           btn.addEventListener("click", () => openStudent360(btn.dataset.id));
         });
@@ -398,28 +577,42 @@
         
         // Populate header
         document.getElementById("drawerStudentName").textContent = student.name;
-        document.getElementById("drawerStudentID").textContent = `ID: ${student.id} | Course: ${student.course}`;
+        document.getElementById("drawerStudentID").textContent = `ID: ${student.id} | ${student.batch} - ${student.session || 'Session 1'}`;
 
         // Populate details form
         document.getElementById("editMobile").value = student.mobile;
         document.getElementById("editEmail").value = student.email;
         document.getElementById("editProgram").value = student.program;
         document.getElementById("editBatch").value = student.batch;
+        updateSessionSelects();
+        document.getElementById("editSession").value = student.session || "Session 1";
         document.getElementById("editFaculty").value = student.faculty;
         document.getElementById("editCounselor").value = student.counselor;
         document.getElementById("editStatus").value = student.status;
+        document.getElementById("editAttendance").value = student.attendance;
+        document.getElementById("editAssignmentCompletion").value = student.assignmentCompletion;
+        
+        // 4-pillar assessment scores
+        const a = student.assessments || {};
+        document.getElementById("editMcq").value = a.mcq || 0;
+        document.getElementById("editPractical").value = a.practical || 0;
+        document.getElementById("editHardpaper").value = a.hardpaper || 0;
+        document.getElementById("editMock").value = a.mockInterview || 0;
         document.getElementById("editNotes").value = student.notes || "";
+        updateLiveDrawerLmsScore();
 
-        // Populate Academics
+        // Populate Academics View Tab
         document.getElementById("academicAttendance").textContent = `${student.attendance}%`;
         document.getElementById("academicAssignments").textContent = `${student.assignmentCompletion}%`;
-        document.getElementById("academicMcq").textContent = `${student.assessments.mcq}%`;
-        document.getElementById("academicPractical").textContent = `${student.assessments.practical}%`;
-        document.getElementById("academicHardpaper").textContent = `${student.assessments.hardpaper}%`;
+        document.getElementById("academicLmsScore").textContent = `${student.lmsScore || 0}%`;
+        document.getElementById("academicMcq").textContent = `${a.mcq || 0}%`;
+        document.getElementById("academicPractical").textContent = `${a.practical || 0}%`;
+        document.getElementById("academicHardpaper").textContent = `${a.hardpaper || 0}%`;
+        document.getElementById("academicMock").textContent = `${a.mockInterview || 0}%`;
 
         // Render Academics Scores Grid
         const scoresGrid = document.getElementById("academicScoresGrid");
-        const modules = Object.keys(student.academicScores);
+        const modules = Object.keys(student.academicScores || {});
         scoresGrid.innerHTML = modules.map(m => `
           <div class="matrix-item">
             <div class="matrix-label">${m}</div>
@@ -429,7 +622,7 @@
 
         // Render Counselor SRM Calls History
         const srmFeed = document.getElementById("counselingHistoryFeed");
-        if (student.callLogs.length === 0) {
+        if (!student.callLogs || student.callLogs.length === 0) {
           srmFeed.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center; padding:10px;">No calls logged yet</div>';
         } else {
           srmFeed.innerHTML = student.callLogs.map(c => `
@@ -454,7 +647,7 @@
 
         // Render Timeline Feed
         const timelineFeed = document.getElementById("studentTimelineFeed");
-        timelineFeed.innerHTML = student.timeline.map(e => `
+        timelineFeed.innerHTML = (student.timeline || []).map(e => `
           <div class="timeline-event">
             <div class="timeline-event-marker"></div>
             <div class="timeline-event-content">
@@ -480,20 +673,29 @@
         mobile: document.getElementById("editMobile").value.trim(),
         email: document.getElementById("editEmail").value.trim(),
         program: document.getElementById("editProgram").value,
-        batch: document.getElementById("editBatch").value.trim(),
+        batch: document.getElementById("editBatch").value,
+        session: document.getElementById("editSession").value,
         faculty: document.getElementById("editFaculty").value.trim(),
         counselor: document.getElementById("editCounselor").value.trim(),
         status: document.getElementById("editStatus").value,
+        attendance: parseInt(document.getElementById("editAttendance").value) || 0,
+        assignmentCompletion: parseInt(document.getElementById("editAssignmentCompletion").value) || 0,
+        assessments: {
+          mcq: parseInt(document.getElementById("editMcq").value) || 0,
+          practical: parseInt(document.getElementById("editPractical").value) || 0,
+          hardpaper: parseInt(document.getElementById("editHardpaper").value) || 0,
+          mockInterview: parseInt(document.getElementById("editMock").value) || 0
+        },
         notes: document.getElementById("editNotes").value.trim()
       };
 
       try {
         await apiFetch(`/api/students/${currentSelectedStudentId}`, {
           method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedData)
         });
         
-        // Reload list and close
         loadDirectory();
         closeDrawer();
       } catch (err) {
@@ -511,11 +713,9 @@
     // Drawer Tabs Event Listeners
     document.querySelectorAll(".tab").forEach(tab => {
       tab.addEventListener("click", () => {
-        // Toggle active class on tab buttons
         tab.closest(".tablist").querySelectorAll(".tab").forEach(t => t.classList.remove("is-active"));
         tab.classList.add("is-active");
 
-        // Toggle active class on tab panels
         const targetId = tab.dataset.tabTarget;
         const body = tab.closest(".drawer").querySelector(".drawer-body");
         body.querySelectorAll(".tabpanel").forEach(p => p.classList.remove("is-active"));
@@ -523,7 +723,6 @@
       });
     });
 
-    // Close drawer clicks
     document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
     document.getElementById("drawerBackdrop").addEventListener("click", (e) => {
       if (e.target === document.getElementById("drawerBackdrop")) {
@@ -533,6 +732,32 @@
 
     // Add Student Modal Bindings
     const addModal = document.getElementById("addStudentModal");
+    const addStudentCard = document.getElementById("addStudentModalCard");
+    const btnToggleMaxAdd = document.getElementById("btnToggleMaximizeAddStudent");
+    const iconMaxAdd = document.getElementById("iconMaxAddStudent");
+    const iconRestoreAdd = document.getElementById("iconRestoreAddStudent");
+
+    let isAddMaximized = false;
+    let prevAddWidth = '740px';
+    let prevAddHeight = '480px';
+
+    btnToggleMaxAdd.addEventListener("click", () => {
+      isAddMaximized = !isAddMaximized;
+      if (isAddMaximized) {
+        prevAddWidth = addStudentCard.style.width || '740px';
+        prevAddHeight = addStudentCard.style.height || '480px';
+        addStudentCard.classList.add("is-maximized");
+        iconMaxAdd.style.display = "none";
+        iconRestoreAdd.style.display = "block";
+      } else {
+        addStudentCard.classList.remove("is-maximized");
+        addStudentCard.style.width = prevAddWidth;
+        addStudentCard.style.height = prevAddHeight;
+        iconMaxAdd.style.display = "block";
+        iconRestoreAdd.style.display = "none";
+      }
+    });
+
     document.getElementById("openAddModal").addEventListener("click", () => addModal.classList.add("is-open"));
     document.getElementById("closeAddModal").addEventListener("click", () => addModal.classList.remove("is-open"));
     document.getElementById("cancelAddModal").addEventListener("click", () => addModal.classList.remove("is-open"));
@@ -544,16 +769,20 @@
         mobile: document.getElementById("addMobile").value.trim(),
         email: document.getElementById("addEmail").value.trim(),
         program: document.getElementById("addProgram").value,
-        batch: document.getElementById("addBatch").value.trim()
+        batch: document.getElementById("addBatch").value,
+        session: document.getElementById("addSession").value,
+        attendance: parseInt(document.getElementById("addAttendance").value) || 100,
+        counselor: document.getElementById("addCounselor").value.trim(),
+        faculty: document.getElementById("addFaculty").value.trim()
       };
 
       try {
         await apiFetch('/api/students', {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         
-        // Reset and close
         document.getElementById("addStudentForm").reset();
         addModal.classList.remove("is-open");
         loadDirectory();
@@ -579,11 +808,9 @@
       loader.style.display = "block";
       
       try {
-        // Mocking Excel parsed update API
         const data = await apiFetch('/api/performance/bulk-import', { method: 'POST' });
         alert(data.message);
         
-        // Close modal & reload
         loader.style.display = "none";
         fileInput.value = "";
         importModal.classList.remove("is-open");
@@ -593,13 +820,12 @@
       }
     });
 
-    // Mock CSV Export
+    // CSV Export
     document.getElementById("exportCsv").addEventListener("click", () => {
-      // Export current directory as CSV mock file download
-      const csvContent = "data:text/csv;charset=utf-8,Student ID,Name,Mobile,Email,Batch,Counselor,Enrollment Date,Status\n" 
-        + "SMS001,Aarav Sharma,+91 98765 43210,aarav.sharma@example.com,B-2026-A,Rohan Das,2026-01-10,Active\n"
-        + "SMS002,Ishita Roy,+91 98213 45678,ishita.roy@example.com,B-2026-A,Priya Nair,2026-01-12,Active\n"
-        + "SMS003,Kabir Mehta,+91 91234 56789,kabir.mehta@example.com,B-2026-B,Rohan Das,2026-02-01,Active";
+      const csvContent = "data:text/csv;charset=utf-8,Student ID,Name,Mobile,Email,Batch,Session,Attendance %,Assignment %,LMS Score %,Status\n" 
+        + "SMS001,Aarav Sharma,+91 98765 43210,aarav.sharma@example.com,B-2026-A,Session 5,94,100,93,Active\n"
+        + "SMS002,Ishita Roy,+91 98213 45678,ishita.roy@example.com,B-2026-A,Session 3,88,80,79,Active\n"
+        + "SMS003,Kabir Mehta,+91 91234 56789,kabir.mehta@example.com,B-2026-B,Session 2,62,40,46,Active";
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -609,20 +835,21 @@
       document.body.removeChild(link);
     });
 
-    // Filters and search binding
+    // Search input binding
     document.getElementById("searchBar").addEventListener("input", loadDirectory);
     document.getElementById("filterStatus").addEventListener("change", loadDirectory);
-    document.getElementById("filterBatch").addEventListener("change", loadDirectory);
     document.getElementById("filterProgram").addEventListener("change", loadDirectory);
 
-    // Initial Load check for ?id= query param (for linking from dashboard)
+    // Initial Load
     const urlParams = new URLSearchParams(window.location.search);
     const linkedStudentId = urlParams.get('id');
 
-    loadDirectory().then(() => {
-      if (linkedStudentId) {
-        openStudent360(linkedStudentId);
-      }
+    initBatchesAndSessions().then(() => {
+      loadDirectory().then(() => {
+        if (linkedStudentId) {
+          openStudent360(linkedStudentId);
+        }
+      });
     });
   </script>
 </body>

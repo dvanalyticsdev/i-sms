@@ -94,10 +94,12 @@
             <label for="perfBatch">Filter Batch</label>
             <select id="perfBatch" class="filter-select">
               <option value="All">All Batches</option>
-              <option value="B-2026-A">B-2026-A</option>
-              <option value="B-2026-B">B-2026-B</option>
-              <option value="B-2026-C">B-2026-C</option>
-              <option value="B-2026-D">B-2026-D</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="perfSession">Filter Session</label>
+            <select id="perfSession" class="filter-select">
+              <option value="All">All Sessions</option>
             </select>
           </div>
         </section>
@@ -110,19 +112,21 @@
                 <th>Student ID</th>
                 <th>Full Name</th>
                 <th>Batch</th>
+                <th>Session</th>
                 <th>Attendance %</th>
-                <th>Assignment Done %</th>
-                <th>MCQ Exam</th>
-                <th>Practical Exam</th>
-                <th>Paper Exam</th>
-                <th>Overall Score</th>
+                <th>Assignment %</th>
+                <th>MCQ %</th>
+                <th>Practical %</th>
+                <th>Paper %</th>
+                <th>Mock %</th>
+                <th>LMS Score %</th>
                 <th>Grade</th>
                 <th>Remarks</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="performanceTableBody">
-              <tr><td colspan="12">Loading academic cards...</td></tr>
+              <tr><td colspan="14">Loading academic cards...</td></tr>
             </tbody>
           </table>
         </section>
@@ -132,54 +136,83 @@
 
   <!-- Edit Scorecard Modal -->
   <div class="modal-backdrop" id="editScorecardModal">
-    <div class="modal" style="max-width: 650px;">
+    <div class="modal modal-lg modal-resizable" id="scorecardModalCard" style="width: 780px; height: 560px;">
       <div class="modal-head">
-        <h3>Update Student Scorecard</h3>
-        <button class="drawer-close" id="closeScorecardModal">&times;</button>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h3>Update Student Scorecard</h3>
+          <span class="badge badge-completed" id="modalLiveLms" style="font-size:12px;">LMS: 0%</span>
+        </div>
+        <div class="modal-head-actions">
+          <button type="button" class="modal-action-btn" id="btnToggleMaximizeScorecard" title="Maximize / Restore Size">
+            <svg id="iconMaxScorecard" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            <svg id="iconRestoreScorecard" style="width:14px;height:14px;display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+            </svg>
+          </button>
+          <button class="drawer-close" id="closeScorecardModal">&times;</button>
+        </div>
       </div>
-      <form id="editScorecardForm">
-        <div class="modal-body" style="max-height: 60vh;">
-          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Attendance & Core</h4>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
-            <div class="form-group">
-              <label for="scoreAttendance">Attendance %</label>
-              <input type="number" id="scoreAttendance" class="form-control" min="0" max="100" required>
+      <form id="editScorecardForm" style="display:flex; flex-direction:column; flex:1 1 auto; min-height:0;">
+        <div class="modal-body" style="flex:1 1 auto; overflow-y:auto;">
+          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Cohort & Core Metrics</h4>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+            <div class="form-group" style="margin:0;">
+              <label for="scoreBatch" style="font-size:11px;">Batch</label>
+              <select id="scoreBatch" class="form-control" required></select>
             </div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <span style="font-size:12px; font-weight:600; color:var(--text-muted);">Assignments (Session 1-5)</span>
-              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
-                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
-                  <input type="checkbox" id="assign1"> S1
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
-                  <input type="checkbox" id="assign2"> S2
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
-                  <input type="checkbox" id="assign3"> S3
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
-                  <input type="checkbox" id="assign4"> S4
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:3px;">
-                  <input type="checkbox" id="assign5"> S5
-                </label>
-              </div>
+            <div class="form-group" style="margin:0;">
+              <label for="scoreSession" style="font-size:11px;">Session</label>
+              <select id="scoreSession" class="form-control" required></select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="scoreAttendance" style="font-size:11px;">Attendance %</label>
+              <input type="number" id="scoreAttendance" class="form-control" min="0" max="100" required>
             </div>
           </div>
 
-          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Exams & Assessments</h4>
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
-            <div class="form-group">
-              <label for="examMcq">MCQ Score (%)</label>
-              <input type="number" id="examMcq" class="form-control" min="0" max="100" required>
+          <div style="margin-bottom:14px; background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:12px; font-weight:700;">Assignments Submission Status</span>
+              <span style="font-size:11px; color:var(--text-muted);">Session 1 - 5</span>
             </div>
-            <div class="form-group">
-              <label for="examPractical">Practical Score (%)</label>
-              <input type="number" id="examPractical" class="form-control" min="0" max="100" required>
+            <div style="display:flex; flex-wrap:wrap; gap:12px;">
+              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="assign1"> Session 1
+              </label>
+              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="assign2"> Session 2
+              </label>
+              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="assign3"> Session 3
+              </label>
+              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="assign4"> Session 4
+              </label>
+              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="assign5"> Session 5
+              </label>
             </div>
-            <div class="form-group">
-              <label for="examHardpaper">Hard Paper Score (%)</label>
-              <input type="number" id="examHardpaper" class="form-control" min="0" max="100" required>
+          </div>
+
+          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">4-Pillar LMS Assessment Scores (%)</h4>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+            <div class="form-group" style="margin:0;">
+              <label for="examMcq" style="font-size:11px;">MCQ Score (%)</label>
+              <input type="number" id="examMcq" class="form-control lms-input-calc" min="0" max="100" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="examPractical" style="font-size:11px;">Practical (%)</label>
+              <input type="number" id="examPractical" class="form-control lms-input-calc" min="0" max="100" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="examHardpaper" style="font-size:11px;">Hard Paper (%)</label>
+              <input type="number" id="examHardpaper" class="form-control lms-input-calc" min="0" max="100" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="examMock" style="font-size:11px;">Mock Interview (%)</label>
+              <input type="number" id="examMock" class="form-control lms-input-calc" min="0" max="100" required>
             </div>
           </div>
 
@@ -193,6 +226,13 @@
           <button type="submit" class="btn-primary">Update Scorecard</button>
         </div>
       </form>
+      <div class="modal-resize-grip" title="Drag corner to adjust size">
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <circle cx="8.5" cy="8.5" r="1.2"/>
+          <circle cx="8.5" cy="4.5" r="1.2"/>
+          <circle cx="4.5" cy="8.5" r="1.2"/>
+        </svg>
+      </div>
     </div>
   </div>
 
@@ -202,6 +242,91 @@
 
     let currentStudentId = null;
     let cachedPerformanceList = [];
+    let cachedBatches = [];
+    let cachedSessions = [];
+
+    const scorecardCard = document.getElementById("scorecardModalCard");
+    const btnToggleMaxScorecard = document.getElementById("btnToggleMaximizeScorecard");
+    const iconMaxScorecard = document.getElementById("iconMaxScorecard");
+    const iconRestoreScorecard = document.getElementById("iconRestoreScorecard");
+
+    let isScorecardMaximized = false;
+    let prevScoreWidth = '780px';
+    let prevScoreHeight = '560px';
+
+    btnToggleMaxScorecard.addEventListener("click", () => {
+      isScorecardMaximized = !isScorecardMaximized;
+      if (isScorecardMaximized) {
+        prevScoreWidth = scorecardCard.style.width || '780px';
+        prevScoreHeight = scorecardCard.style.height || '560px';
+        scorecardCard.classList.add("is-maximized");
+        iconMaxScorecard.style.display = "none";
+        iconRestoreScorecard.style.display = "block";
+      } else {
+        scorecardCard.classList.remove("is-maximized");
+        scorecardCard.style.width = prevScoreWidth;
+        scorecardCard.style.height = prevScoreHeight;
+        iconMaxScorecard.style.display = "block";
+        iconRestoreScorecard.style.display = "none";
+      }
+    });
+
+    async function initBatches() {
+      const [batches, sessions] = await Promise.all([
+        apiFetch('/api/batches'),
+        apiFetch('/api/sessions')
+      ]);
+      cachedBatches = batches;
+      cachedSessions = sessions;
+
+      const batchSelect = document.getElementById("perfBatch");
+      batchSelect.innerHTML = `<option value="All">All Batches</option>` +
+        batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
+
+      const scoreBatch = document.getElementById("scoreBatch");
+      scoreBatch.innerHTML = batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
+
+      updateSessionFilterOptions();
+    }
+
+    function updateSessionFilterOptions() {
+      const selectedBatch = document.getElementById("perfBatch").value;
+      const filteredSessions = selectedBatch === "All"
+        ? cachedSessions
+        : cachedSessions.filter(s => s.batchCode === selectedBatch);
+      
+      const distinctNames = [...new Set(filteredSessions.map(s => s.name))];
+      document.getElementById("perfSession").innerHTML = `<option value="All">All Sessions</option>` +
+        distinctNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
+
+    function updateModalSessions() {
+      const bCode = document.getElementById("scoreBatch").value;
+      const fSessions = cachedSessions.filter(s => s.batchCode === bCode);
+      document.getElementById("scoreSession").innerHTML = (fSessions.length ? fSessions : [{ name: 'Session 1' }])
+        .map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    }
+
+    document.getElementById("perfBatch").addEventListener("change", () => {
+      updateSessionFilterOptions();
+      renderPerformanceList();
+    });
+    document.getElementById("perfSession").addEventListener("change", renderPerformanceList);
+    document.getElementById("scoreBatch").addEventListener("change", updateModalSessions);
+
+    // Live calc for modal LMS score
+    function updateLiveScorecardLms() {
+      const mcq = parseInt(document.getElementById("examMcq").value) || 0;
+      const practical = parseInt(document.getElementById("examPractical").value) || 0;
+      const hardpaper = parseInt(document.getElementById("examHardpaper").value) || 0;
+      const mock = parseInt(document.getElementById("examMock").value) || 0;
+      const avg = Math.round((mcq + practical + hardpaper + mock) / 4);
+      document.getElementById("modalLiveLms").textContent = `LMS: ${avg}%`;
+    }
+
+    document.querySelectorAll(".lms-input-calc").forEach(input => {
+      input.addEventListener("input", updateLiveScorecardLms);
+    });
 
     async function loadPerformance() {
       try {
@@ -215,6 +340,7 @@
     function renderPerformanceList() {
       const search = document.getElementById("perfSearch").value.toLowerCase();
       const batch = document.getElementById("perfBatch").value;
+      const session = document.getElementById("perfSession").value;
       const tbody = document.getElementById("performanceTableBody");
 
       let filtered = cachedPerformanceList;
@@ -224,21 +350,24 @@
       if (batch && batch !== 'All') {
         filtered = filtered.filter(s => s.batch === batch);
       }
+      if (session && session !== 'All') {
+        filtered = filtered.filter(s => s.session === session);
+      }
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12">No performance scorecard matches search constraints.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="14">No performance scorecard matches filter constraints.</td></tr>';
         return;
       }
 
       tbody.innerHTML = filtered.map(s => {
-        // Calculate Grade
+        const lmsScore = s.lmsScore !== undefined ? s.lmsScore : s.overallScore;
         let grade = "F";
-        if (s.overallScore >= 90) grade = "A+";
-        else if (s.overallScore >= 80) grade = "A";
-        else if (s.overallScore >= 70) grade = "B";
-        else if (s.overallScore >= 50) grade = "C";
+        if (lmsScore >= 90) grade = "A+";
+        else if (lmsScore >= 80) grade = "A";
+        else if (lmsScore >= 70) grade = "B";
+        else if (lmsScore >= 50) grade = "C";
 
-        // Attendance badge style
+        const a = s.assessments || {};
         const attStyle = s.attendance < 75 ? 'color:var(--danger);font-weight:700;' : 'font-weight:600;';
         
         return `
@@ -246,12 +375,14 @@
             <td style="font-weight:700;">${s.id}</td>
             <td style="font-weight:600; text-align:left; color:var(--heading);">${s.name}</td>
             <td><span class="badge" style="background:var(--primary-soft); color:var(--primary); font-weight:700;">${s.batch}</span></td>
+            <td style="font-size:12px; color:var(--text-muted);">${s.session || 'Session 1'}</td>
             <td style="${attStyle}">${s.attendance}%</td>
             <td>${s.assignmentCompletion}%</td>
-            <td>${s.assessments.mcq}%</td>
-            <td>${s.assessments.practical}%</td>
-            <td>${s.assessments.hardpaper}%</td>
-            <td style="font-weight:700; color:var(--primary);">${s.overallScore}%</td>
+            <td>${a.mcq || 0}%</td>
+            <td>${a.practical || 0}%</td>
+            <td>${a.hardpaper || 0}%</td>
+            <td>${a.mockInterview || 0}%</td>
+            <td><strong style="color:var(--primary); font-size:13px;">${lmsScore}%</strong></td>
             <td style="font-weight:800;">${grade}</td>
             <td style="font-size:11px; font-weight:600; color:var(--text-muted);">${s.remarks}</td>
             <td>
@@ -271,26 +402,31 @@
       try {
         const student = await apiFetch(`/api/students/${studentId}`);
         
+        document.getElementById("scoreBatch").value = student.batch;
+        updateModalSessions();
+        document.getElementById("scoreSession").value = student.session || "Session 1";
         document.getElementById("scoreAttendance").value = student.attendance;
         
-        // Checklist
-        document.getElementById("assign1").checked = student.assignments.session1 === 'Completed';
-        document.getElementById("assign2").checked = student.assignments.session2 === 'Completed';
-        document.getElementById("assign3").checked = student.assignments.session3 === 'Completed';
-        document.getElementById("assign4").checked = student.assignments.session4 === 'Completed';
-        document.getElementById("assign5").checked = student.assignments.session5 === 'Completed';
+        const a = student.assignments || {};
+        document.getElementById("assign1").checked = a.session1 === 'Completed';
+        document.getElementById("assign2").checked = a.session2 === 'Completed';
+        document.getElementById("assign3").checked = a.session3 === 'Completed';
+        document.getElementById("assign4").checked = a.session4 === 'Completed';
+        document.getElementById("assign5").checked = a.session5 === 'Completed';
 
-        // Assessments
-        document.getElementById("examMcq").value = student.assessments.mcq;
-        document.getElementById("examPractical").value = student.assessments.practical;
-        document.getElementById("examHardpaper").value = student.assessments.hardpaper;
+        const asmt = student.assessments || {};
+        document.getElementById("examMcq").value = asmt.mcq || 0;
+        document.getElementById("examPractical").value = asmt.practical || 0;
+        document.getElementById("examHardpaper").value = asmt.hardpaper || 0;
+        document.getElementById("examMock").value = asmt.mockInterview || 0;
+        updateLiveScorecardLms();
 
-        // Render dynamic input fields for all course modules
+        // Render dynamic input fields for module scores
         const modGrid = document.getElementById("modulesInputGrid");
-        const modules = Object.keys(student.academicScores);
+        const modules = Object.keys(student.academicScores || {});
         modGrid.innerHTML = modules.map(m => `
-          <div class="form-group">
-            <label for="mod_${m}" style="text-transform:uppercase;">${m}</label>
+          <div class="form-group" style="margin:0;">
+            <label for="mod_${m}" style="text-transform:uppercase; font-size:10px;">${m}</label>
             <input type="number" id="mod_${m}" class="form-control module-score-input" data-module="${m}" min="0" max="100" value="${student.academicScores[m]}" required>
           </div>
         `).join('');
@@ -306,14 +442,15 @@
     document.getElementById("editScorecardForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // Collect module scores
       const scores = {};
       document.querySelectorAll(".module-score-input").forEach(input => {
-        scores[input.dataset.module] = parseInt(input.value);
+        scores[input.dataset.module] = parseInt(input.value) || 0;
       });
 
       const payload = {
-        attendance: document.getElementById("scoreAttendance").value,
+        batch: document.getElementById("scoreBatch").value,
+        session: document.getElementById("scoreSession").value,
+        attendance: parseInt(document.getElementById("scoreAttendance").value) || 0,
         assignments: {
           session1: document.getElementById("assign1").checked ? 'Completed' : 'Pending',
           session2: document.getElementById("assign2").checked ? 'Completed' : 'Pending',
@@ -322,9 +459,10 @@
           session5: document.getElementById("assign5").checked ? 'Completed' : 'Pending'
         },
         assessments: {
-          mcq: parseInt(document.getElementById("examMcq").value),
-          practical: parseInt(document.getElementById("examPractical").value),
-          hardpaper: parseInt(document.getElementById("examHardpaper").value)
+          mcq: parseInt(document.getElementById("examMcq").value) || 0,
+          practical: parseInt(document.getElementById("examPractical").value) || 0,
+          hardpaper: parseInt(document.getElementById("examHardpaper").value) || 0,
+          mockInterview: parseInt(document.getElementById("examMock").value) || 0
         },
         scores
       };
@@ -332,10 +470,10 @@
       try {
         await apiFetch(`/api/performance/${currentStudentId}`, {
           method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         
-        // Reset and close
         document.getElementById("editScorecardModal").classList.remove("is-open");
         loadPerformance();
       } catch (err) {
@@ -356,11 +494,12 @@
       }
     });
 
-    // Mock CSV Export
+    // CSV Export
     document.getElementById("exportPerformance").addEventListener("click", () => {
-      let csvContent = "data:text/csv;charset=utf-8,Student ID,Name,Batch,Attendance %,Assignment %,MCQ Exam,Practical Exam,Paper Exam,Overall Score\n";
+      let csvContent = "data:text/csv;charset=utf-8,Student ID,Name,Batch,Session,Attendance %,Assignment %,MCQ %,Practical %,Paper %,Mock %,LMS Score %,Grade\n";
       cachedPerformanceList.forEach(s => {
-        csvContent += `${s.id},${s.name},${s.batch},${s.attendance},${s.assignmentCompletion},${s.assessments.mcq},${s.assessments.practical},${s.assessments.hardpaper},${s.overallScore}\n`;
+        const a = s.assessments || {};
+        csvContent += `${s.id},${s.name},${s.batch},${s.session || 'Session 1'},${s.attendance},${s.assignmentCompletion},${a.mcq || 0},${a.practical || 0},${a.hardpaper || 0},${a.mockInterview || 0},${s.lmsScore || s.overallScore},A\n`;
       });
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -382,9 +521,10 @@
 
     // Filter triggers
     document.getElementById("perfSearch").addEventListener("input", renderPerformanceList);
-    document.getElementById("perfBatch").addEventListener("change", renderPerformanceList);
 
-    loadPerformance();
+    initBatches().then(() => {
+      loadPerformance();
+    });
   </script>
 </body>
 </html>

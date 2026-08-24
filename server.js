@@ -16,6 +16,7 @@ let students = [
     program: "Advanced AI & ML with Gen AI",
     course: "Generative AI Specialization",
     batch: "B-2026-A",
+    session: "Session 5",
     faculty: "Dr. Amit Verma",
     counselor: "Rohan Das",
     status: "Active",
@@ -29,7 +30,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Completed", session4: "Completed", session5: "Completed"
     },
     assessments: {
-      mcq: 95, practical: 92, hardpaper: 90
+      mcq: 95, practical: 92, hardpaper: 90, mockInterview: 94
     },
     notes: "Highly proactive student, interested in building multi-agent systems.",
     documents: ["Resume.pdf", "Offer_Letter.pdf"],
@@ -47,6 +48,7 @@ let students = [
     program: "Data Science Master Program",
     course: "Data Science Foundation",
     batch: "B-2026-A",
+    session: "Session 3",
     faculty: "Dr. Amit Verma",
     counselor: "Priya Nair",
     status: "Active",
@@ -60,7 +62,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Completed", session4: "Pending", session5: "Pending"
     },
     assessments: {
-      mcq: 82, practical: 75, hardpaper: 78
+      mcq: 82, practical: 75, hardpaper: 78, mockInterview: 80
     },
     notes: "Requires minor assistance in advanced programming algorithms.",
     documents: ["Graduation_Degree.pdf"],
@@ -77,6 +79,7 @@ let students = [
     program: "Advanced AI & ML with Gen AI",
     course: "Deep Learning Bootcamp",
     batch: "B-2026-B",
+    session: "Session 2",
     faculty: "Prof. S. R. Sen",
     counselor: "Rohan Das",
     status: "Active",
@@ -90,7 +93,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Pending", session4: "Pending", session5: "Pending"
     },
     assessments: {
-      mcq: 50, practical: 42, hardpaper: 48
+      mcq: 50, practical: 42, hardpaper: 48, mockInterview: 45
     },
     notes: "Weak performance. Low attendance due to health issues. Counselor recommended remedial session.",
     documents: [],
@@ -108,6 +111,7 @@ let students = [
     program: "Business Analytics Pro",
     course: "Business Analytics Core",
     batch: "B-2026-C",
+    session: "Session 4",
     faculty: "Mrs. Anjali Roy",
     counselor: "Priya Nair",
     status: "Active",
@@ -121,7 +125,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Completed", session4: "Completed", session5: "Completed"
     },
     assessments: {
-      mcq: 90, practical: 88, hardpaper: 86
+      mcq: 90, practical: 88, hardpaper: 86, mockInterview: 92
     },
     notes: "Consistent performer, excellent analytics presentation skills.",
     documents: ["Academic_Transcript.pdf"],
@@ -138,6 +142,7 @@ let students = [
     program: "Data Engineering Master",
     course: "Big Data & Pipelines",
     batch: "B-2026-D",
+    session: "Session 5",
     faculty: "Mr. Raj Malhotra",
     counselor: "Rohan Das",
     status: "Completed",
@@ -151,7 +156,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Completed", session4: "Completed", session5: "Completed"
     },
     assessments: {
-      mcq: 94, practical: 96, hardpaper: 95
+      mcq: 94, practical: 96, hardpaper: 95, mockInterview: 98
     },
     notes: "Completed course successfully. Placed at CloudTech Solutions as Associate Engineer.",
     documents: ["Completion_Certificate.pdf", "Placement_Letter.pdf"],
@@ -169,6 +174,7 @@ let students = [
     program: "Data Science Master Program",
     course: "Python & Machine Learning",
     batch: "B-2026-B",
+    session: "Session 1",
     faculty: "Prof. S. R. Sen",
     counselor: "Priya Nair",
     status: "Dropped",
@@ -182,7 +188,7 @@ let students = [
       session1: "Completed", session2: "Pending", session3: "Pending", session4: "Pending", session5: "Pending"
     },
     assessments: {
-      mcq: 45, practical: 30, hardpaper: 0
+      mcq: 45, practical: 30, hardpaper: 35, mockInterview: 40
     },
     notes: "Student discontinued due to work relocation. Fee refund processed.",
     documents: ["Refund_Receipt.pdf"],
@@ -200,6 +206,7 @@ let students = [
     program: "Advanced AI & ML with Gen AI",
     course: "Generative AI Specialization",
     batch: "B-2026-A",
+    session: "Session 4",
     faculty: "Dr. Amit Verma",
     counselor: "Priya Nair",
     status: "Active",
@@ -213,7 +220,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Completed", session4: "Completed", session5: "Completed"
     },
     assessments: {
-      mcq: 90, practical: 92, hardpaper: 85
+      mcq: 90, practical: 92, hardpaper: 85, mockInterview: 89
     },
     notes: "Punctual student, good coding style.",
     documents: [],
@@ -229,6 +236,7 @@ let students = [
     program: "Business Analytics Pro",
     course: "Business Analytics Core",
     batch: "B-2026-C",
+    session: "Session 2",
     faculty: "Mrs. Anjali Roy",
     counselor: "Rohan Das",
     status: "Inactive",
@@ -242,7 +250,7 @@ let students = [
       session1: "Completed", session2: "Completed", session3: "Completed", session4: "Pending", session5: "Pending"
     },
     assessments: {
-      mcq: 68, practical: 55, hardpaper: 60
+      mcq: 68, practical: 55, hardpaper: 60, mockInterview: 58
     },
     notes: "On medical leave since last 2 weeks. Expected to return by end of August.",
     documents: ["Medical_Certificate.pdf"],
@@ -251,6 +259,72 @@ let students = [
       { date: "2026-03-01", event: "Submitted medical leave application" }
     ]
   }
+];
+
+// Batches Collection
+let batches = [
+  {
+    id: "BATCH001",
+    code: "B-2026-A",
+    name: "AI & ML Alpha Cohort 2026",
+    program: "Advanced AI & ML with Gen AI",
+    course: "Generative AI Specialization",
+    faculty: "Dr. Amit Verma",
+    startDate: "2026-01-10",
+    endDate: "2026-06-30",
+    timing: "09:30 AM - 11:30 AM",
+    status: "Active"
+  },
+  {
+    id: "BATCH002",
+    code: "B-2026-B",
+    name: "Data Science Foundation & Deep Learning",
+    program: "Data Science Master Program",
+    course: "Deep Learning Bootcamp",
+    faculty: "Prof. S. R. Sen",
+    startDate: "2026-02-01",
+    endDate: "2026-07-31",
+    timing: "11:30 AM - 01:30 PM",
+    status: "Active"
+  },
+  {
+    id: "BATCH003",
+    code: "B-2026-C",
+    name: "Business Analytics & Predictive Modeling",
+    program: "Business Analytics Pro",
+    course: "Business Analytics Core",
+    faculty: "Mrs. Anjali Roy",
+    startDate: "2026-02-10",
+    endDate: "2026-08-15",
+    timing: "02:30 PM - 04:30 PM",
+    status: "Active"
+  },
+  {
+    id: "BATCH004",
+    code: "B-2026-D",
+    name: "Big Data Pipelines & Distributed Streams",
+    program: "Data Engineering Master",
+    course: "Big Data & Pipelines",
+    faculty: "Mr. Raj Malhotra",
+    startDate: "2025-08-01",
+    endDate: "2026-01-20",
+    timing: "04:30 PM - 06:30 PM",
+    status: "Completed"
+  }
+];
+
+// Sessions Collection
+let sessions = [
+  { id: "SESS001", batchCode: "B-2026-A", sessionNumber: 1, name: "Session 1", topic: "Intro to GenAI & Agent Architectures", date: "2026-01-15", timing: "09:30 AM", faculty: "Dr. Amit Verma", status: "Completed" },
+  { id: "SESS002", batchCode: "B-2026-A", sessionNumber: 2, name: "Session 2", topic: "Prompt Engineering & Few-Shot", date: "2026-01-22", timing: "09:30 AM", faculty: "Dr. Amit Verma", status: "Completed" },
+  { id: "SESS003", batchCode: "B-2026-A", sessionNumber: 3, name: "Session 3", topic: "Agent Frameworks & Function Calling", date: "2026-02-05", timing: "09:30 AM", faculty: "Dr. Amit Verma", status: "Completed" },
+  { id: "SESS004", batchCode: "B-2026-A", sessionNumber: 4, name: "Session 4", topic: "Multi-Agent System Orchestration", date: "2026-02-20", timing: "09:30 AM", faculty: "Dr. Amit Verma", status: "Completed" },
+  { id: "SESS005", batchCode: "B-2026-A", sessionNumber: 5, name: "Session 5", topic: "Production Deployment & LLMOps", date: "2026-03-12", timing: "09:30 AM", faculty: "Dr. Amit Verma", status: "Completed" },
+  { id: "SESS006", batchCode: "B-2026-B", sessionNumber: 1, name: "Session 1", topic: "Python Data Science Foundations", date: "2026-02-05", timing: "11:30 AM", faculty: "Prof. S. R. Sen", status: "Completed" },
+  { id: "SESS007", batchCode: "B-2026-B", sessionNumber: 2, name: "Session 2", topic: "Advanced Pandas & Vectorization", date: "2026-02-15", timing: "11:30 AM", faculty: "Prof. S. R. Sen", status: "Completed" },
+  { id: "SESS008", batchCode: "B-2026-B", sessionNumber: 3, name: "Session 3", topic: "Machine Learning Regression & Trees", date: "2026-02-28", timing: "11:30 AM", faculty: "Prof. S. R. Sen", status: "Ongoing" },
+  { id: "SESS009", batchCode: "B-2026-C", sessionNumber: 1, name: "Session 1", topic: "Advanced Excel Modeling", date: "2026-02-15", timing: "02:30 PM", faculty: "Mrs. Anjali Roy", status: "Completed" },
+  { id: "SESS010", batchCode: "B-2026-C", sessionNumber: 2, name: "Session 2", topic: "SQL Analytics & Aggregations", date: "2026-03-01", timing: "02:30 PM", faculty: "Mrs. Anjali Roy", status: "Completed" }
 ];
 
 let callLogs = [
@@ -344,26 +418,71 @@ let alerts = [
   { id: "A3", type: "Pending Assignment", text: "Ishita Roy (SMS002) has overdue assignment: Session 4", status: "Active" }
 ];
 
-// Helper to calculate statistics
-function getSmsStats() {
-  const activeStudents = students.filter(s => s.status === 'Active');
-  const total = students.length;
+// Helper to calculate individual student LMS Score (combining 4 assessment pillars)
+function calculateStudentLmsScore(assessments = {}) {
+  const mcq = typeof assessments.mcq === 'number' ? Math.max(0, Math.min(100, assessments.mcq)) : 0;
+  const practical = typeof assessments.practical === 'number' ? Math.max(0, Math.min(100, assessments.practical)) : 0;
+  const hardpaper = typeof assessments.hardpaper === 'number' ? Math.max(0, Math.min(100, assessments.hardpaper)) : 0;
+  const mockInterview = typeof assessments.mockInterview === 'number' ? Math.max(0, Math.min(100, assessments.mockInterview)) : 0;
+  return Math.round((mcq + practical + hardpaper + mockInterview) / 4);
+}
+
+// Helper to calculate statistics with dynamic Batch & Session cohort filtering
+function getSmsStats(batchFilter = 'All', sessionFilter = 'All') {
+  let cohortStudents = [...students];
+
+  if (batchFilter && batchFilter !== 'All') {
+    cohortStudents = cohortStudents.filter(s => s.batch === batchFilter);
+  }
+  if (sessionFilter && sessionFilter !== 'All') {
+    cohortStudents = cohortStudents.filter(s => s.session === sessionFilter);
+  }
+
+  const total = cohortStudents.length;
+  const activeStudents = cohortStudents.filter(s => s.status === 'Active');
   const activeCount = activeStudents.length;
-  const activeBatchesCount = [...new Set(activeStudents.map(s => s.batch))].length;
-  
-  const avgAttendance = Math.round(activeStudents.reduce((acc, curr) => acc + curr.attendance, 0) / (activeCount || 1));
-  const avgAssignment = Math.round(activeStudents.reduce((acc, curr) => acc + curr.assignmentCompletion, 0) / (activeCount || 1));
-  
-  // Calculate average performance percent (overall score out of 100 based on all academicScores)
+  const activeBatchesCount = [...new Set((activeStudents.length ? activeStudents : cohortStudents).map(s => s.batch))].length;
+
+  const targetList = activeStudents.length > 0 ? activeStudents : cohortStudents;
+  const count = targetList.length || 1;
+
+  const avgAttendance = targetList.length ? Math.round(targetList.reduce((acc, curr) => acc + (Number(curr.attendance) || 0), 0) / count) : 0;
+  const avgAssignment = targetList.length ? Math.round(targetList.reduce((acc, curr) => acc + (Number(curr.assignmentCompletion) || 0), 0) / count) : 0;
+
+  // LMS assessment component averages
+  let mcqSum = 0, practicalSum = 0, hardpaperSum = 0, mockInterviewSum = 0, lmsScoreSum = 0;
+  targetList.forEach(s => {
+    const a = s.assessments || {};
+    const mcq = Number(a.mcq) || 0;
+    const practical = Number(a.practical) || 0;
+    const hardpaper = Number(a.hardpaper) || 0;
+    const mockInterview = Number(a.mockInterview) || 0;
+    const studentLms = calculateStudentLmsScore(a);
+    mcqSum += mcq;
+    practicalSum += practical;
+    hardpaperSum += hardpaper;
+    mockInterviewSum += mockInterview;
+    lmsScoreSum += studentLms;
+  });
+
+  const avgLmsScore = targetList.length ? Math.round(lmsScoreSum / count) : 0;
+  const avgMcq = targetList.length ? Math.round(mcqSum / count) : 0;
+  const avgPractical = targetList.length ? Math.round(practicalSum / count) : 0;
+  const avgHardpaper = targetList.length ? Math.round(hardpaperSum / count) : 0;
+  const avgMockInterview = targetList.length ? Math.round(mockInterviewSum / count) : 0;
+
+  // Calculate average performance percent across academic module scores
   let totalScoreSum = 0;
   let totalScoreCount = 0;
-  activeStudents.forEach(s => {
-    const scores = Object.values(s.academicScores);
-    totalScoreSum += scores.reduce((a, b) => a + b, 0);
-    totalScoreCount += scores.length;
+  targetList.forEach(s => {
+    const scores = Object.values(s.academicScores || {});
+    if (scores.length) {
+      totalScoreSum += scores.reduce((a, b) => a + b, 0);
+      totalScoreCount += scores.length;
+    }
   });
-  const avgPerformance = Math.round(totalScoreSum / (totalScoreCount || 1));
-  
+  const avgPerformance = totalScoreCount > 0 ? Math.round(totalScoreSum / totalScoreCount) : avgLmsScore;
+
   // Satisfaction %
   const totalCallsCount = callLogs.length;
   const satisfiedCalls = callLogs.filter(c => c.feedback === 'Satisfactory').length;
@@ -372,19 +491,23 @@ function getSmsStats() {
   // Follow ups counts
   const pendingFollowups = callLogs.filter(c => c.followUpStatus === 'Pending' || c.followUpStatus === 'Overdue').length;
   const completedCalls = callLogs.length;
-  
-  // Top and Weak
-  const topPerformers = students.filter(s => {
-    const scores = Object.values(s.academicScores);
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return avg >= 88 && s.status === 'Active';
-  });
-  
-  const weakStudents = students.filter(s => {
-    const scores = Object.values(s.academicScores);
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return (avg < 70 || s.attendance < 75) && s.status === 'Active';
-  });
+
+  // Top and Weak performers for this cohort
+  const topPerformers = targetList.filter(s => {
+    const lms = calculateStudentLmsScore(s.assessments);
+    return lms >= 85 || s.attendance >= 90;
+  }).sort((a, b) => calculateStudentLmsScore(b.assessments) - calculateStudentLmsScore(a.assessments));
+
+  const weakStudents = targetList.filter(s => {
+    const lms = calculateStudentLmsScore(s.assessments);
+    return (lms < 70 || s.attendance < 75) && s.status === 'Active';
+  }).sort((a, b) => calculateStudentLmsScore(a.assessments) - calculateStudentLmsScore(b.assessments));
+
+  // Filter upcoming classes if batch is selected
+  let cohortClasses = [...upcomingClasses];
+  if (batchFilter && batchFilter !== 'All') {
+    cohortClasses = cohortClasses.filter(c => c.batch === batchFilter);
+  }
 
   return {
     totalStudents: total,
@@ -392,14 +515,36 @@ function getSmsStats() {
     activeBatches: activeBatchesCount,
     attendanceRate: avgAttendance,
     assignmentCompletionRate: avgAssignment,
+    lmsScoreRate: avgLmsScore,
     overallPerformance: avgPerformance,
+    mcqAvg: avgMcq,
+    practicalAvg: avgPractical,
+    hardpaperAvg: avgHardpaper,
+    mockInterviewAvg: avgMockInterview,
     satisfactionRate: satisfactionRate,
     pendingFollowups: pendingFollowups,
     completedCalls: completedCalls,
     topPerformersCount: topPerformers.length,
     weakStudentsCount: weakStudents.length,
-    topPerformers: topPerformers.map(s => ({ id: s.id, name: s.name, batch: s.batch, attendance: s.attendance, performance: Math.round(Object.values(s.academicScores).reduce((a, b) => a + b, 0) / Object.values(s.academicScores).length) })),
-    weakStudents: weakStudents.map(s => ({ id: s.id, name: s.name, batch: s.batch, attendance: s.attendance, performance: Math.round(Object.values(s.academicScores).reduce((a, b) => a + b, 0) / Object.values(s.academicScores).length) }))
+    topPerformers: topPerformers.map(s => ({
+      id: s.id,
+      name: s.name,
+      batch: s.batch,
+      session: s.session || "Session 1",
+      attendance: s.attendance,
+      performance: calculateStudentLmsScore(s.assessments),
+      lmsScore: calculateStudentLmsScore(s.assessments)
+    })),
+    weakStudents: weakStudents.map(s => ({
+      id: s.id,
+      name: s.name,
+      batch: s.batch,
+      session: s.session || "Session 1",
+      attendance: s.attendance,
+      performance: calculateStudentLmsScore(s.assessments),
+      lmsScore: calculateStudentLmsScore(s.assessments)
+    })),
+    classes: cohortClasses
   };
 }
 
@@ -448,19 +593,120 @@ function getSrmStats() {
 // Mock login
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
-  // Simulating successful login
   if (username === 'admin' && password === 'admin') {
-    res.json({ token: 'mock-token-admin', user: { name: 'Dr. Amit Verma (Admin)', role: 'Admin' } });
+    res.json({ token: 'mock-token-admin', user: { name: 'Dr. Amit Verma', role: 'Admin' } });
   } else if (username === 'counselor' && password === 'counselor') {
-    res.json({ token: 'mock-token-counselor', user: { name: 'Rohan Das (Counselor)', role: 'Counselor' } });
+    res.json({ token: 'mock-token-counselor', user: { name: 'Rohan Das', role: 'Counselor' } });
   } else {
     res.status(401).json({ error: "Invalid credentials. Use 'admin'/'admin' or 'counselor'/'counselor'" });
   }
 });
 
+// Batches Management APIs
+app.get('/api/batches', (req, res) => {
+  res.json(batches);
+});
+
+app.post('/api/batches', (req, res) => {
+  const b = req.body;
+  if (!b.code || !b.name) {
+    return res.status(400).json({ error: "Batch code and name are required." });
+  }
+  const nextId = "BATCH" + String(batches.length + 1).padStart(3, '0');
+  const newBatch = {
+    id: nextId,
+    code: b.code.trim().toUpperCase(),
+    name: b.name.trim(),
+    program: b.program || "Advanced AI & ML with Gen AI",
+    course: b.course || "Specialization Track",
+    faculty: b.faculty || "Dr. Amit Verma",
+    startDate: b.startDate || new Date().toISOString().split('T')[0],
+    endDate: b.endDate || "",
+    timing: b.timing || "09:30 AM - 11:30 AM",
+    status: b.status || "Active"
+  };
+  batches.push(newBatch);
+  res.status(201).json(newBatch);
+});
+
+app.put('/api/batches/:id', (req, res) => {
+  const id = req.params.id;
+  const idx = batches.findIndex(b => b.id === id || b.code === id);
+  if (idx !== -1) {
+    batches[idx] = { ...batches[idx], ...req.body };
+    res.json(batches[idx]);
+  } else {
+    res.status(404).json({ error: "Batch not found" });
+  }
+});
+
+app.delete('/api/batches/:id', (req, res) => {
+  const id = req.params.id;
+  const idx = batches.findIndex(b => b.id === id || b.code === id);
+  if (idx !== -1) {
+    batches.splice(idx, 1);
+    res.json({ message: "Batch deleted successfully" });
+  } else {
+    res.status(404).json({ error: "Batch not found" });
+  }
+});
+
+// Sessions Management APIs
+app.get('/api/sessions', (req, res) => {
+  const { batch } = req.query;
+  let filtered = [...sessions];
+  if (batch && batch !== 'All') {
+    filtered = filtered.filter(s => s.batchCode === batch);
+  }
+  res.json(filtered);
+});
+
+app.post('/api/sessions', (req, res) => {
+  const s = req.body;
+  if (!s.name || !s.batchCode) {
+    return res.status(400).json({ error: "Session name and batch are required." });
+  }
+  const nextId = "SESS" + String(sessions.length + 1).padStart(3, '0');
+  const newSession = {
+    id: nextId,
+    batchCode: s.batchCode,
+    sessionNumber: parseInt(s.sessionNumber) || (sessions.filter(x => x.batchCode === s.batchCode).length + 1),
+    name: s.name.trim(),
+    topic: s.topic || "Core Module Overview",
+    date: s.date || new Date().toISOString().split('T')[0],
+    timing: s.timing || "09:30 AM",
+    faculty: s.faculty || "Faculty Lead",
+    status: s.status || "Scheduled"
+  };
+  sessions.push(newSession);
+  res.status(201).json(newSession);
+});
+
+app.put('/api/sessions/:id', (req, res) => {
+  const id = req.params.id;
+  const idx = sessions.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    sessions[idx] = { ...sessions[idx], ...req.body };
+    res.json(sessions[idx]);
+  } else {
+    res.status(404).json({ error: "Session not found" });
+  }
+});
+
+app.delete('/api/sessions/:id', (req, res) => {
+  const id = req.params.id;
+  const idx = sessions.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    sessions.splice(idx, 1);
+    res.json({ message: "Session deleted successfully" });
+  } else {
+    res.status(404).json({ error: "Session not found" });
+  }
+});
+
 // Students API
 app.get('/api/students', (req, res) => {
-  const { search, status, batch, program } = req.query;
+  const { search, status, batch, session, program } = req.query;
   let filtered = [...students];
 
   if (search) {
@@ -478,19 +724,28 @@ app.get('/api/students', (req, res) => {
   if (batch && batch !== 'All') {
     filtered = filtered.filter(s => s.batch === batch);
   }
+  if (session && session !== 'All') {
+    filtered = filtered.filter(s => s.session === session);
+  }
   if (program && program !== 'All') {
     filtered = filtered.filter(s => s.program === program);
   }
 
-  res.json(filtered);
+  res.json(filtered.map(s => ({
+    ...s,
+    lmsScore: calculateStudentLmsScore(s.assessments)
+  })));
 });
 
 app.get('/api/students/:id', (req, res) => {
   const student = students.find(s => s.id === req.params.id);
   if (student) {
-    // Inject call logs into student profile
     const studentCalls = callLogs.filter(c => c.studentId === student.id);
-    res.json({ ...student, callLogs: studentCalls });
+    res.json({
+      ...student,
+      lmsScore: calculateStudentLmsScore(student.assessments),
+      callLogs: studentCalls
+    });
   } else {
     res.status(404).json({ error: "Student not found" });
   }
@@ -498,30 +753,33 @@ app.get('/api/students/:id', (req, res) => {
 
 app.post('/api/students', (req, res) => {
   const newStudent = req.body;
-  // Generate ID
   const nextId = "SMS" + String(students.length + 1).padStart(3, '0');
   const student = {
     id: nextId,
     name: newStudent.name || "Unknown Student",
     mobile: newStudent.mobile || "",
     email: newStudent.email || "",
-    program: newStudent.program || "Data Science Master Program",
-    course: newStudent.course || "Data Science Foundation",
+    program: newStudent.program || "Advanced AI & ML with Gen AI",
+    course: newStudent.course || "Generative AI Specialization",
     batch: newStudent.batch || "B-2026-A",
+    session: newStudent.session || "Session 1",
     faculty: newStudent.faculty || "Dr. Amit Verma",
     counselor: newStudent.counselor || "Rohan Das",
     status: newStudent.status || "Active",
     enrollmentDate: newStudent.enrollmentDate || new Date().toISOString().split('T')[0],
-    attendance: parseInt(newStudent.attendance) || 100,
-    assignmentCompletion: 0,
-    academicScores: {
+    attendance: Math.max(0, Math.min(100, parseInt(newStudent.attendance) || 100)),
+    assignmentCompletion: Math.max(0, Math.min(100, parseInt(newStudent.assignmentCompletion) || 0)),
+    academicScores: newStudent.academicScores || {
       excel: 0, sql: 0, sas: 0, python: 0, ml: 0, dl: 0, genai: 0, agenticai: 0, mlops: 0, llmops: 0
     },
-    assignments: {
+    assignments: newStudent.assignments || {
       session1: "Pending", session2: "Pending", session3: "Pending", session4: "Pending", session5: "Pending"
     },
     assessments: {
-      mcq: 0, practical: 0, hardpaper: 0
+      mcq: Math.max(0, Math.min(100, parseInt(newStudent.assessments?.mcq) || 0)),
+      practical: Math.max(0, Math.min(100, parseInt(newStudent.assessments?.practical) || 0)),
+      hardpaper: Math.max(0, Math.min(100, parseInt(newStudent.assessments?.hardpaper) || 0)),
+      mockInterview: Math.max(0, Math.min(100, parseInt(newStudent.assessments?.mockInterview) || 0))
     },
     notes: newStudent.notes || "",
     documents: [],
@@ -530,15 +788,30 @@ app.post('/api/students', (req, res) => {
     ]
   };
   students.push(student);
-  res.status(201).json(student);
+  res.status(201).json({ ...student, lmsScore: calculateStudentLmsScore(student.assessments) });
 });
 
 app.put('/api/students/:id', (req, res) => {
   const id = req.params.id;
   const index = students.findIndex(s => s.id === id);
   if (index !== -1) {
-    students[index] = { ...students[index], ...req.body };
-    res.json(students[index]);
+    const updated = { ...students[index], ...req.body };
+    if (req.body.assessments) {
+      updated.assessments = {
+        mcq: Math.max(0, Math.min(100, parseInt(req.body.assessments.mcq ?? students[index].assessments?.mcq) || 0)),
+        practical: Math.max(0, Math.min(100, parseInt(req.body.assessments.practical ?? students[index].assessments?.practical) || 0)),
+        hardpaper: Math.max(0, Math.min(100, parseInt(req.body.assessments.hardpaper ?? students[index].assessments?.hardpaper) || 0)),
+        mockInterview: Math.max(0, Math.min(100, parseInt(req.body.assessments.mockInterview ?? students[index].assessments?.mockInterview) || 0))
+      };
+    }
+    if (req.body.attendance !== undefined) {
+      updated.attendance = Math.max(0, Math.min(100, parseInt(req.body.attendance) || 0));
+    }
+    if (req.body.assignmentCompletion !== undefined) {
+      updated.assignmentCompletion = Math.max(0, Math.min(100, parseInt(req.body.assignmentCompletion) || 0));
+    }
+    students[index] = updated;
+    res.json({ ...students[index], lmsScore: calculateStudentLmsScore(students[index].assessments) });
   } else {
     res.status(404).json({ error: "Student not found" });
   }
@@ -557,59 +830,87 @@ app.delete('/api/students/:id', (req, res) => {
 
 // Performance APIs
 app.get('/api/performance', (req, res) => {
-  // Returns academic progress list
-  const data = students.map(s => ({
-    id: s.id,
-    name: s.name,
-    batch: s.batch,
-    course: s.course,
-    attendance: s.attendance,
-    scores: s.academicScores,
-    assignments: s.assignments,
-    assignmentCompletion: s.assignmentCompletion,
-    assessments: s.assessments,
-    overallScore: Math.round(Object.values(s.academicScores).reduce((a, b) => a + b, 0) / Object.values(s.academicScores).length),
-    remarks: s.attendance < 75 ? "Needs Attention - Attendance Low" : "Progressing Well"
-  }));
+  const { batch, session } = req.query;
+  let filtered = [...students];
+  if (batch && batch !== 'All') {
+    filtered = filtered.filter(s => s.batch === batch);
+  }
+  if (session && session !== 'All') {
+    filtered = filtered.filter(s => s.session === session);
+  }
+
+  const data = filtered.map(s => {
+    const lms = calculateStudentLmsScore(s.assessments);
+    return {
+      id: s.id,
+      name: s.name,
+      batch: s.batch,
+      session: s.session || "Session 1",
+      course: s.course,
+      attendance: s.attendance,
+      scores: s.academicScores,
+      assignments: s.assignments,
+      assignmentCompletion: s.assignmentCompletion,
+      assessments: s.assessments,
+      lmsScore: lms,
+      overallScore: lms,
+      remarks: (lms < 70 || s.attendance < 75) ? "Needs Attention - Retake Recommended" : "Progressing Well"
+    };
+  });
   res.json(data);
 });
 
 app.put('/api/performance/:id', (req, res) => {
   const student = students.find(s => s.id === req.params.id);
   if (student) {
-    const { scores, assignments, assessments, attendance } = req.body;
+    const { scores, assignments, assessments, attendance, assignmentCompletion, session, batch } = req.body;
     if (scores) student.academicScores = { ...student.academicScores, ...scores };
     if (assignments) {
       student.assignments = { ...student.assignments, ...assignments };
-      // Recalculate completion percentage
       const vals = Object.values(student.assignments);
       const done = vals.filter(v => v === 'Completed').length;
       student.assignmentCompletion = Math.round((done / vals.length) * 100);
     }
-    if (assessments) student.assessments = { ...student.assessments, ...assessments };
-    if (attendance !== undefined) student.attendance = parseInt(attendance);
+    if (assignmentCompletion !== undefined) {
+      student.assignmentCompletion = Math.max(0, Math.min(100, parseInt(assignmentCompletion) || 0));
+    }
+    if (assessments) {
+      student.assessments = {
+        mcq: Math.max(0, Math.min(100, parseInt(assessments.mcq ?? student.assessments?.mcq) || 0)),
+        practical: Math.max(0, Math.min(100, parseInt(assessments.practical ?? student.assessments?.practical) || 0)),
+        hardpaper: Math.max(0, Math.min(100, parseInt(assessments.hardpaper ?? student.assessments?.hardpaper) || 0)),
+        mockInterview: Math.max(0, Math.min(100, parseInt(assessments.mockInterview ?? student.assessments?.mockInterview) || 0))
+      };
+    }
+    if (attendance !== undefined) student.attendance = Math.max(0, Math.min(100, parseInt(attendance) || 0));
+    if (session) student.session = session;
+    if (batch) student.batch = batch;
     
     // Add to timeline
     student.timeline.push({
       date: new Date().toISOString().split('T')[0],
-      event: "Academic performance scorecard updated"
+      event: `Academic performance scorecard updated (LMS: ${calculateStudentLmsScore(student.assessments)}%)`
     });
     
-    res.json(student);
+    res.json({
+      ...student,
+      lmsScore: calculateStudentLmsScore(student.assessments)
+    });
   } else {
     res.status(404).json({ error: "Student not found" });
   }
 });
 
 app.post('/api/performance/bulk-import', (req, res) => {
-  // Mock performance Excel import
   students.forEach(s => {
-    // Bump scores randomly as mock update
     Object.keys(s.academicScores).forEach(module => {
       s.academicScores[module] = Math.min(100, s.academicScores[module] + Math.floor(Math.random() * 5));
     });
+    if (s.assessments) {
+      s.assessments.mockInterview = Math.min(100, (s.assessments.mockInterview || 75) + Math.floor(Math.random() * 4));
+    }
   });
-  res.json({ message: "Academic scores successfully synchronized from external report." });
+  res.json({ message: "Academic and LMS scores successfully synchronized from external report." });
 });
 
 // Relationship / Reviews API
@@ -642,12 +943,10 @@ app.post('/api/relationship', (req, res) => {
 
   callLogs.push(newCall);
 
-  // If there's an active low attendance or bad feedback alert, mark resolved if feedback is Satisfactory
   if (newCall.feedback === 'Satisfactory') {
     alerts = alerts.filter(a => !(a.type === 'Unsatisfied Feedback' && a.text.includes(student.id)));
   }
 
-  // Add event to student timeline
   student.timeline.push({
     date: newCall.date,
     event: `Counselor Call Logged (${newCall.feedback}) - Remarks: ${newCall.counselorRemarks}`
@@ -658,10 +957,13 @@ app.post('/api/relationship', (req, res) => {
 
 // Dashboards APIs
 app.get('/api/dashboard/sms', (req, res) => {
+  const { batch, session } = req.query;
   res.json({
-    stats: getSmsStats(),
+    stats: getSmsStats(batch, session),
     upcomingClasses: upcomingClasses,
-    alerts: alerts
+    alerts: alerts,
+    batches: batches,
+    sessions: sessions
   });
 });
 
@@ -677,6 +979,11 @@ app.post('/api/alerts/:id/resolve', (req, res) => {
   const alertId = req.params.id;
   alerts = alerts.filter(a => a.id !== alertId);
   res.json({ message: "Alert dismissed successfully" });
+});
+
+app.post('/api/alerts/clear-all', (req, res) => {
+  alerts = [];
+  res.json({ message: "All alerts cleared successfully" });
 });
 
 // Catch-all route to serve the SPA or individual files

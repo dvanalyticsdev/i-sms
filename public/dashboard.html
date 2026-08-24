@@ -71,6 +71,36 @@
 
       <!-- Page Content -->
       <main class="page-container">
+        <!-- Cohort Filter Bar -->
+        <section class="dashboard-filter-bar">
+          <div class="filter-group-items">
+            <div class="filter-item">
+              <label for="cohortBatchSelect">Batch:</label>
+              <select id="cohortBatchSelect" class="filter-select">
+                <option value="All">All Batches</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label for="cohortSessionSelect">Session:</label>
+              <select id="cohortSessionSelect" class="filter-select">
+                <option value="All">All Sessions</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnResetCohortFilters">Reset</button>
+          </div>
+          <div>
+            <button type="button" class="btn btn-primary btn-sm" id="btnOpenBatchModal">
+              <svg style="width:14px;height:14px;margin-right:6px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Manage Batches & Sessions
+            </button>
+          </div>
+        </section>
+
         <!-- KPI Metrics Grid -->
         <section class="kpi-grid">
           <article class="card kpi-card">
@@ -86,16 +116,34 @@
             <h2 id="activeBatches">0</h2>
           </article>
           <article class="card kpi-card">
-            <p>Avg Attendance</p>
+            <p>Overall Attendance</p>
             <h2 id="attendanceRate">0%</h2>
           </article>
           <article class="card kpi-card">
-            <p>Avg Assignment</p>
+            <p>Assignment Completion</p>
             <h2 id="assignmentCompletionRate">0%</h2>
           </article>
-          <article class="card kpi-card">
-            <p>Avg Score</p>
-            <h2 id="overallPerformance">0%</h2>
+          <article class="card kpi-card kpi-card--lms">
+            <p>LMS Score %</p>
+            <h2 id="lmsScoreRate">0%</h2>
+            <div class="lms-pill-grid">
+              <div class="lms-pill">
+                <span>MCQ</span>
+                <strong id="kpiMcq">0%</strong>
+              </div>
+              <div class="lms-pill">
+                <span>Prac</span>
+                <strong id="kpiPractical">0%</strong>
+              </div>
+              <div class="lms-pill">
+                <span>Paper</span>
+                <strong id="kpiPaper">0%</strong>
+              </div>
+              <div class="lms-pill">
+                <span>Mock</span>
+                <strong id="kpiMock">0%</strong>
+              </div>
+            </div>
           </article>
         </section>
 
@@ -108,7 +156,7 @@
               <article class="card chart-card">
                 <div class="card-head">
                   <h3>Attendance & Assignment Trends</h3>
-                  <p>Aggregated weekly metrics across all active programs</p>
+                  <p id="trendSubtitle">Aggregated weekly metrics across active cohort</p>
                 </div>
                 <div style="position:relative; flex-grow:1; min-height:220px;">
                   <canvas id="trendsChart" aria-label="Attendance and assignment trends chart"></canvas>
@@ -116,8 +164,8 @@
               </article>
               <article class="card chart-card">
                 <div class="card-head">
-                  <h3>Academic Score Distribution</h3>
-                  <p>Count of students falling into specific grade ranges</p>
+                  <h3>Academic & LMS Score Distribution</h3>
+                  <p id="scoreSubtitle">Count of students falling into specific grade ranges</p>
                 </div>
                 <div style="position:relative; flex-grow:1; min-height:220px;">
                   <canvas id="scoresChart" aria-label="Academic score distribution chart"></canvas>
@@ -129,7 +177,7 @@
             <article class="card">
               <div class="card-head">
                 <h3>Today's Classes Schedule</h3>
-                <p>Allocated faculty and batch tracks for today</p>
+                <p id="scheduleSubtitle">Allocated faculty and batch tracks for selected cohort</p>
               </div>
               <div class="table-responsive">
                 <table class="data-table">
@@ -177,6 +225,158 @@
     </div>
   </div>
 
+  <!-- Manage Batches & Sessions Modal -->
+  <div class="modal-backdrop" id="batchManagementModal">
+    <div class="modal modal-lg modal-resizable" id="batchModalCard" style="width: 860px; height: 600px;">
+      <div class="modal-head">
+        <h3>Manage Batches & Sessions</h3>
+        <div class="modal-head-actions">
+          <button type="button" class="modal-action-btn" id="btnToggleMaximizeBatchModal" title="Maximize / Restore Size">
+            <svg id="iconMax" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            <svg id="iconRestore" style="width:14px;height:14px;display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+            </svg>
+          </button>
+          <button class="drawer-close" id="btnCloseBatchModal">&times;</button>
+        </div>
+      </div>
+      
+      <div class="modal-subtabs">
+        <button class="modal-subtab is-active" data-subtab="tabBatches">Batches</button>
+        <button class="modal-subtab" data-subtab="tabSessions">Sessions</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Batches Tab Panel -->
+        <div id="tabBatches" class="subtab-panel">
+          <form id="batchForm" style="display:grid; grid-template-columns:1fr 1.5fr 1fr 1fr; gap:10px; margin-bottom:16px; align-items:end;">
+            <input type="hidden" id="batchEditId">
+            <div class="form-group" style="margin:0;">
+              <label for="batchCodeInput" style="font-size:11px;">Batch Code</label>
+              <input type="text" id="batchCodeInput" class="form-control" placeholder="e.g. B-2026-E" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="batchNameInput" style="font-size:11px;">Batch Name</label>
+              <input type="text" id="batchNameInput" class="form-control" placeholder="e.g. GenAI Alpha" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="batchFacultyInput" style="font-size:11px;">Faculty</label>
+              <input type="text" id="batchFacultyInput" class="form-control" placeholder="e.g. Dr. Amit Verma" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="batchTimingInput" style="font-size:11px;">Timing</label>
+              <input type="text" id="batchTimingInput" class="form-control" placeholder="e.g. 09:30 AM - 11:30 AM" required>
+            </div>
+            <div class="form-group" style="margin:0; grid-column:span 2;">
+              <label for="batchProgramInput" style="font-size:11px;">Course / Program</label>
+              <select id="batchProgramInput" class="form-control">
+                <option value="Advanced AI & ML with Gen AI">Advanced AI & ML with Gen AI</option>
+                <option value="Data Science Master Program">Data Science Master Program</option>
+                <option value="Business Analytics Pro">Business Analytics Pro</option>
+                <option value="Data Engineering Master">Data Engineering Master</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="batchStatusInput" style="font-size:11px;">Status</label>
+              <select id="batchStatusInput" class="form-control">
+                <option value="Active">Active</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+            <div>
+              <button type="submit" class="btn-primary form-control" id="btnSaveBatch" style="height:36px; cursor:pointer;">Add Batch</button>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Batch Name</th>
+                  <th>Program</th>
+                  <th>Faculty</th>
+                  <th>Timing</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="batchTableBody">
+                <tr><td colspan="7">Loading batches...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Sessions Tab Panel -->
+        <div id="tabSessions" class="subtab-panel" style="display:none;">
+          <form id="sessionForm" style="display:grid; grid-template-columns:1fr 1fr 1.5fr 1fr; gap:10px; margin-bottom:16px; align-items:end;">
+            <input type="hidden" id="sessionEditId">
+            <div class="form-group" style="margin:0;">
+              <label for="sessionBatchCodeInput" style="font-size:11px;">Select Batch</label>
+              <select id="sessionBatchCodeInput" class="form-control" required></select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="sessionNameInput" style="font-size:11px;">Session Name</label>
+              <input type="text" id="sessionNameInput" class="form-control" placeholder="e.g. Session 1" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="sessionTopicInput" style="font-size:11px;">Session Topic</label>
+              <input type="text" id="sessionTopicInput" class="form-control" placeholder="e.g. Agentic Systems" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="sessionDateInput" style="font-size:11px;">Date & Time</label>
+              <input type="date" id="sessionDateInput" class="form-control" required>
+            </div>
+            <div class="form-group" style="margin:0; grid-column:span 2;">
+              <label for="sessionTimingInput" style="font-size:11px;">Timing</label>
+              <input type="text" id="sessionTimingInput" class="form-control" placeholder="e.g. 09:30 AM" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="sessionStatusInput" style="font-size:11px;">Status</label>
+              <select id="sessionStatusInput" class="form-control">
+                <option value="Completed">Completed</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Scheduled">Scheduled</option>
+              </select>
+            </div>
+            <div>
+              <button type="submit" class="btn-primary form-control" id="btnSaveSession" style="height:36px; cursor:pointer;">Add Session</button>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Batch</th>
+                  <th>Session</th>
+                  <th>Topic</th>
+                  <th>Date & Time</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sessionTableBody">
+                <tr><td colspan="6">Loading sessions...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-resize-grip" title="Drag corner to adjust size">
+        <svg viewBox="0 0 10 10" fill="currentColor">
+          <circle cx="8.5" cy="8.5" r="1.2"/>
+          <circle cx="8.5" cy="4.5" r="1.2"/>
+          <circle cx="4.5" cy="8.5" r="1.2"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="app.js"></script>
   <script type="module">
     import { apiFetch } from './app.js';
@@ -184,23 +384,142 @@
 
     let trendsChartInstance = null;
     let scoresChartInstance = null;
+    let cachedStats = null;
+    let cachedBatches = [];
+    let cachedSessions = [];
+
+    const batchSelect = document.getElementById("cohortBatchSelect");
+    const sessionSelect = document.getElementById("cohortSessionSelect");
+    const resetBtn = document.getElementById("btnResetCohortFilters");
+    const modal = document.getElementById("batchManagementModal");
+    const modalCard = document.getElementById("batchModalCard");
+    const btnOpenModal = document.getElementById("btnOpenBatchModal");
+    const btnCloseModal = document.getElementById("btnCloseBatchModal");
+    const btnToggleMax = document.getElementById("btnToggleMaximizeBatchModal");
+    const iconMax = document.getElementById("iconMax");
+    const iconRestore = document.getElementById("iconRestore");
+
+    // Maximize / Restore Toggle
+    let isMaximized = false;
+    let prevWidth = '860px';
+    let prevHeight = '600px';
+
+    btnToggleMax.addEventListener("click", () => {
+      isMaximized = !isMaximized;
+      if (isMaximized) {
+        prevWidth = modalCard.style.width || '860px';
+        prevHeight = modalCard.style.height || '600px';
+        modalCard.classList.add("is-maximized");
+        iconMax.style.display = "none";
+        iconRestore.style.display = "block";
+      } else {
+        modalCard.classList.remove("is-maximized");
+        modalCard.style.width = prevWidth;
+        modalCard.style.height = prevHeight;
+        iconMax.style.display = "block";
+        iconRestore.style.display = "none";
+      }
+    });
+
+    // Modal tabs toggle
+    document.querySelectorAll(".modal-subtab").forEach(tabBtn => {
+      tabBtn.addEventListener("click", () => {
+        document.querySelectorAll(".modal-subtab").forEach(b => b.classList.remove("is-active"));
+        tabBtn.classList.add("is-active");
+        const target = tabBtn.dataset.subtab;
+        document.querySelectorAll(".subtab-panel").forEach(panel => {
+          panel.style.display = panel.id === target ? "block" : "none";
+        });
+      });
+    });
+
+    btnOpenModal.addEventListener("click", () => {
+      modal.classList.add("is-open");
+      loadBatchesAndSessionsTable();
+    });
+
+    btnCloseModal.addEventListener("click", () => {
+      modal.classList.remove("is-open");
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("is-open");
+    });
+
+    batchSelect.addEventListener("change", async () => {
+      updateSessionFilterOptions();
+      await fetchDashboardData();
+    });
+
+    sessionSelect.addEventListener("change", async () => {
+      await fetchDashboardData();
+    });
+
+    resetBtn.addEventListener("click", async () => {
+      batchSelect.value = "All";
+      updateSessionFilterOptions();
+      sessionSelect.value = "All";
+      await fetchDashboardData();
+    });
+
+    function updateSessionFilterOptions() {
+      const selectedBatch = batchSelect.value;
+      const filteredSessions = selectedBatch === "All"
+        ? cachedSessions
+        : cachedSessions.filter(s => s.batchCode === selectedBatch);
+      
+      const distinctNames = [...new Set(filteredSessions.map(s => s.name))];
+      sessionSelect.innerHTML = `<option value="All">All Sessions</option>` +
+        distinctNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
 
     async function initDashboard() {
       try {
-        const data = await apiFetch('/api/dashboard/sms');
-        const stats = data.stats;
-        
-        // Populate KPIs
-        document.getElementById("totalStudents").textContent = stats.totalStudents;
-        document.getElementById("activeStudents").textContent = stats.activeStudents;
-        document.getElementById("activeBatches").textContent = stats.activeBatches;
-        document.getElementById("attendanceRate").textContent = `${stats.attendanceRate}%`;
-        document.getElementById("assignmentCompletionRate").textContent = `${stats.assignmentCompletionRate}%`;
-        document.getElementById("overallPerformance").textContent = `${stats.overallPerformance}%`;
+        await fetchDashboardData(true);
+      } catch (err) {
+        console.error("Dashboard initialization failed:", err);
+      }
+    }
 
-        // Render Today's Classes Schedule
-        const scheduleTable = document.getElementById("scheduleTable");
-        scheduleTable.innerHTML = data.upcomingClasses.map(c => `
+    async function fetchDashboardData(initial = false) {
+      const batch = batchSelect.value || "All";
+      const session = sessionSelect.value || "All";
+      const data = await apiFetch(`/api/dashboard/sms?batch=${encodeURIComponent(batch)}&session=${encodeURIComponent(session)}`);
+      
+      cachedStats = data.stats;
+      cachedBatches = data.batches || [];
+      cachedSessions = data.sessions || [];
+
+      if (initial) {
+        // Populate Batch filter dropdown
+        const currentBatchVal = batchSelect.value;
+        batchSelect.innerHTML = `<option value="All">All Batches</option>` +
+          cachedBatches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
+        if (currentBatchVal) batchSelect.value = currentBatchVal;
+
+        updateSessionFilterOptions();
+      }
+
+      // Populate KPI Cards
+      document.getElementById("totalStudents").textContent = cachedStats.totalStudents;
+      document.getElementById("activeStudents").textContent = cachedStats.activeStudents;
+      document.getElementById("activeBatches").textContent = cachedStats.activeBatches;
+      document.getElementById("attendanceRate").textContent = `${cachedStats.attendanceRate}%`;
+      document.getElementById("assignmentCompletionRate").textContent = `${cachedStats.assignmentCompletionRate}%`;
+      document.getElementById("lmsScoreRate").textContent = `${cachedStats.lmsScoreRate}%`;
+
+      // LMS 4-Pillar Breakdown
+      document.getElementById("kpiMcq").textContent = `${cachedStats.mcqAvg}%`;
+      document.getElementById("kpiPractical").textContent = `${cachedStats.practicalAvg}%`;
+      document.getElementById("kpiPaper").textContent = `${cachedStats.hardpaperAvg}%`;
+      document.getElementById("kpiMock").textContent = `${cachedStats.mockInterviewAvg}%`;
+
+      // Render Schedule
+      const scheduleTable = document.getElementById("scheduleTable");
+      const classesList = cachedStats.classes || data.upcomingClasses || [];
+      scheduleTable.innerHTML = classesList.length === 0
+        ? `<tr><td colspan="5" style="color:var(--text-muted);">No scheduled classes for this selection</td></tr>`
+        : classesList.map(c => `
           <tr>
             <td style="font-weight:700;">${c.time}</td>
             <td>${c.course}</td>
@@ -210,56 +529,54 @@
           </tr>
         `).join('');
 
-        // Render Top Performers
-        const topList = document.getElementById("topPerformersList");
-        topList.innerHTML = stats.topPerformers.length === 0 
-          ? '<div style="font-size:12px;color:var(--text-muted);">None found</div>'
-          : stats.topPerformers.map(s => `
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
-              <div>
-                <a href="students.html?id=${s.id}" style="font-weight:700; color:var(--heading); font-size:12px; text-decoration:none;">${s.name}</a>
-                <div style="font-size:10px; color:var(--text-muted);">${s.batch}</div>
-              </div>
-              <div style="text-align:right;">
-                <span class="badge badge-active" style="font-size:10px;">${s.performance}% Score</span>
-                <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${s.attendance}%</div>
-              </div>
+      // Render Top Performers
+      const topList = document.getElementById("topPerformersList");
+      topList.innerHTML = cachedStats.topPerformers.length === 0 
+        ? '<div style="font-size:12px;color:var(--text-muted); text-align:center; padding:10px;">No top performers found</div>'
+        : cachedStats.topPerformers.map(s => `
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
+            <div>
+              <a href="students.html?id=${s.id}" style="font-weight:700; color:var(--heading); font-size:12px; text-decoration:none;">${s.name}</a>
+              <div style="font-size:10px; color:var(--text-muted);">${s.batch} &bull; ${s.session}</div>
             </div>
-          `).join('');
-
-        // Render Weak Performers
-        const weakList = document.getElementById("weakPerformersList");
-        weakList.innerHTML = stats.weakStudents.length === 0
-          ? '<div style="font-size:12px;color:var(--text-muted); text-align:center; padding:10px;">All students in good standing!</div>'
-          : stats.weakStudents.map(s => `
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
-              <div>
-                <a href="students.html?id=${s.id}" style="font-weight:700; color:var(--heading); font-size:12px; text-decoration:none;">${s.name}</a>
-                <div style="font-size:10px; color:var(--text-muted);">${s.batch}</div>
-              </div>
-              <div style="text-align:right;">
-                <span class="badge badge-dropped" style="font-size:10px;">${s.performance}% Score</span>
-                <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${s.attendance}%</div>
-              </div>
+            <div style="text-align:right;">
+              <span class="badge badge-active" style="font-size:10px;">${s.performance}% LMS</span>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${s.attendance}%</div>
             </div>
-          `).join('');
+          </div>
+        `).join('');
 
-        // Initialize Charts
-        renderCharts();
+      // Render Weak Performers
+      const weakList = document.getElementById("weakPerformersList");
+      weakList.innerHTML = cachedStats.weakStudents.length === 0
+        ? '<div style="font-size:12px;color:var(--text-muted); text-align:center; padding:10px;">All students in good standing!</div>'
+        : cachedStats.weakStudents.map(s => `
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px;">
+            <div>
+              <a href="students.html?id=${s.id}" style="font-weight:700; color:var(--heading); font-size:12px; text-decoration:none;">${s.name}</a>
+              <div style="font-size:10px; color:var(--text-muted);">${s.batch} &bull; ${s.session}</div>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge badge-dropped" style="font-size:10px;">${s.performance}% LMS</span>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${s.attendance}%</div>
+            </div>
+          </div>
+        `).join('');
 
-      } catch (err) {
-        console.error("Dashboard initialization failed:", err);
-      }
+      // Render Charts
+      renderCharts();
     }
 
     function renderCharts() {
       const palette = readThemePalette();
-      
-      // Destroy existing charts to redraw on theme change
       if (trendsChartInstance) trendsChartInstance.destroy();
       if (scoresChartInstance) scoresChartInstance.destroy();
 
-      // Chart 1: Attendance & Assignments
+      const att = cachedStats ? cachedStats.attendanceRate : 85;
+      const assign = cachedStats ? cachedStats.assignmentCompletionRate : 80;
+      const lms = cachedStats ? cachedStats.lmsScoreRate : 78;
+
+      // Chart 1: Attendance & Assignments Trends
       const ctxTrends = document.getElementById("trendsChart").getContext("2d");
       trendsChartInstance = new Chart(ctxTrends, {
         type: 'line',
@@ -267,21 +584,21 @@
           labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
           datasets: [
             {
-              label: 'Attendance Rate',
-              data: [82, 85, 84, 88, 89],
-              borderColor: palette.chartSeries[1], // Blue
+              label: 'Attendance Rate %',
+              data: [Math.max(50, att - 7), Math.max(50, att - 4), Math.max(50, att - 2), Math.max(50, att - 1), att],
+              borderColor: palette.chartSeries[1],
               backgroundColor: 'transparent',
-              tension: 0.2,
-              borderWidth: 2
+              tension: 0.25,
+              borderWidth: 2.5
             },
             {
-              label: 'Assignment Completion',
-              data: [70, 72, 75, 78, 81],
-              borderColor: palette.chartSeries[0], // Orange
+              label: 'Assignment %',
+              data: [Math.max(40, assign - 12), Math.max(45, assign - 8), Math.max(50, assign - 5), Math.max(55, assign - 2), assign],
+              borderColor: palette.chartSeries[0],
               backgroundColor: palette.chartFill,
               fill: true,
-              tension: 0.2,
-              borderWidth: 2
+              tension: 0.25,
+              borderWidth: 2.5
             }
           ]
         },
@@ -292,16 +609,16 @@
             legend: {
               labels: {
                 color: palette.chartGrid.includes('232') ? '#333' : '#cbd5e1',
-                font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' }
+                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
               }
             }
           },
           scales: {
             y: {
-              min: 50,
+              min: 40,
               max: 100,
               grid: { color: palette.chartGrid },
-              ticks: { color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
+              ticks: { callback: v => `${v}%`, color: palette.chartGrid.includes('232') ? '#666' : '#8e9db0' }
             },
             x: {
               grid: { display: false },
@@ -311,17 +628,22 @@
         }
       });
 
-      // Chart 2: Scores Distribution
+      // Chart 2: Academic & LMS Score Distribution
       const ctxScores = document.getElementById("scoresChart").getContext("2d");
+      const failCount = cachedStats && cachedStats.weakStudents ? cachedStats.weakStudents.filter(s => s.performance < 50).length : 1;
+      const cCount = cachedStats && cachedStats.weakStudents ? cachedStats.weakStudents.filter(s => s.performance >= 50 && s.performance < 70).length : 1;
+      const bCount = Math.max(1, (cachedStats ? cachedStats.totalStudents : 8) - failCount - cCount - (cachedStats ? cachedStats.topPerformers.length : 2));
+      const aCount = cachedStats && cachedStats.topPerformers ? cachedStats.topPerformers.length : 2;
+
       scoresChartInstance = new Chart(ctxScores, {
         type: 'bar',
         data: {
           labels: ['<50% (Fail)', '50-69% (Grade C)', '70-85% (Grade B)', '86-100% (Grade A)'],
           datasets: [{
             label: 'Students Count',
-            data: [1, 2, 3, 2],
+            data: [failCount, cCount, bCount, aCount],
             backgroundColor: palette.chartSeries.slice(0, 4),
-            borderRadius: 4
+            borderRadius: 6
           }]
         },
         options: {
@@ -345,7 +667,176 @@
       });
     }
 
-    // Redraw charts when theme changes
+    // Modal Data & Form Handlers
+    async function loadBatchesAndSessionsTable() {
+      const [batches, sessions] = await Promise.all([
+        apiFetch('/api/batches'),
+        apiFetch('/api/sessions')
+      ]);
+
+      cachedBatches = batches;
+      cachedSessions = sessions;
+
+      // Populate batch options in session form
+      const sessionBatchSelect = document.getElementById("sessionBatchCodeInput");
+      sessionBatchSelect.innerHTML = batches.map(b => `<option value="${b.code}">${b.code} - ${b.name}</option>`).join('');
+
+      // Render Batches table
+      const batchBody = document.getElementById("batchTableBody");
+      batchBody.innerHTML = batches.length === 0 ? `<tr><td colspan="7">No batches defined</td></tr>` : batches.map(b => `
+        <tr>
+          <td><strong>${b.code}</strong></td>
+          <td>${b.name}</td>
+          <td>${b.program}</td>
+          <td>${b.faculty}</td>
+          <td>${b.timing}</td>
+          <td><span class="badge ${b.status === 'Active' ? 'badge-active' : 'badge-completed'}">${b.status}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm edit-batch-btn" data-id="${b.id}" style="padding:2px 8px; font-size:11px; margin-right:4px;">Edit</button>
+            <button class="btn btn-danger btn-sm del-batch-btn" data-id="${b.id}" style="padding:2px 8px; font-size:11px;">Del</button>
+          </td>
+        </tr>
+      `).join('');
+
+      // Render Sessions table
+      const sessionBody = document.getElementById("sessionTableBody");
+      sessionBody.innerHTML = sessions.length === 0 ? `<tr><td colspan="6">No sessions defined</td></tr>` : sessions.map(s => `
+        <tr>
+          <td><strong>${s.batchCode}</strong></td>
+          <td>${s.name}</td>
+          <td>${s.topic}</td>
+          <td>${s.date} (${s.timing})</td>
+          <td><span class="badge ${s.status === 'Completed' ? 'badge-completed' : (s.status === 'Ongoing' ? 'badge-active' : 'badge-pending')}">${s.status}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm edit-sess-btn" data-id="${s.id}" style="padding:2px 8px; font-size:11px; margin-right:4px;">Edit</button>
+            <button class="btn btn-danger btn-sm del-sess-btn" data-id="${s.id}" style="padding:2px 8px; font-size:11px;">Del</button>
+          </td>
+        </tr>
+      `).join('');
+
+      // Wire Batch edit/del buttons
+      document.querySelectorAll(".edit-batch-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const b = cachedBatches.find(x => x.id === btn.dataset.id);
+          if (b) {
+            document.getElementById("batchEditId").value = b.id;
+            document.getElementById("batchCodeInput").value = b.code;
+            document.getElementById("batchNameInput").value = b.name;
+            document.getElementById("batchFacultyInput").value = b.faculty;
+            document.getElementById("batchTimingInput").value = b.timing;
+            document.getElementById("batchProgramInput").value = b.program;
+            document.getElementById("batchStatusInput").value = b.status;
+            document.getElementById("btnSaveBatch").textContent = "Update Batch";
+          }
+        });
+      });
+
+      document.querySelectorAll(".del-batch-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (confirm("Are you sure you want to delete this batch?")) {
+            await apiFetch(`/api/batches/${btn.dataset.id}`, { method: 'DELETE' });
+            await loadBatchesAndSessionsTable();
+            await fetchDashboardData(true);
+          }
+        });
+      });
+
+      // Wire Session edit/del buttons
+      document.querySelectorAll(".edit-sess-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const s = cachedSessions.find(x => x.id === btn.dataset.id);
+          if (s) {
+            document.getElementById("sessionEditId").value = s.id;
+            document.getElementById("sessionBatchCodeInput").value = s.batchCode;
+            document.getElementById("sessionNameInput").value = s.name;
+            document.getElementById("sessionTopicInput").value = s.topic;
+            document.getElementById("sessionDateInput").value = s.date;
+            document.getElementById("sessionTimingInput").value = s.timing;
+            document.getElementById("sessionStatusInput").value = s.status;
+            document.getElementById("btnSaveSession").textContent = "Update Session";
+          }
+        });
+      });
+
+      document.querySelectorAll(".del-sess-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (confirm("Are you sure you want to delete this session?")) {
+            await apiFetch(`/api/sessions/${btn.dataset.id}`, { method: 'DELETE' });
+            await loadBatchesAndSessionsTable();
+            await fetchDashboardData(true);
+          }
+        });
+      });
+    }
+
+    // Submit Batch Form
+    document.getElementById("batchForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById("batchEditId").value;
+      const payload = {
+        code: document.getElementById("batchCodeInput").value,
+        name: document.getElementById("batchNameInput").value,
+        faculty: document.getElementById("batchFacultyInput").value,
+        timing: document.getElementById("batchTimingInput").value,
+        program: document.getElementById("batchProgramInput").value,
+        status: document.getElementById("batchStatusInput").value
+      };
+
+      if (editId) {
+        await apiFetch(`/api/batches/${editId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        await apiFetch('/api/batches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      document.getElementById("batchForm").reset();
+      document.getElementById("batchEditId").value = "";
+      document.getElementById("btnSaveBatch").textContent = "Add Batch";
+      await loadBatchesAndSessionsTable();
+      await fetchDashboardData(true);
+    });
+
+    // Submit Session Form
+    document.getElementById("sessionForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById("sessionEditId").value;
+      const payload = {
+        batchCode: document.getElementById("sessionBatchCodeInput").value,
+        name: document.getElementById("sessionNameInput").value,
+        topic: document.getElementById("sessionTopicInput").value,
+        date: document.getElementById("sessionDateInput").value,
+        timing: document.getElementById("sessionTimingInput").value,
+        status: document.getElementById("sessionStatusInput").value
+      };
+
+      if (editId) {
+        await apiFetch(`/api/sessions/${editId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        await apiFetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      document.getElementById("sessionForm").reset();
+      document.getElementById("sessionEditId").value = "";
+      document.getElementById("btnSaveSession").textContent = "Add Session";
+      await loadBatchesAndSessionsTable();
+      await fetchDashboardData(true);
+    });
+
     document.addEventListener("dv-theme-change", () => {
       renderCharts();
     });
