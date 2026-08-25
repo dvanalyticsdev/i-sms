@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const zlib = require('zlib');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -135,6 +137,308 @@ function computeStudentAggregates(student) {
     attendanceResult,
     attentionResult
   };
+}
+
+function cleanPdfText(value) {
+  return String(value ?? "")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u2265/g, ">=")
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, " ");
+}
+
+function pdfEscape(value) {
+  return cleanPdfText(value).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
+function wrapText(value, maxChars) {
+  const words = cleanPdfText(value).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  words.forEach(word => {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > maxChars && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.length ? lines : [""];
+}
+
+function parsePngForPdf(filePath) {
+  const png = fs.readFileSync(filePath);
+  const signature = png.subarray(0, 8).toString('hex');
+  if (signature !== '89504e470d0a1a0a') {
+    throw new Error("Logo must be a PNG file.");
+  }
+
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  const idatChunks = [];
+
+  while (offset < png.length) {
+    const length = png.readUInt32BE(offset);
+    const type = png.toString('ascii', offset + 4, offset + 8);
+    const data = png.subarray(offset + 8, offset + 8 + length);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+      const interlace = data[12];
+      if (bitDepth !== 8 || interlace !== 0 || ![2, 6].includes(colorType)) {
+        throw new Error("Logo PNG format is not supported for PDF embedding.");
+      }
+    } else if (type === 'IDAT') {
+      idatChunks.push(data);
+    } else if (type === 'IEND') {
+      break;
+    }
+    offset += 12 + length;
+  }
+
+  const bytesPerPixel = colorType === 6 ? 4 : 3;
+  const scanlineLength = width * bytesPerPixel;
+  const inflated = zlib.inflateSync(Buffer.concat(idatChunks));
+  const rawRgb = Buffer.alloc(width * height * 3);
+  let src = 0;
+  let dst = 0;
+  let previous = Buffer.alloc(scanlineLength);
+
+  for (let y = 0; y < height; y++) {
+    const filter = inflated[src++];
+    const current = Buffer.alloc(scanlineLength);
+    for (let x = 0; x < scanlineLength; x++) {
+      const raw = inflated[src++];
+      const left = x >= bytesPerPixel ? current[x - bytesPerPixel] : 0;
+      const up = previous[x] || 0;
+      const upLeft = x >= bytesPerPixel ? previous[x - bytesPerPixel] : 0;
+      let value = raw;
+      if (filter === 1) value = raw + left;
+      if (filter === 2) value = raw + up;
+      if (filter === 3) value = raw + Math.floor((left + up) / 2);
+      if (filter === 4) {
+        const p = left + up - upLeft;
+        const pa = Math.abs(p - left);
+        const pb = Math.abs(p - up);
+        const pc = Math.abs(p - upLeft);
+        const predictor = pa <= pb && pa <= pc ? left : (pb <= pc ? up : upLeft);
+        value = raw + predictor;
+      }
+      current[x] = value & 255;
+    }
+
+    for (let x = 0; x < width; x++) {
+      const idx = x * bytesPerPixel;
+      const alpha = colorType === 6 ? current[idx + 3] / 255 : 1;
+      rawRgb[dst++] = Math.round(current[idx] * alpha + 255 * (1 - alpha));
+      rawRgb[dst++] = Math.round(current[idx + 1] * alpha + 255 * (1 - alpha));
+      rawRgb[dst++] = Math.round(current[idx + 2] * alpha + 255 * (1 - alpha));
+    }
+    previous = current;
+  }
+
+  return {
+    width,
+    height,
+    data: zlib.deflateSync(rawRgb)
+  };
+}
+
+function createStudentReportPdf(student) {
+  const logoPath = path.join(__dirname, 'public', 'Logos', 'DV-Logo.png');
+  const logo = parsePngForPdf(logoPath);
+  const objects = [];
+  const addObject = content => {
+    objects.push(Buffer.isBuffer(content) ? content : Buffer.from(content, 'binary'));
+    return objects.length;
+  };
+
+  const catalogId = addObject("");
+  const pagesId = addObject("");
+  const fontRegularId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const fontBoldId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  const logoId = addObject(Buffer.concat([
+    Buffer.from(`<< /Type /XObject /Subtype /Image /Width ${logo.width} /Height ${logo.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${logo.data.length} >>\nstream\n`, 'binary'),
+    logo.data,
+    Buffer.from("\nendstream", 'binary')
+  ]));
+
+  const pageIds = [];
+  const pageWidth = 595;
+  const pageHeight = 842;
+  let ops = [];
+  let y = 780;
+
+  const newPage = () => {
+    ops = [];
+    y = 780;
+  };
+
+  const finishPage = () => {
+    const stream = Buffer.from(ops.join("\n"), 'binary');
+    const contentId = addObject(Buffer.concat([
+      Buffer.from(`<< /Length ${stream.length} >>\nstream\n`, 'binary'),
+      stream,
+      Buffer.from("\nendstream", 'binary')
+    ]));
+    const pageId = addObject(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontRegularId} 0 R /F2 ${fontBoldId} 0 R >> /XObject << /Logo ${logoId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    pageIds.push(pageId);
+  };
+
+  const ensureSpace = amount => {
+    if (y - amount < 60) {
+      finishPage();
+      newPage();
+      drawHeader(false);
+    }
+  };
+
+  const text = (value, x, size = 10, bold = false) => {
+    ops.push(`BT /${bold ? "F2" : "F1"} ${size} Tf ${x} ${y} Td (${pdfEscape(value)}) Tj ET`);
+  };
+
+  const line = (x1, y1, x2, y2) => {
+    ops.push(`0.75 w ${x1} ${y1} m ${x2} ${y2} l S`);
+  };
+
+  const drawHeader = (withTitle = true) => {
+    ops.push("q 74 0 0 31 465 782 cm /Logo Do Q");
+    text("DV Analytics", 50, 9, true);
+    y -= 16;
+    text("Student Performance Report", 50, 18, true);
+    if (withTitle) {
+      y -= 18;
+      text(`${student.name} (${student.id})`, 50, 13, true);
+    }
+    line(50, y - 12, 545, y - 12);
+    y -= 34;
+  };
+
+  const section = title => {
+    ensureSpace(34);
+    text(title, 50, 13, true);
+    y -= 8;
+    line(50, y, 545, y);
+    y -= 18;
+  };
+
+  const keyValue = (label, value, x, width = 220) => {
+    text(label, x, 8, true);
+    y -= 12;
+    wrapText(value, Math.floor(width / 5.2)).forEach(lineText => {
+      text(lineText, x, 10, false);
+      y -= 12;
+    });
+  };
+
+  const moduleScore = mod => Math.round((mod.mcq + mod.test + mod.penAndPaper + mod.mockInterview) / 4);
+
+  newPage();
+  drawHeader(true);
+
+  section("Student Summary");
+  const summaryTop = y;
+  keyValue("Course", student.program, 50);
+  y = summaryTop;
+  keyValue("Batch / Session", `${student.batch} / ${student.session}`, 300);
+  y -= 6;
+  const secondTop = y;
+  keyValue("Email", student.email || "Not recorded", 50);
+  y = secondTop;
+  keyValue("Mobile", student.mobile || "Not recorded", 300);
+
+  section("Performance Snapshot");
+  const cards = [
+    ["Attendance", `${student.attendance}%`, student.attendanceResult],
+    ["Focus Rate", `${student.attention}%`, student.attentionResult],
+    ["Assignments", `${student.assignmentCompletion}%`, "S1-S6 completion"],
+    ["LMS Score", `${student.lmsScore}%`, "Assessment pillar average"]
+  ];
+  cards.forEach((card, idx) => {
+    const x = 50 + idx * 124;
+    ops.push(`0.9 0.9 0.9 RG ${x} ${y - 54} 112 58 re S`);
+    ops.push(`BT /F2 8 Tf ${x + 8} ${y - 15} Td (${pdfEscape(card[0])}) Tj ET`);
+    ops.push(`BT /F2 18 Tf ${x + 8} ${y - 35} Td (${pdfEscape(card[1])}) Tj ET`);
+    ops.push(`BT /F1 7 Tf ${x + 8} ${y - 48} Td (${pdfEscape(card[2])}) Tj ET`);
+  });
+  y -= 82;
+
+  section("Eligibility Rules");
+  text(`DV Elite: ${student.dvEliteEligible ? "Eligible" : "Pending"} - SQL, Python, SAS, and ML must score at least 70%.`, 50, 10);
+  y -= 15;
+  text(`Placement Support: ${student.placementSupportEligible ? "Ready" : "Pending"} - mock interview average must be at least 70%.`, 50, 10);
+  y -= 18;
+  wrapText(`Counselor Note: ${student.notes || "No note recorded."}`, 95).forEach(lineText => {
+    text(lineText, 50, 10);
+    y -= 13;
+  });
+
+  section("Module Scorecard");
+  const headers = ["Application", "Attendance", "Attention", "Assign.", "MCQ", "Test", "Paper", "Mock", "Score"];
+  const colX = [50, 195, 260, 325, 378, 415, 452, 492, 532];
+  headers.forEach((header, index) => {
+    ops.push(`BT /F2 8 Tf ${colX[index]} ${y} Td (${pdfEscape(header)}) Tj ET`);
+  });
+  y -= 10;
+  line(50, y, 545, y);
+  y -= 14;
+
+  student.modules.forEach(mod => {
+    ensureSpace(28);
+    const row = [
+      mod.name,
+      `${mod.attended}/${mod.classes} (${mod.attendancePct}%)`,
+      `${mod.attentionPct}%`,
+      `${mod.assignmentTotal}/${mod.assignmentTarget}`,
+      `${mod.mcq}%`,
+      `${mod.test}%`,
+      `${mod.penAndPaper}%`,
+      `${mod.mockInterview}%`,
+      `${moduleScore(mod)}%`
+    ];
+    row.forEach((value, index) => {
+      const shown = index === 0 && value.length > 21 ? `${value.slice(0, 20)}...` : value;
+      ops.push(`BT /${index === 0 ? "F2" : "F1"} 8 Tf ${colX[index]} ${y} Td (${pdfEscape(shown)}) Tj ET`);
+    });
+    y -= 18;
+  });
+
+  section("Feedback Summary");
+  const feedbackRows = [
+    ["Faculty Feedback", student.facultyFeedback?.length || 0],
+    ["Mentor Feedback", student.mentorFeedback?.length || 0],
+    ["Mentor Evaluations", student.mentorEvaluations?.length || 0]
+  ];
+  feedbackRows.forEach(([label, count]) => {
+    text(`${label}: ${count} record${count === 1 ? "" : "s"}`, 50, 10, true);
+    y -= 15;
+  });
+
+  finishPage();
+
+  objects[catalogId - 1] = Buffer.from(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`, 'binary');
+  objects[pagesId - 1] = Buffer.from(`<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`, 'binary');
+
+  const buffers = [Buffer.from("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n", 'binary')];
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets.push(Buffer.concat(buffers).length);
+    buffers.push(Buffer.from(`${index + 1} 0 obj\n`, 'binary'), object, Buffer.from("\nendobj\n", 'binary'));
+  });
+  const xrefOffset = Buffer.concat(buffers).length;
+  const xref = [`xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`];
+  for (let i = 1; i <= objects.length; i++) {
+    xref.push(`${String(offsets[i]).padStart(10, "0")} 00000 n \n`);
+  }
+  xref.push(`trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+  buffers.push(Buffer.from(xref.join(""), 'binary'));
+  return Buffer.concat(buffers);
 }
 
 // Initial Mock Students including MR DEV (LMS1001) from I-SMS.xlsx
@@ -670,6 +974,32 @@ app.get('/api/students', (req, res) => {
   }
 
   res.json(filtered);
+});
+
+app.get('/api/students/:id/report.pdf', (req, res) => {
+  refreshStudents();
+  const student = students.find(s => s.id === req.params.id);
+  if (!student) {
+    return res.status(404).json({ error: "Student not found" });
+  }
+
+  const reportStudent = {
+    ...student,
+    facultyFeedback: facultyFeedbackLogs.filter(f => f.studentId === student.id),
+    mentorFeedback: mentorFeedbackLogs.filter(f => f.studentId === student.id),
+    mentorEvaluations: mentorEvaluationLogs.filter(f => f.studentId === student.id)
+  };
+
+  try {
+    const pdf = createStudentReportPdf(reportStudent);
+    const safeName = student.name.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="I-SMS_${safeName}_${student.id}_Report.pdf"`);
+    res.send(pdf);
+  } catch (error) {
+    console.error("PDF report generation failed:", error);
+    res.status(500).json({ error: "Unable to generate student report PDF" });
+  }
 });
 
 app.get('/api/students/:id', (req, res) => {

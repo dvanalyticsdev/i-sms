@@ -180,6 +180,9 @@
             <p>${student.email || "No email recorded"} / ${student.mobile || "No mobile recorded"}</p>
           </div>
           <div class="status-stack">${statusBadges}</div>
+          <div style="margin-top:14px;">
+            <a class="btn-primary btn-sm" id="downloadReportBtn" href="/api/students/${encodeURIComponent(student.id)}/report.pdf" target="_blank" rel="noopener" style="text-decoration:none; display:inline-flex;">Download Report</a>
+          </div>
           <p style="margin:14px 0 0; color:var(--text-muted); font-size:12px; line-height:1.5;">${student.notes || "No counselor note recorded."}</p>
         </div>
         <div class="rule-panel">
