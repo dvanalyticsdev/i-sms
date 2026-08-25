@@ -1784,3 +1784,109 @@ html[data-theme="dark"] .alert-item {
 .bell-notification-item:last-child {
   border-bottom: none;
 }
+
+/* ====================================================
+   I-SMS PERFORMANCE & 360 FEEDBACK SYSTEM ADDONS
+   ==================================================== */
+
+.badge-elite {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(79, 70, 229, 0.15));
+  color: #9333ea;
+  border: 1px solid rgba(147, 51, 234, 0.3);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+html[data-theme="dark"] .badge-elite {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(99, 102, 241, 0.25));
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.badge-placement {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+html[data-theme="dark"] .badge-placement {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.badge-risk {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-weight: 700;
+}
+html[data-theme="dark"] .badge-risk {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.badge-knowledge-best {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.badge-knowledge-good {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.badge-knowledge-avg {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.badge-knowledge-low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.assignment-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.assignment-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+}
+.assignment-dot.done {
+  background: rgba(16, 185, 129, 0.2);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+.assignment-dot.pending {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+html[data-theme="dark"] .assignment-dot.done {
+  background: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+html[data-theme="dark"] .assignment-dot.pending {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+.rating-stars {
+  color: #f59e0b;
+  font-size: 13px;
+  letter-spacing: 1px;
+}

@@ -3,16 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>i-SMS | Student Performance Management</title>
+  <title>i-SMS | Student Performance (Sheet 1)</title>
   <script src="theme-bootstrap.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .sheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      background: var(--surface);
+    }
+    .sheet-table th, .sheet-table td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .sheet-table th {
+      background: var(--surface-muted);
+      font-weight: 800;
+      color: var(--heading);
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+    .sheet-table .text-left {
+      text-align: left;
+    }
+    .sheet-table .highlight-cell {
+      background: var(--primary-soft);
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .summary-box {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+    .summary-table th {
+      background: var(--surface-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+    }
+    .summary-table td {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+    }
+  </style>
 </head>
 <body>
   <div class="layout-root">
-    <!-- Sidebar -->
+    <!-- Sidebar (Only 3 Pages) -->
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="sms-logo-wrap">
@@ -26,13 +76,9 @@
         </div>
       </div>
       <nav class="sidebar-nav">
-        <a href="dashboard.html" class="sidebar-link">Dashboard</a>
-        <a href="students.html" class="sidebar-link">Student Directory</a>
-        <a href="performance.html" class="sidebar-link is-active">Performance Metrics</a>
-        <a href="relationship.html" class="sidebar-link">Relationship Logs</a>
-        <a href="srm-dashboard.html" class="sidebar-link">SRM Analytics</a>
-        <a href="reports.html" class="sidebar-link">Reports Portal</a>
-        <a href="analytics.html" class="sidebar-link">Advanced Analytics</a>
+        <a href="performance.html" class="sidebar-link is-active">Student Performance</a>
+        <a href="feedback.html" class="sidebar-link">Student Feedback</a>
+        <a href="dashboard.html" class="sidebar-link">Analytics Dashboard</a>
       </nav>
       <div class="sidebar-bottom-links">
         <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
@@ -44,8 +90,8 @@
       <!-- Topbar -->
       <header class="topbar">
         <div class="topbar-title">
-          <h1>Student Performance & Assessments</h1>
-          <p>Monitor module scorecards, assignment statuses, attendance records, and exam results.</p>
+          <h1>Student Performance (Sheet 1)</h1>
+          <p>Curriculum module matrices, attendance %, attention %, assignments (S1-S6), and test quadrant.</p>
         </div>
         <div class="topbar-actions">
           <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
@@ -58,6 +104,7 @@
               </span>
               <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <circle cx="12" cy="12" r="4.5"></circle>
                   <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
                 </svg>
               </span>
@@ -70,461 +117,328 @@
 
       <!-- Page Content -->
       <main class="page-container">
-        <!-- Control buttons -->
-        <section style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-          <div>
-            <button class="btn-primary" id="bulkSyncBtn" style="padding:8px 14px; font-size:12px; border-radius:var(--radius-sm); cursor:pointer;">
-              Sync External Test Report
-            </button>
+        <!-- Student Selection & Actions -->
+        <section style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label for="studentPicker" style="font-weight:800; font-size:12px; color:var(--text-muted);">SELECT STUDENT:</label>
+            <select id="studentPicker" class="filter-select" style="font-weight:700; font-size:13px; min-width:240px;"></select>
           </div>
-          <div>
-            <button class="btn-secondary" id="exportPerformance" style="padding:8px 14px; font-size:12px; border-radius:var(--radius-sm); cursor:pointer;">
-              Export Performance (CSV)
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" id="btnExportCsv" style="padding:6px 12px; font-size:11px; border-radius:var(--radius-sm); cursor:pointer;">
+              Export Sheet (CSV)
             </button>
           </div>
         </section>
 
-        <!-- Filters Bar -->
-        <section class="filter-bar">
-          <div class="filter-group">
-            <label for="perfSearch">Search Student</label>
-            <input type="search" id="perfSearch" class="filter-input" placeholder="Search by name, ID...">
-          </div>
-          <div class="filter-group">
-            <label for="perfBatch">Filter Batch</label>
-            <select id="perfBatch" class="filter-select">
-              <option value="All">All Batches</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="perfSession">Filter Session</label>
-            <select id="perfSession" class="filter-select">
-              <option value="All">All Sessions</option>
-            </select>
+        <!-- Sheet 1 Main Performance Table -->
+        <section class="card" style="padding:0; overflow:hidden;">
+          <div class="table-responsive">
+            <table class="sheet-table" id="perfSheetTable">
+              <thead>
+                <tr>
+                  <th style="background:var(--surface-elevated);">STU NAME</th>
+                  <th style="background:var(--surface-elevated);">LMS ID</th>
+                  <th style="background:var(--surface-elevated);">COURSE</th>
+                  <th style="background:var(--surface-elevated);">BATCH</th>
+                  <th>#</th>
+                  <th>APPLICATION</th>
+                  <th>CLASSES</th>
+                  <th>ATTENDED</th>
+                  <th>ATTENDANCE %</th>
+                  <th>CLASS DURATION</th>
+                  <th>CLASS ATTENTION</th>
+                  <th>ATTENTION %</th>
+                  <th>ASSIGNMENT S-1</th>
+                  <th>ASSIGNMENT S-2</th>
+                  <th>ASSIGNMENT S-3</th>
+                  <th>ASSIGNMENT S-4</th>
+                  <th>ASSIGNMENT S-5</th>
+                  <th>ASSIGNMENT S-6</th>
+                  <th>TOTAL</th>
+                  <th>TARGET</th>
+                  <th>ASSIGNMENT %</th>
+                  <th>MCQs</th>
+                  <th>TEST</th>
+                  <th>PEN AND PAPER</th>
+                  <th>MOCK INTERVIEW</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="perfSheetBody">
+                <tr><td colspan="26" style="padding:20px; text-align:center;">Loading Sheet 1 data...</td></tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <!-- Performance Matrix Table -->
-        <section class="table-responsive">
-          <table class="data-table">
+        <!-- Bottom Summary Row (Rows 16-17 of Excel) -->
+        <div class="summary-box">
+          <table class="summary-table" style="width:100%; border-collapse:collapse;">
             <thead>
               <tr>
-                <th>Student ID</th>
-                <th>Full Name</th>
-                <th>Batch</th>
-                <th>Session</th>
-                <th>Attendance %</th>
-                <th>Assignment %</th>
-                <th>MCQ %</th>
-                <th>Practical %</th>
-                <th>Paper %</th>
-                <th>Mock %</th>
-                <th>LMS Score %</th>
-                <th>Grade</th>
-                <th>Remarks</th>
-                <th>Actions</th>
+                <th style="width:90px;">STU NAME</th>
+                <th style="width:80px;">LMS ID</th>
+                <th style="width:70px;">COURSE</th>
+                <th style="width:100px;">BATCH</th>
+                <th>ATTENDANCE RESULT</th>
+                <th>ATTENTION RESULT</th>
+                <th>DV ELITE</th>
+                <th>PLACEMENT SUPPORT</th>
+                <th>NOTE</th>
               </tr>
             </thead>
-            <tbody id="performanceTableBody">
-              <tr><td colspan="14">Loading academic cards...</td></tr>
+            <tbody>
+              <tr>
+                <td id="sumStuName" style="color:var(--heading);">MR DEV</td>
+                <td id="sumLmsId"><code>LMS1001</code></td>
+                <td id="sumCourse">APIDS</td>
+                <td id="sumBatch">BATCH 202601</td>
+                <td id="sumAttendanceResult" style="color:var(--danger);">FREQUENTLY MISSED CLASSES</td>
+                <td id="sumAttentionResult" style="color:var(--danger);">LESS FOCUSED</td>
+                <td id="sumDvElite" style="color:#9333ea; font-size:10px;">IF THEY HAVE SCORED &gt;= 70% IN SQL,PYTHON,SAS AND ML</td>
+                <td id="sumPlacement" style="color:#059669; font-size:10px;">IF THEY HAVE SCORED IN THE MOCK INTERVIEW &gt;= 70% THEN YES ELSE NO</td>
+                <td id="sumNote" style="font-size:10px; font-weight:600; color:var(--text-muted); max-width:300px;">STUDENT IS NOT SERIOUS IN THE CLASSES AND ALSO NEVER ATTENDED THE TEST AND ASSIGNMENTS PROPERLY</td>
+              </tr>
             </tbody>
           </table>
-        </section>
+        </div>
       </main>
     </div>
   </div>
 
-  <!-- Edit Scorecard Modal -->
-  <div class="modal-backdrop" id="editScorecardModal">
-    <div class="modal modal-lg modal-resizable" id="scorecardModalCard" style="width: 780px; height: 560px;">
-      <div class="modal-head">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <h3>Update Student Scorecard</h3>
-          <span class="badge badge-completed" id="modalLiveLms" style="font-size:12px;">LMS: 0%</span>
-        </div>
-        <div class="modal-head-actions">
-          <button type="button" class="modal-action-btn" id="btnToggleMaximizeScorecard" title="Maximize / Restore Size">
-            <svg id="iconMaxScorecard" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-            </svg>
-            <svg id="iconRestoreScorecard" style="width:14px;height:14px;display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
-            </svg>
-          </button>
-          <button class="drawer-close" id="closeScorecardModal">&times;</button>
-        </div>
+  <!-- Edit Scorecard Row Modal -->
+  <div class="modal-backdrop" id="editRowModal">
+    <div class="modal-overlay" id="editRowOverlay"></div>
+    <div class="modal-container" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalModTitle">Edit Module Row</h3>
+        <button class="modal-close" id="closeRowModal">&times;</button>
       </div>
-      <form id="editScorecardForm" style="display:flex; flex-direction:column; flex:1 1 auto; min-height:0;">
-        <div class="modal-body" style="flex:1 1 auto; overflow-y:auto;">
-          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Cohort & Core Metrics</h4>
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
-            <div class="form-group" style="margin:0;">
-              <label for="scoreBatch" style="font-size:11px;">Batch</label>
-              <select id="scoreBatch" class="form-control" required></select>
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label for="scoreSession" style="font-size:11px;">Session</label>
-              <select id="scoreSession" class="form-control" required></select>
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label for="scoreAttendance" style="font-size:11px;">Attendance %</label>
-              <input type="number" id="scoreAttendance" class="form-control" min="0" max="100" required>
+      <form id="editRowForm">
+        <input type="hidden" id="editModName">
+        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label for="rowAttended">Attended (Classes) *</label>
+            <input type="number" id="rowAttended" class="form-control" min="0" max="10" required>
+          </div>
+          <div class="form-group">
+            <label for="rowAttention">Class Attention (Minutes) *</label>
+            <input type="number" id="rowAttention" class="form-control" min="0" max="1200" required>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label style="font-weight:700; margin-bottom:6px; display:block;">Assignments S-1 to S-6 (1 = Done, 0 = Missing)</label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <label><input type="checkbox" id="rowS1"> S-1</label>
+              <label><input type="checkbox" id="rowS2"> S-2</label>
+              <label><input type="checkbox" id="rowS3"> S-3</label>
+              <label><input type="checkbox" id="rowS4"> S-4</label>
+              <label><input type="checkbox" id="rowS5"> S-5</label>
+              <label><input type="checkbox" id="rowS6"> S-6</label>
             </div>
           </div>
-
-          <div style="margin-bottom:14px; background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:12px; font-weight:700;">Assignments Submission Status</span>
-              <span style="font-size:11px; color:var(--text-muted);">Session 1 - 5</span>
-            </div>
-            <div style="display:flex; flex-wrap:wrap; gap:12px;">
-              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="assign1"> Session 1
-              </label>
-              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="assign2"> Session 2
-              </label>
-              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="assign3"> Session 3
-              </label>
-              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="assign4"> Session 4
-              </label>
-              <label style="font-size:12px; display:flex; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="assign5"> Session 5
-              </label>
-            </div>
+          <div class="form-group">
+            <label for="rowMcq">MCQs Score (%) *</label>
+            <input type="number" id="rowMcq" class="form-control" min="0" max="100" required>
           </div>
-
-          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">4-Pillar LMS Assessment Scores (%)</h4>
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
-            <div class="form-group" style="margin:0;">
-              <label for="examMcq" style="font-size:11px;">MCQ Score (%)</label>
-              <input type="number" id="examMcq" class="form-control lms-input-calc" min="0" max="100" required>
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label for="examPractical" style="font-size:11px;">Practical (%)</label>
-              <input type="number" id="examPractical" class="form-control lms-input-calc" min="0" max="100" required>
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label for="examHardpaper" style="font-size:11px;">Hard Paper (%)</label>
-              <input type="number" id="examHardpaper" class="form-control lms-input-calc" min="0" max="100" required>
-            </div>
-            <div class="form-group" style="margin:0;">
-              <label for="examMock" style="font-size:11px;">Mock Interview (%)</label>
-              <input type="number" id="examMock" class="form-control lms-input-calc" min="0" max="100" required>
-            </div>
+          <div class="form-group">
+            <label for="rowTest">Test Score (%) *</label>
+            <input type="number" id="rowTest" class="form-control" min="0" max="100" required>
           </div>
-
-          <h4 style="font-size:12px; text-transform:uppercase; margin-bottom:10px;">Module Academics Score (0-100)</h4>
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;" id="modulesInputGrid">
-            <!-- Render modules input fields here dynamically -->
+          <div class="form-group">
+            <label for="rowPaper">Pen and Paper (%) *</label>
+            <input type="number" id="rowPaper" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group">
+            <label for="rowMock">Mock Interview (%) *</label>
+            <input type="number" id="rowMock" class="form-control" min="0" max="100" required>
           </div>
         </div>
         <div class="modal-foot">
-          <button type="button" class="btn-secondary" id="cancelScorecardModal">Cancel</button>
-          <button type="submit" class="btn-primary">Update Scorecard</button>
+          <button type="button" class="btn-secondary" id="cancelRowBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Save Score</button>
         </div>
       </form>
-      <div class="modal-resize-grip" title="Drag corner to adjust size">
-        <svg viewBox="0 0 10 10" fill="currentColor">
-          <circle cx="8.5" cy="8.5" r="1.2"/>
-          <circle cx="8.5" cy="4.5" r="1.2"/>
-          <circle cx="4.5" cy="8.5" r="1.2"/>
-        </svg>
-      </div>
     </div>
   </div>
 
-  <script type="module" src="app.js"></script>
   <script type="module">
     import { apiFetch } from './app.js';
 
-    let currentStudentId = null;
-    let cachedPerformanceList = [];
-    let cachedBatches = [];
-    let cachedSessions = [];
+    let allStudents = [];
+    let activeStudent = null;
 
-    const scorecardCard = document.getElementById("scorecardModalCard");
-    const btnToggleMaxScorecard = document.getElementById("btnToggleMaximizeScorecard");
-    const iconMaxScorecard = document.getElementById("iconMaxScorecard");
-    const iconRestoreScorecard = document.getElementById("iconRestoreScorecard");
-
-    let isScorecardMaximized = false;
-    let prevScoreWidth = '780px';
-    let prevScoreHeight = '560px';
-
-    btnToggleMaxScorecard.addEventListener("click", () => {
-      isScorecardMaximized = !isScorecardMaximized;
-      if (isScorecardMaximized) {
-        prevScoreWidth = scorecardCard.style.width || '780px';
-        prevScoreHeight = scorecardCard.style.height || '560px';
-        scorecardCard.classList.add("is-maximized");
-        iconMaxScorecard.style.display = "none";
-        iconRestoreScorecard.style.display = "block";
-      } else {
-        scorecardCard.classList.remove("is-maximized");
-        scorecardCard.style.width = prevScoreWidth;
-        scorecardCard.style.height = prevScoreHeight;
-        iconMaxScorecard.style.display = "block";
-        iconRestoreScorecard.style.display = "none";
-      }
-    });
-
-    async function initBatches() {
-      const [batches, sessions] = await Promise.all([
-        apiFetch('/api/batches'),
-        apiFetch('/api/sessions')
-      ]);
-      cachedBatches = batches;
-      cachedSessions = sessions;
-
-      const batchSelect = document.getElementById("perfBatch");
-      batchSelect.innerHTML = `<option value="All">All Batches</option>` +
-        batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
-
-      const scoreBatch = document.getElementById("scoreBatch");
-      scoreBatch.innerHTML = batches.map(b => `<option value="${b.code}">${b.code} (${b.name})</option>`).join('');
-
-      updateSessionFilterOptions();
-    }
-
-    function updateSessionFilterOptions() {
-      const selectedBatch = document.getElementById("perfBatch").value;
-      const filteredSessions = selectedBatch === "All"
-        ? cachedSessions
-        : cachedSessions.filter(s => s.batchCode === selectedBatch);
-      
-      const distinctNames = [...new Set(filteredSessions.map(s => s.name))];
-      document.getElementById("perfSession").innerHTML = `<option value="All">All Sessions</option>` +
-        distinctNames.map(n => `<option value="${n}">${n}</option>`).join('');
-    }
-
-    function updateModalSessions() {
-      const bCode = document.getElementById("scoreBatch").value;
-      const fSessions = cachedSessions.filter(s => s.batchCode === bCode);
-      document.getElementById("scoreSession").innerHTML = (fSessions.length ? fSessions : [{ name: 'Session 1' }])
-        .map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-    }
-
-    document.getElementById("perfBatch").addEventListener("change", () => {
-      updateSessionFilterOptions();
-      renderPerformanceList();
-    });
-    document.getElementById("perfSession").addEventListener("change", renderPerformanceList);
-    document.getElementById("scoreBatch").addEventListener("change", updateModalSessions);
-
-    // Live calc for modal LMS score
-    function updateLiveScorecardLms() {
-      const mcq = parseInt(document.getElementById("examMcq").value) || 0;
-      const practical = parseInt(document.getElementById("examPractical").value) || 0;
-      const hardpaper = parseInt(document.getElementById("examHardpaper").value) || 0;
-      const mock = parseInt(document.getElementById("examMock").value) || 0;
-      const avg = Math.round((mcq + practical + hardpaper + mock) / 4);
-      document.getElementById("modalLiveLms").textContent = `LMS: ${avg}%`;
-    }
-
-    document.querySelectorAll(".lms-input-calc").forEach(input => {
-      input.addEventListener("input", updateLiveScorecardLms);
-    });
-
-    async function loadPerformance() {
+    async function init() {
       try {
-        cachedPerformanceList = await apiFetch('/api/performance');
-        renderPerformanceList();
+        allStudents = await apiFetch('/api/students');
+        const picker = document.getElementById("studentPicker");
+        picker.innerHTML = allStudents.map(s => `<option value="${s.id}">${s.name} (${s.id}) - ${s.batch}</option>`).join('');
+
+        if (allStudents.length > 0) {
+          loadStudent(allStudents[0].id);
+        }
+
+        picker.addEventListener("change", (e) => loadStudent(e.target.value));
       } catch (err) {
-        console.error("Failed to load performance metrics:", err);
+        console.error("Failed to load students:", err);
       }
     }
 
-    function renderPerformanceList() {
-      const search = document.getElementById("perfSearch").value.toLowerCase();
-      const batch = document.getElementById("perfBatch").value;
-      const session = document.getElementById("perfSession").value;
-      const tbody = document.getElementById("performanceTableBody");
+    function loadStudent(id) {
+      activeStudent = allStudents.find(s => s.id === id);
+      if (!activeStudent) return;
+      renderSheet(activeStudent);
+    }
 
-      let filtered = cachedPerformanceList;
-      if (search) {
-        filtered = filtered.filter(s => s.id.toLowerCase().includes(search) || s.name.toLowerCase().includes(search));
-      }
-      if (batch && batch !== 'All') {
-        filtered = filtered.filter(s => s.batch === batch);
-      }
-      if (session && session !== 'All') {
-        filtered = filtered.filter(s => s.session === session);
-      }
+    function renderSheet(student) {
+      // Summary Row
+      document.getElementById("sumStuName").textContent = student.name;
+      document.getElementById("sumLmsId").textContent = student.id;
+      document.getElementById("sumCourse").textContent = student.program;
+      document.getElementById("sumBatch").textContent = student.batch;
+      document.getElementById("sumAttendanceResult").textContent = student.attendanceResult;
+      document.getElementById("sumAttentionResult").textContent = student.attentionResult;
+      document.getElementById("sumDvElite").textContent = student.dvEliteEligible ? "YES (ELIGIBLE: SCORED >= 70% IN SQL, PYTHON, SAS, ML)" : "IF THEY HAVE SCORED >= 70% IN SQL,PYTHON,SAS AND ML";
+      document.getElementById("sumPlacement").textContent = student.placementSupportEligible ? "YES (QUALIFIED: MOCK INTERVIEW >= 70%)" : "IF THEY HAVE SCORED IN THE MOCK INTERVIEW >= 70% THEN YES ELSE NO";
+      document.getElementById("sumNote").textContent = student.notes || "STUDENT IS NOT SERIOUS IN THE CLASSES AND ALSO NEVER ATTENDED THE TEST AND ASSIGNMENTS PROPERLY";
 
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="14">No performance scorecard matches filter constraints.</td></tr>';
-        return;
-      }
+      // Main Table
+      const tbody = document.getElementById("perfSheetBody");
+      const rows = student.modules.map((m, idx) => {
+        const s1 = m.assignments?.s1 ? 1 : 0;
+        const s2 = m.assignments?.s2 ? 1 : 0;
+        const s3 = m.assignments?.s3 ? 1 : 0;
+        const s4 = m.assignments?.s4 ? 1 : 0;
+        const s5 = m.assignments?.s5 ? 1 : 0;
+        const s6 = m.assignments?.s6 ? 1 : 0;
 
-      tbody.innerHTML = filtered.map(s => {
-        const lmsScore = s.lmsScore !== undefined ? s.lmsScore : s.overallScore;
-        let grade = "F";
-        if (lmsScore >= 90) grade = "A+";
-        else if (lmsScore >= 80) grade = "A";
-        else if (lmsScore >= 70) grade = "B";
-        else if (lmsScore >= 50) grade = "C";
-
-        const a = s.assessments || {};
-        const attStyle = s.attendance < 75 ? 'color:var(--danger);font-weight:700;' : 'font-weight:600;';
-        
         return `
           <tr>
-            <td style="font-weight:700;">${s.id}</td>
-            <td style="font-weight:600; text-align:left; color:var(--heading);">${s.name}</td>
-            <td><span class="badge" style="background:var(--primary-soft); color:var(--primary); font-weight:700;">${s.batch}</span></td>
-            <td style="font-size:12px; color:var(--text-muted);">${s.session || 'Session 1'}</td>
-            <td style="${attStyle}">${s.attendance}%</td>
-            <td>${s.assignmentCompletion}%</td>
-            <td>${a.mcq || 0}%</td>
-            <td>${a.practical || 0}%</td>
-            <td>${a.hardpaper || 0}%</td>
-            <td>${a.mockInterview || 0}%</td>
-            <td><strong style="color:var(--primary); font-size:13px;">${lmsScore}%</strong></td>
-            <td style="font-weight:800;">${grade}</td>
-            <td style="font-size:11px; font-weight:600; color:var(--text-muted);">${s.remarks}</td>
+            ${idx === 0 ? `<td rowspan="${student.modules.length}" style="vertical-align:middle; font-weight:800; background:var(--surface);">${student.name}</td>` : ''}
+            ${idx === 0 ? `<td rowspan="${student.modules.length}" style="vertical-align:middle; font-weight:700; background:var(--surface);"><code>${student.id}</code></td>` : ''}
+            ${idx === 0 ? `<td rowspan="${student.modules.length}" style="vertical-align:middle; background:var(--surface);">${student.program}</td>` : ''}
+            ${idx === 0 ? `<td rowspan="${student.modules.length}" style="vertical-align:middle; background:var(--surface);">${student.batch}</td>` : ''}
+            <td style="font-weight:700; color:var(--text-muted);">${idx + 1}</td>
+            <td class="text-left" style="font-weight:800; color:var(--heading);">${m.name}</td>
+            <td>${m.classes}</td>
+            <td style="font-weight:700;">${m.attended}</td>
+            <td style="font-weight:700; color:${m.attendancePct >= 75 ? 'inherit' : 'var(--danger)'};">${m.attendancePct}%</td>
+            <td>${m.classDuration}</td>
+            <td>${m.classAttention}</td>
+            <td style="font-weight:700; color:${m.attentionPct >= 60 ? 'inherit' : 'var(--danger)'};">${m.attentionPct}%</td>
+            <td>${s1}</td>
+            <td>${s2}</td>
+            <td>${s3}</td>
+            <td>${s4}</td>
+            <td>${s5}</td>
+            <td>${s6}</td>
+            <td style="font-weight:800;">${m.assignmentTotal}</td>
+            <td>${m.assignmentTarget}</td>
+            <td style="font-weight:700;">${m.assignmentPct}%</td>
+            <td>${m.mcq}%</td>
+            <td>${m.test}%</td>
+            <td>${m.penAndPaper}%</td>
+            <td style="font-weight:700; color:${m.mockInterview >= 70 ? 'var(--success)' : 'inherit'};">${m.mockInterview}%</td>
             <td>
-              <button class="btn-primary btn-edit-scores" data-id="${s.id}" style="padding:3px 8px; font-size:11px; border-radius:var(--radius-sm); cursor:pointer;">Update Scores</button>
+              <button class="btn-secondary btn-edit-row" data-mod="${m.name}" style="padding:2px 6px; font-size:10px; border-radius:var(--radius-sm); cursor:pointer;">
+                Edit
+              </button>
             </td>
           </tr>
         `;
       }).join('');
 
-      document.querySelectorAll(".btn-edit-scores").forEach(btn => {
-        btn.addEventListener("click", () => openScorecardModal(btn.dataset.id));
+      tbody.innerHTML = rows;
+
+      document.querySelectorAll(".btn-edit-row").forEach(btn => {
+        btn.addEventListener("click", () => openEditModal(btn.dataset.mod));
       });
     }
 
-    async function openScorecardModal(studentId) {
-      currentStudentId = studentId;
-      try {
-        const student = await apiFetch(`/api/students/${studentId}`);
-        
-        document.getElementById("scoreBatch").value = student.batch;
-        updateModalSessions();
-        document.getElementById("scoreSession").value = student.session || "Session 1";
-        document.getElementById("scoreAttendance").value = student.attendance;
-        
-        const a = student.assignments || {};
-        document.getElementById("assign1").checked = a.session1 === 'Completed';
-        document.getElementById("assign2").checked = a.session2 === 'Completed';
-        document.getElementById("assign3").checked = a.session3 === 'Completed';
-        document.getElementById("assign4").checked = a.session4 === 'Completed';
-        document.getElementById("assign5").checked = a.session5 === 'Completed';
+    // Edit Modal Logic
+    const editModal = document.getElementById("editRowModal");
+    const editOverlay = document.getElementById("editRowOverlay");
+    const closeBtn = document.getElementById("closeRowModal");
+    const cancelBtn = document.getElementById("cancelRowBtn");
+    const form = document.getElementById("editRowForm");
 
-        const asmt = student.assessments || {};
-        document.getElementById("examMcq").value = asmt.mcq || 0;
-        document.getElementById("examPractical").value = asmt.practical || 0;
-        document.getElementById("examHardpaper").value = asmt.hardpaper || 0;
-        document.getElementById("examMock").value = asmt.mockInterview || 0;
-        updateLiveScorecardLms();
+    const closeModal = () => editModal.classList.remove("is-open");
+    closeBtn.addEventListener("click", closeModal);
+    editOverlay.addEventListener("click", closeModal);
+    cancelBtn.addEventListener("click", closeModal);
 
-        // Render dynamic input fields for module scores
-        const modGrid = document.getElementById("modulesInputGrid");
-        const modules = Object.keys(student.academicScores || {});
-        modGrid.innerHTML = modules.map(m => `
-          <div class="form-group" style="margin:0;">
-            <label for="mod_${m}" style="text-transform:uppercase; font-size:10px;">${m}</label>
-            <input type="number" id="mod_${m}" class="form-control module-score-input" data-module="${m}" min="0" max="100" value="${student.academicScores[m]}" required>
-          </div>
-        `).join('');
+    function openEditModal(modName) {
+      const mod = activeStudent.modules.find(m => m.name === modName);
+      if (!mod) return;
 
-        document.getElementById("editScorecardModal").classList.add("is-open");
+      document.getElementById("modalModTitle").textContent = `Edit Row: ${mod.name}`;
+      document.getElementById("editModName").value = mod.name;
+      document.getElementById("rowAttended").value = mod.attended;
+      document.getElementById("rowAttention").value = mod.classAttention;
 
-      } catch (err) {
-        console.error("Failed to load student for scorecard edit:", err);
-      }
+      const a = mod.assignments || {};
+      document.getElementById("rowS1").checked = !!a.s1;
+      document.getElementById("rowS2").checked = !!a.s2;
+      document.getElementById("rowS3").checked = !!a.s3;
+      document.getElementById("rowS4").checked = !!a.s4;
+      document.getElementById("rowS5").checked = !!a.s5;
+      document.getElementById("rowS6").checked = !!a.s6;
+
+      document.getElementById("rowMcq").value = mod.mcq;
+      document.getElementById("rowTest").value = mod.test;
+      document.getElementById("rowPaper").value = mod.penAndPaper;
+      document.getElementById("rowMock").value = mod.mockInterview;
+
+      editModal.classList.add("is-open");
     }
 
-    // Submit scores update
-    document.getElementById("editScorecardForm").addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const modName = document.getElementById("editModName").value;
+      const attended = parseInt(document.getElementById("rowAttended").value) || 0;
+      const classAttention = parseInt(document.getElementById("rowAttention").value) || 0;
+      const assignments = {
+        s1: document.getElementById("rowS1").checked,
+        s2: document.getElementById("rowS2").checked,
+        s3: document.getElementById("rowS3").checked,
+        s4: document.getElementById("rowS4").checked,
+        s5: document.getElementById("rowS5").checked,
+        s6: document.getElementById("rowS6").checked
+      };
+      const mcq = parseInt(document.getElementById("rowMcq").value) || 0;
+      const test = parseInt(document.getElementById("rowTest").value) || 0;
+      const penAndPaper = parseInt(document.getElementById("rowPaper").value) || 0;
+      const mockInterview = parseInt(document.getElementById("rowMock").value) || 0;
 
-      const scores = {};
-      document.querySelectorAll(".module-score-input").forEach(input => {
-        scores[input.dataset.module] = parseInt(input.value) || 0;
+      const updated = await apiFetch(`/api/performance/${activeStudent.id}/module/${encodeURIComponent(modName)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ attended, classAttention, assignments, mcq, test, penAndPaper, mockInterview })
       });
 
-      const payload = {
-        batch: document.getElementById("scoreBatch").value,
-        session: document.getElementById("scoreSession").value,
-        attendance: parseInt(document.getElementById("scoreAttendance").value) || 0,
-        assignments: {
-          session1: document.getElementById("assign1").checked ? 'Completed' : 'Pending',
-          session2: document.getElementById("assign2").checked ? 'Completed' : 'Pending',
-          session3: document.getElementById("assign3").checked ? 'Completed' : 'Pending',
-          session4: document.getElementById("assign4").checked ? 'Completed' : 'Pending',
-          session5: document.getElementById("assign5").checked ? 'Completed' : 'Pending'
-        },
-        assessments: {
-          mcq: parseInt(document.getElementById("examMcq").value) || 0,
-          practical: parseInt(document.getElementById("examPractical").value) || 0,
-          hardpaper: parseInt(document.getElementById("examHardpaper").value) || 0,
-          mockInterview: parseInt(document.getElementById("examMock").value) || 0
-        },
-        scores
-      };
-
-      try {
-        await apiFetch(`/api/performance/${currentStudentId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        
-        document.getElementById("editScorecardModal").classList.remove("is-open");
-        loadPerformance();
-      } catch (err) {
-        console.error("Failed to save student scores:", err);
-      }
-    });
-
-    // Bulk Synchronize excel
-    document.getElementById("bulkSyncBtn").addEventListener("click", async () => {
-      if (confirm("This will simulate synchronizing student exam matrices from an external grading tool sheet. Proceed?")) {
-        try {
-          const res = await apiFetch('/api/performance/bulk-import', { method: 'POST' });
-          alert(res.message);
-          loadPerformance();
-        } catch (err) {
-          console.error("Failed to synchronize scores:", err);
-        }
-      }
+      const idx = allStudents.findIndex(s => s.id === updated.id);
+      if (idx !== -1) allStudents[idx] = updated;
+      activeStudent = updated;
+      renderSheet(activeStudent);
+      closeModal();
     });
 
     // CSV Export
-    document.getElementById("exportPerformance").addEventListener("click", () => {
-      let csvContent = "data:text/csv;charset=utf-8,Student ID,Name,Batch,Session,Attendance %,Assignment %,MCQ %,Practical %,Paper %,Mock %,LMS Score %,Grade\n";
-      cachedPerformanceList.forEach(s => {
-        const a = s.assessments || {};
-        csvContent += `${s.id},${s.name},${s.batch},${s.session || 'Session 1'},${s.attendance},${s.assignmentCompletion},${a.mcq || 0},${a.practical || 0},${a.hardpaper || 0},${a.mockInterview || 0},${s.lmsScore || s.overallScore},A\n`;
+    document.getElementById("btnExportCsv").addEventListener("click", () => {
+      if (!activeStudent) return;
+      let csv = "STU_NAME,LMS_ID,COURSE,BATCH,#,APPLICATION,CLASSES,ATTENDED,ATTENDANCE_PCT,CLASS_DURATION,CLASS_ATTENTION,ATTENTION_PCT,ASSIGNMENT_S1,ASSIGNMENT_S2,ASSIGNMENT_S3,ASSIGNMENT_S4,ASSIGNMENT_S5,ASSIGNMENT_S6,TOTAL,TARGET,ASSIGNMENT_PCT,MCQs,TEST,PEN_AND_PAPER,MOCK_INTERVIEW
+";
+      activeStudent.modules.forEach((m, idx) => {
+        csv += `"${activeStudent.name}",${activeStudent.id},"${activeStudent.program}","${activeStudent.batch}",${idx+1},"${m.name}",${m.classes},${m.attended},${m.attendancePct}%,${m.classDuration},${m.classAttention},${m.attentionPct}%,${m.assignments?.s1?1:0},${m.assignments?.s2?1:0},${m.assignments?.s3?1:0},${m.assignments?.s4?1:0},${m.assignments?.s5?1:0},${m.assignments?.s6?1:0},${m.assignmentTotal},${m.assignmentTarget},${m.assignmentPct}%,${m.mcq}%,${m.test}%,${m.penAndPaper}%,${m.mockInterview}%
+`;
       });
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "student_performance_records.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Sheet1_STUDENT_PERFORMANCE_${activeStudent.id}.csv`;
+      a.click();
     });
 
-    // Modal close
-    const closeModal = () => {
-      document.getElementById("editScorecardModal").classList.remove("is-open");
-      currentStudentId = null;
-    };
-
-    document.getElementById("closeScorecardModal").addEventListener("click", closeModal);
-    document.getElementById("cancelScorecardModal").addEventListener("click", closeModal);
-
-    // Filter triggers
-    document.getElementById("perfSearch").addEventListener("input", renderPerformanceList);
-
-    initBatches().then(() => {
-      loadPerformance();
-    });
+    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
   </script>
 </body>
 </html>
