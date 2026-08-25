@@ -54,6 +54,7 @@
             <p>Fast entry forms and recent records, not spreadsheet rows.</p>
           </div>
           <div class="toolbar-group">
+            <input type="search" class="filter-input" id="searchInput" placeholder="Search name, LMS ID, batch">
             <select class="filter-select" id="studentFilter"><option value="All">All students</option></select>
             <select class="filter-select" id="applicationFilter"><option value="All">All applications</option></select>
           </div>
@@ -195,7 +196,17 @@
     const matchesFilters = item => {
       const student = el("studentFilter").value;
       const application = el("applicationFilter").value;
-      return (student === "All" || item.studentId === student) && (application === "All" || up(item.application) === up(application));
+      const searchInput = el("searchInput");
+      const query = (searchInput ? searchInput.value.trim().toLowerCase() : "");
+
+      const matchesStudent = (student === "All" || item.studentId === student);
+      const matchesApp = (application === "All" || up(item.application) === up(application));
+      const matchesQuery = !query ||
+        String(item.studentName || "").toLowerCase().includes(query) ||
+        String(item.studentId || "").toLowerCase().includes(query) ||
+        String(item.batch || "").toLowerCase().includes(query);
+
+      return matchesStudent && matchesApp && matchesQuery;
     };
 
     function renderMetrics() {
@@ -324,6 +335,7 @@
         });
       });
       el("activeAddBtn").addEventListener("click", () => openModal(tabConfig[activeTab].modal));
+      if (el("searchInput")) el("searchInput").addEventListener("input", renderActiveTab);
       el("studentFilter").addEventListener("change", renderActiveTab);
       el("applicationFilter").addEventListener("change", renderActiveTab);
       await loadFeedback();
