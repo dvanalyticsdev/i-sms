@@ -383,6 +383,14 @@ function createStudentReportPdf(student) {
   };
 
   const moduleScore = mod => Math.round((mod.mcq + mod.test + mod.penAndPaper + mod.mockInterview) / 4);
+  const strongestModules = [...student.modules].sort((a, b) => moduleScore(b) - moduleScore(a)).slice(0, 3);
+  const focusModules = [...student.modules]
+    .sort((a, b) => {
+      const aRisk = (a.attendancePct < 75 ? 20 : 0) + (a.attentionPct < 60 ? 20 : 0) + (moduleScore(a) < 50 ? 20 : 0) + (100 - moduleScore(a));
+      const bRisk = (b.attendancePct < 75 ? 20 : 0) + (b.attentionPct < 60 ? 20 : 0) + (moduleScore(b) < 50 ? 20 : 0) + (100 - moduleScore(b));
+      return bRisk - aRisk;
+    })
+    .slice(0, 3);
 
   newPage();
   drawHeader();
@@ -428,6 +436,48 @@ function createStudentReportPdf(student) {
     textAt(lineText, margin + 12, y - 27 - idx * 11, 9, false, navy);
   });
   y -= 62;
+
+  section("Executive Insights");
+  ensureSpace(176);
+  const insightTop = y;
+  const insightCard = (title, items, x, yy, w, h) => {
+    rect(x, yy - h, w, h, light, border);
+    textAt(title, x + 10, yy - 14, 8, true, muted);
+    items.forEach((item, idx) => {
+      textAt(item, x + 10, yy - 32 - idx * 15, 9, idx === 0, navy);
+    });
+  };
+
+  insightCard(
+    "Strongest Modules",
+    strongestModules.map(mod => `${mod.name}: ${moduleScore(mod)}%`),
+    margin,
+    insightTop,
+    240,
+    82
+  );
+  insightCard(
+    "Needs Focus",
+    focusModules.map(mod => `${mod.name}: ${moduleScore(mod)}%, Att. ${mod.attendancePct}%`),
+    305,
+    insightTop,
+    240,
+    82
+  );
+
+  y = insightTop - 104;
+  rect(margin, y - 70, contentRight - margin, 74, "0.965 0.985 0.975", "0.70 0.84 0.76");
+  textAt("Recommended Actions", margin + 12, y - 14, 8, true, muted);
+  const actionItems = [];
+  if (student.attendance < 75) actionItems.push("Schedule attendance recovery plan for low-attendance modules.");
+  if (student.attention < 70) actionItems.push("Add mentor check-ins to improve class focus and doubt clearing.");
+  if (student.assignmentCompletion < 80) actionItems.push("Prioritize pending S1-S6 assignment submissions.");
+  if (student.lmsScore < 70) actionItems.push("Plan remedial assessment practice before placement support.");
+  if (!actionItems.length) actionItems.push("Continue current learning plan and prepare for advanced placement support.");
+  actionItems.slice(0, 4).forEach((item, idx) => {
+    textAt(`${idx + 1}. ${item}`, margin + 12, y - 31 - idx * 12, 8.5, false, navy);
+  });
+  y -= 94;
 
   ensureSpace(70 + student.modules.length * 18);
   section("Module Scorecard");
