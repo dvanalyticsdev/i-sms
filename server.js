@@ -1040,15 +1040,13 @@ function refreshStudents() {
 // 1. Auth Endpoint
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
-  if ((username === 'admin' && password === 'admin') ||
-      (username === 'counselor' && password === 'counselor') ||
-      (username === 'faculty' && password === 'faculty')) {
+  if (username === 'admin' && password === 'admin') {
     res.json({
       message: "Login successful",
       user: {
-        username,
-        role: username === 'admin' ? 'Administrator' : (username === 'faculty' ? 'Faculty Member' : 'Academic Counselor'),
-        name: username === 'admin' ? 'Admin Officer' : (username === 'faculty' ? 'Dr. Amit Verma' : 'Rohan Das')
+        username: 'admin',
+        role: 'Administrator',
+        name: 'Admin Officer'
       }
     });
   } else {
