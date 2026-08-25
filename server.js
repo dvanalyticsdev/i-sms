@@ -272,15 +272,25 @@ function createStudentReportPdf(student) {
   const pageIds = [];
   const pageWidth = 595;
   const pageHeight = 842;
+  const margin = 44;
+  const contentRight = pageWidth - margin;
+  const orange = "0.941 0.353 0.157";
+  const navy = "0.071 0.094 0.173";
+  const muted = "0.376 0.435 0.529";
+  const border = "0.82 0.84 0.88";
+  const light = "0.965 0.972 0.984";
   let ops = [];
-  let y = 780;
+  let y = 760;
+  let pageNo = 0;
 
   const newPage = () => {
     ops = [];
-    y = 780;
+    y = 760;
+    pageNo += 1;
   };
 
   const finishPage = () => {
+    drawFooter();
     const stream = Buffer.from(ops.join("\n"), 'binary');
     const contentId = addObject(Buffer.concat([
       Buffer.from(`<< /Length ${stream.length} >>\nstream\n`, 'binary'),
@@ -292,66 +302,100 @@ function createStudentReportPdf(student) {
   };
 
   const ensureSpace = amount => {
-    if (y - amount < 60) {
+    if (y - amount < 78) {
       finishPage();
       newPage();
-      drawHeader(false);
+      drawHeader();
     }
   };
 
-  const text = (value, x, size = 10, bold = false) => {
-    ops.push(`BT /${bold ? "F2" : "F1"} ${size} Tf ${x} ${y} Td (${pdfEscape(value)}) Tj ET`);
+  const setFill = color => ops.push(`${color} rg`);
+  const setStroke = color => ops.push(`${color} RG`);
+
+  const textAt = (value, x, yy, size = 10, bold = false, color = navy) => {
+    setFill(color);
+    ops.push(`BT /${bold ? "F2" : "F1"} ${size} Tf ${x} ${yy} Td (${pdfEscape(value)}) Tj ET`);
+  };
+
+  const text = (value, x, size = 10, bold = false, color = navy) => {
+    textAt(value, x, y, size, bold, color);
   };
 
   const line = (x1, y1, x2, y2) => {
-    ops.push(`0.75 w ${x1} ${y1} m ${x2} ${y2} l S`);
+    setStroke(border);
+    ops.push(`0.7 w ${x1} ${y1} m ${x2} ${y2} l S`);
   };
 
-  const drawHeader = (withTitle = true) => {
-    ops.push("q 74 0 0 31 465 782 cm /Logo Do Q");
-    text("DV Analytics", 50, 9, true);
-    y -= 16;
-    text("Student Performance Report", 50, 18, true);
-    if (withTitle) {
-      y -= 18;
-      text(`${student.name} (${student.id})`, 50, 13, true);
+  const rect = (x, yy, w, h, fillColor = null, strokeColor = border) => {
+    if (fillColor) {
+      setFill(fillColor);
+      ops.push(`${x} ${yy} ${w} ${h} re f`);
     }
-    line(50, y - 12, 545, y - 12);
-    y -= 34;
+    if (strokeColor) {
+      setStroke(strokeColor);
+      ops.push(`0.7 w ${x} ${yy} ${w} ${h} re S`);
+    }
+  };
+
+  const drawHeader = () => {
+    setFill(orange);
+    ops.push(`${margin} 804 ${contentRight - margin} 4 re f`);
+    ops.push("q 82 0 0 35 454 754 cm /Logo Do Q");
+    textAt("I-SMS", margin, 780, 10, true, orange);
+    textAt("Student Performance Report", margin, 758, 22, true, navy);
+    textAt(`${student.name} (${student.id})`, margin, 738, 12, true, navy);
+    textAt(`Generated: ${new Date().toISOString().split('T')[0]}`, margin, 721, 9, false, muted);
+    line(margin, 704, contentRight, 704);
+    y = 678;
+  };
+
+  const drawFooter = () => {
+    line(margin, 48, contentRight, 48);
+    textAt("DV Analytics / I-SMS", margin, 32, 8, false, muted);
+    textAt(`Page ${pageNo}`, contentRight - 42, 32, 8, false, muted);
   };
 
   const section = title => {
-    ensureSpace(34);
-    text(title, 50, 13, true);
-    y -= 8;
-    line(50, y, 545, y);
-    y -= 18;
+    ensureSpace(42);
+    text(title, margin, 14, true, navy);
+    y -= 10;
+    setFill(orange);
+    ops.push(`${margin} ${y} 34 2 re f`);
+    line(margin + 40, y + 1, contentRight, y + 1);
+    y -= 22;
   };
 
-  const keyValue = (label, value, x, width = 220) => {
-    text(label, x, 8, true);
-    y -= 12;
-    wrapText(value, Math.floor(width / 5.2)).forEach(lineText => {
-      text(lineText, x, 10, false);
-      y -= 12;
+  const keyValueAt = (label, value, x, yy, width = 220) => {
+    textAt(label, x, yy, 8, true, muted);
+    const lines = wrapText(value, Math.floor(width / 5.3));
+    lines.forEach((lineText, idx) => {
+      textAt(lineText, x, yy - 13 - idx * 12, 10, idx === 0, navy);
+    });
+    return 16 + lines.length * 12;
+  };
+
+  const paragraph = (value, x, maxChars, size = 9) => {
+    wrapText(value, maxChars).forEach(lineText => {
+      ensureSpace(14);
+      text(lineText, x, size, false, navy);
+      y -= 13;
     });
   };
 
   const moduleScore = mod => Math.round((mod.mcq + mod.test + mod.penAndPaper + mod.mockInterview) / 4);
 
   newPage();
-  drawHeader(true);
+  drawHeader();
 
   section("Student Summary");
-  const summaryTop = y;
-  keyValue("Course", student.program, 50);
-  y = summaryTop;
-  keyValue("Batch / Session", `${student.batch} / ${student.session}`, 300);
-  y -= 6;
-  const secondTop = y;
-  keyValue("Email", student.email || "Not recorded", 50);
-  y = secondTop;
-  keyValue("Mobile", student.mobile || "Not recorded", 300);
+  const summaryY = y;
+  const h1 = keyValueAt("Course", student.program, margin, summaryY, 230);
+  const h2 = keyValueAt("Batch / Session", `${student.batch} / ${student.session}`, 310, summaryY, 220);
+  const rowHeight1 = Math.max(h1, h2);
+  const summaryY2 = summaryY - rowHeight1 - 10;
+  const h3 = keyValueAt("Email", student.email || "Not recorded", margin, summaryY2, 230);
+  const h4 = keyValueAt("Mobile", student.mobile || "Not recorded", 310, summaryY2, 220);
+  y = summaryY2 - Math.max(h3, h4) - 14;
 
   section("Performance Snapshot");
   const cards = [
@@ -360,37 +404,46 @@ function createStudentReportPdf(student) {
     ["Assignments", `${student.assignmentCompletion}%`, "S1-S6 completion"],
     ["LMS Score", `${student.lmsScore}%`, "Assessment pillar average"]
   ];
+  ensureSpace(88);
   cards.forEach((card, idx) => {
-    const x = 50 + idx * 124;
-    ops.push(`0.9 0.9 0.9 RG ${x} ${y - 54} 112 58 re S`);
-    ops.push(`BT /F2 8 Tf ${x + 8} ${y - 15} Td (${pdfEscape(card[0])}) Tj ET`);
-    ops.push(`BT /F2 18 Tf ${x + 8} ${y - 35} Td (${pdfEscape(card[1])}) Tj ET`);
-    ops.push(`BT /F1 7 Tf ${x + 8} ${y - 48} Td (${pdfEscape(card[2])}) Tj ET`);
+    const x = margin + idx * 126;
+    rect(x, y - 66, 116, 66, light, border);
+    setFill(orange);
+    ops.push(`${x} ${y - 66} 3 66 re f`);
+    textAt(card[0], x + 12, y - 18, 8, true, muted);
+    textAt(card[1], x + 12, y - 42, 22, true, navy);
+    wrapText(card[2], 21).slice(0, 2).forEach((lineText, lineIndex) => {
+      textAt(lineText, x + 12, y - 55 - lineIndex * 9, 7, false, muted);
+    });
   });
-  y -= 82;
+  y -= 90;
 
   section("Eligibility Rules");
-  text(`DV Elite: ${student.dvEliteEligible ? "Eligible" : "Pending"} - SQL, Python, SAS, and ML must score at least 70%.`, 50, 10);
-  y -= 15;
-  text(`Placement Support: ${student.placementSupportEligible ? "Ready" : "Pending"} - mock interview average must be at least 70%.`, 50, 10);
-  y -= 18;
-  wrapText(`Counselor Note: ${student.notes || "No note recorded."}`, 95).forEach(lineText => {
-    text(lineText, 50, 10);
-    y -= 13;
+  paragraph(`DV Elite: ${student.dvEliteEligible ? "Eligible" : "Pending"} - SQL, Python, SAS, and ML must score at least 70%.`, margin, 102, 10);
+  paragraph(`Placement Support: ${student.placementSupportEligible ? "Ready" : "Pending"} - mock interview average must be at least 70%.`, margin, 102, 10);
+  y -= 4;
+  rect(margin, y - 42, contentRight - margin, 46, "1 0.985 0.965", "0.94 0.72 0.62");
+  textAt("Counselor Note", margin + 12, y - 12, 8, true, orange);
+  wrapText(student.notes || "No note recorded.", 94).slice(0, 2).forEach((lineText, idx) => {
+    textAt(lineText, margin + 12, y - 27 - idx * 11, 9, false, navy);
   });
+  y -= 62;
 
+  ensureSpace(70 + student.modules.length * 18);
   section("Module Scorecard");
   const headers = ["Application", "Attendance", "Attention", "Assign.", "MCQ", "Test", "Paper", "Mock", "Score"];
-  const colX = [50, 195, 260, 325, 378, 415, 452, 492, 532];
+  const colX = [margin, 194, 260, 320, 372, 412, 450, 490, 530];
+  rect(margin, y - 11, contentRight - margin, 22, light, null);
   headers.forEach((header, index) => {
-    ops.push(`BT /F2 8 Tf ${colX[index]} ${y} Td (${pdfEscape(header)}) Tj ET`);
+    textAt(header, colX[index], y - 2, 7, true, muted);
   });
-  y -= 10;
-  line(50, y, 545, y);
-  y -= 14;
+  y -= 22;
 
-  student.modules.forEach(mod => {
+  student.modules.forEach((mod, rowIndex) => {
     ensureSpace(28);
+    if (rowIndex % 2 === 0) {
+      rect(margin, y - 5, contentRight - margin, 18, "0.992 0.994 0.998", null);
+    }
     const row = [
       mod.name,
       `${mod.attended}/${mod.classes} (${mod.attendancePct}%)`,
@@ -403,11 +456,12 @@ function createStudentReportPdf(student) {
       `${moduleScore(mod)}%`
     ];
     row.forEach((value, index) => {
-      const shown = index === 0 && value.length > 21 ? `${value.slice(0, 20)}...` : value;
-      ops.push(`BT /${index === 0 ? "F2" : "F1"} 8 Tf ${colX[index]} ${y} Td (${pdfEscape(shown)}) Tj ET`);
+      const shown = index === 0 && value.length > 19 ? `${value.slice(0, 18)}...` : value;
+      textAt(shown, colX[index], y, 7.5, index === 0 || index === 8, navy);
     });
     y -= 18;
   });
+  y -= 8;
 
   section("Feedback Summary");
   const feedbackRows = [
@@ -415,10 +469,13 @@ function createStudentReportPdf(student) {
     ["Mentor Feedback", student.mentorFeedback?.length || 0],
     ["Mentor Evaluations", student.mentorEvaluations?.length || 0]
   ];
-  feedbackRows.forEach(([label, count]) => {
-    text(`${label}: ${count} record${count === 1 ? "" : "s"}`, 50, 10, true);
-    y -= 15;
+  feedbackRows.forEach(([label, count], index) => {
+    const x = margin + index * 166;
+    rect(x, y - 38, 150, 42, light, border);
+    textAt(label, x + 10, y - 13, 8, true, muted);
+    textAt(`${count} record${count === 1 ? "" : "s"}`, x + 10, y - 29, 11, true, navy);
   });
+  y -= 56;
 
   finishPage();
 
