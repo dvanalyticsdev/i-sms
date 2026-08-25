@@ -68,6 +68,7 @@
               <button class="tab is-active" data-feedback-tab="faculty">Faculty Feedback</button>
               <button class="tab" data-feedback-tab="mentor">Mentor Feedback</button>
               <button class="tab" data-feedback-tab="evaluation">Student Evaluation</button>
+              <button class="tab" data-feedback-tab="people">Faculty & Mentors</button>
             </div>
             <button class="btn-primary btn-sm" id="activeAddBtn">Add Record</button>
           </div>
@@ -103,6 +104,7 @@
           <div class="form-group"><label>Connection</label><select id="facStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
           <div class="form-group"><label>Application</label><select id="facApp" class="form-control" required></select></div>
           <div class="form-group"><label>Session</label><input id="facSession" class="form-control" value="SESSION-1" required></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Faculty Name</label><select id="facFaculty" class="form-control" required></select></div>
           <div class="form-group"><label>Faculty Rating</label><input id="facRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Class Timing</label><input id="facTiming" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Material</label><input id="facMaterial" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
@@ -126,6 +128,7 @@
           <div class="form-group"><label>Connection</label><select id="menStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
           <div class="form-group"><label>Application</label><select id="menApp" class="form-control" required></select></div>
           <div class="form-group"><label>Session</label><input id="menSession" class="form-control" value="SESSION-1" required></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Mentor Name</label><select id="menMentor" class="form-control" required></select></div>
           <div class="form-group"><label>Mentor Rating</label><input id="menRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Doubt Support</label><input id="menDoubt" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Behaviour</label><input id="menBehaviour" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
@@ -148,11 +151,28 @@
           <div class="form-group"><label>Call Date</label><input id="evalDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="evalStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
           <div class="form-group"><label>Application</label><select id="evalApp" class="form-control" required></select></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Mentor Name</label><select id="evalMentor" class="form-control" required></select></div>
           <div class="form-group"><label>Assignment Status</label><select id="evalAssignment" class="form-control"><option>COMPLETED</option><option>IN PROGRESS</option><option>NOT STARTED</option></select></div>
           <div class="form-group"><label>Knowledge</label><select id="evalKnowledge" class="form-control"><option>BEST</option><option selected>GOOD</option><option>AVERAGE</option><option>LOW</option></select></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Overall Feedback</label><textarea id="evalComments" class="form-control" rows="3" required></textarea></div>
         </div>
         <div class="modal-foot"><button type="button" class="btn-secondary" data-close="evalModal">Cancel</button><button class="btn-primary" type="submit" style="background:#059669; border-color:#059669;">Save</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="staffModal">
+    <div class="modal-overlay" data-close="staffModal"></div>
+    <div class="modal-container">
+      <div class="modal-header"><h3 class="modal-title">Add Faculty / Mentor</h3><button class="modal-close" data-close="staffModal">&times;</button></div>
+      <form id="staffForm">
+        <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Type</label><select id="staffType" class="form-control" required><option>Faculty</option><option>Mentor</option></select></div>
+          <div class="form-group"><label>Name</label><input id="staffName" class="form-control" required placeholder="Enter name"></div>
+          <div class="form-group"><label>Email</label><input id="staffEmail" type="email" class="form-control" placeholder="name@example.com"></div>
+          <div class="form-group"><label>Phone</label><input id="staffPhone" class="form-control" placeholder="+91 ..."></div>
+        </div>
+        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="staffModal">Cancel</button><button class="btn-primary" type="submit">Save Person</button></div>
       </form>
     </div>
   </div>
@@ -165,6 +185,7 @@
     let faculty = [];
     let mentor = [];
     let evals = [];
+    let staff = [];
     let activeTab = "faculty";
 
     const tabConfig = {
@@ -172,19 +193,25 @@
         title: "Faculty Feedback",
         description: "Student rates class delivery, pace, material, and satisfaction.",
         modal: "facultyModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Faculty", "Timing", "Material", "Speed", "Satisfaction", "Comments"]
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Faculty Name", "Faculty Rating", "Timing", "Material", "Speed", "Satisfaction", "Comments"]
       },
       mentor: {
         title: "Mentor Feedback",
         description: "Student rates mentoring, doubt support, behaviour, and attention.",
         modal: "mentorModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Mentor", "Doubt Support", "Behaviour", "Attention", "Satisfaction", "Comments"]
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Mentor Name", "Mentor Rating", "Doubt Support", "Behaviour", "Attention", "Satisfaction", "Comments"]
       },
       evaluation: {
         title: "Student Evaluation",
         description: "Mentor records assignment status, knowledge level, and call note.",
         modal: "evalModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Assignment Status", "Knowledge", "Overall Feedback"]
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Mentor Name", "Assignment Status", "Knowledge", "Overall Feedback"]
+      },
+      people: {
+        title: "Faculty & Mentors",
+        description: "Maintain faculty and mentor names used inside feedback forms.",
+        modal: "staffModal",
+        headers: ["Name", "Type", "Email", "Phone", "Status", ""]
       }
     };
 
@@ -213,6 +240,16 @@
       const all = [...faculty, ...mentor, ...evals].filter(matchesFilters);
       const connected = all.filter(i => up(i.connectionStatus) === "YES").length;
       const avgRating = arr => arr.length ? (arr.reduce((a, b) => a + Number(b.facultyRating || b.mentorRating || 0), 0) / arr.length).toFixed(1) : "0.0";
+      if (activeTab === "people") {
+        el("feedbackMetrics").innerHTML = [
+          ["Faculty", staff.filter(member => member.type === "Faculty").length, "Available in faculty review forms"],
+          ["Mentors", staff.filter(member => member.type === "Mentor").length, "Available in mentor review forms"],
+          ["Active People", staff.filter(member => member.status === "Active").length, "Current staff directory"],
+          ["Total People", staff.length, "Faculty and mentors combined"]
+        ].map(m => `<div class="metric-card"><p class="metric-label">${m[0]}</p><p class="metric-value">${m[1]}</p><p class="metric-note">${m[2]}</p></div>`).join("");
+        return;
+      }
+
       el("feedbackMetrics").innerHTML = [
         ["Total Logs", all.length, "Across the selected filters"],
         ["Reachability", `${all.length ? Math.round((connected / all.length) * 100) : 0}%`, "Connected calls"],
@@ -224,6 +261,7 @@
     function activeRows() {
       if (activeTab === "faculty") return faculty.filter(matchesFilters);
       if (activeTab === "mentor") return mentor.filter(matchesFilters);
+      if (activeTab === "people") return staff;
       return evals.filter(matchesFilters);
     }
 
@@ -242,6 +280,7 @@
           <td>${connectionBadge(item.connectionStatus)}</td>
           <td>${item.application}</td>
           <td>${item.session}</td>
+          <td><strong>${item.facultyName || "Not assigned"}</strong></td>
           <td><strong>${item.facultyRating} / 5</strong></td>
           <td>${item.classTiming}</td>
           <td>${item.material}</td>
@@ -263,6 +302,7 @@
           <td>${connectionBadge(item.connectionStatus)}</td>
           <td>${item.application}</td>
           <td>${item.session}</td>
+          <td><strong>${item.mentorName || "Not assigned"}</strong></td>
           <td><strong>${item.mentorRating} / 5</strong></td>
           <td>${item.doubtClearing}</td>
           <td>${item.behaviour}</td>
@@ -284,9 +324,23 @@
           <td>${item.callDate}</td>
           <td>${connectionBadge(item.connectionStatus)}</td>
           <td>${item.application}</td>
+          <td><strong>${item.mentorName || "Not assigned"}</strong></td>
           <td><strong>${up(item.assignmentStatus)}</strong></td>
           <td><span class="badge badge-${knowledgeClass}">${up(item.applicationKnowledge)}</span></td>
           <td class="feedback-comment-cell">${item.overallFeedback || "--"}</td>
+        </tr>
+      `;
+    }
+
+    function renderStaffRow(item) {
+      return `
+        <tr>
+          <td><strong>${item.name}</strong></td>
+          <td><span class="badge ${item.type === "Faculty" ? "badge-completed" : "badge-neutral"}">${item.type}</span></td>
+          <td>${item.email || "--"}</td>
+          <td>${item.phone || "--"}</td>
+          <td><span class="badge badge-active">${item.status || "Active"}</span></td>
+          <td class="table-actions"><button class="btn-danger btn-sm" data-remove-staff="${item.id}" data-staff-name="${item.name}">Remove</button></td>
         </tr>
       `;
     }
@@ -296,18 +350,42 @@
       const rows = activeRows();
       el("activeTitle").textContent = config.title;
       el("activeDescription").textContent = config.description;
-      el("activeAddBtn").textContent = `Add ${config.title}`;
+      el("activeAddBtn").textContent = activeTab === "people" ? "Add Faculty / Mentor" : `Add ${config.title}`;
       el("feedbackHead").innerHTML = config.headers.map(header => `<th>${header}</th>`).join("");
       el("feedbackBody").innerHTML = rows.length ? rows.map(item => {
         if (activeTab === "faculty") return renderFacultyRow(item);
         if (activeTab === "mentor") return renderMentorRow(item);
+        if (activeTab === "people") return renderStaffRow(item);
         return renderEvaluationRow(item);
       }).join("") : `<tr><td colspan="${config.headers.length}"><div class="empty-state">No ${config.title.toLowerCase()} records match the current filters.</div></td></tr>`;
 
       document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
         btn.classList.toggle("is-active", btn.dataset.feedbackTab === activeTab);
       });
+      document.querySelectorAll("[data-remove-staff]").forEach(btn => {
+        btn.addEventListener("click", () => removeStaff(btn.dataset.removeStaff, btn.dataset.staffName));
+      });
       renderMetrics();
+    }
+
+    function populateStaffDropdowns() {
+      const facultyOptions = staff.filter(member => member.type === "Faculty").map(member => `<option value="${member.name}">${member.name}</option>`).join("");
+      const mentorOptions = staff.filter(member => member.type === "Mentor").map(member => `<option value="${member.name}">${member.name}</option>`).join("");
+      el("facFaculty").innerHTML = facultyOptions || `<option value="Not assigned">Not assigned</option>`;
+      el("menMentor").innerHTML = mentorOptions || `<option value="Not assigned">Not assigned</option>`;
+      el("evalMentor").innerHTML = mentorOptions || `<option value="Not assigned">Not assigned</option>`;
+    }
+
+    async function loadStaff() {
+      staff = await apiFetch('/api/staff');
+      populateStaffDropdowns();
+      if (activeTab === "people") renderActiveTab();
+    }
+
+    async function removeStaff(id, name) {
+      if (!confirm(`Remove ${name} from Faculty & Mentors? Existing feedback records will keep the saved name.`)) return;
+      await apiFetch(`/api/staff/${encodeURIComponent(id)}`, { method: "DELETE" });
+      await loadStaff();
     }
 
     async function loadFeedback() {
@@ -320,10 +398,12 @@
     async function init() {
       students = await apiFetch('/api/students');
       modules = await apiFetch('/api/modules');
+      staff = await apiFetch('/api/staff');
       const studentOptions = students.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join("");
       const moduleOptions = modules.map(m => `<option value="${m}">${m}</option>`).join("");
       ["facStudent", "menStudent", "evalStudent"].forEach(id => el(id).innerHTML = studentOptions);
       ["facApp", "menApp", "evalApp"].forEach(id => el(id).innerHTML = moduleOptions);
+      populateStaffDropdowns();
       el("studentFilter").innerHTML = `<option value="All">All students</option>${studentOptions}`;
       el("applicationFilter").innerHTML = `<option value="All">All applications</option>${moduleOptions}`;
       ["facDate", "menDate", "evalDate"].forEach(id => el(id).value = today());
@@ -345,6 +425,7 @@
       e.preventDefault();
       await apiFetch('/api/feedback/faculty', { method: "POST", body: JSON.stringify({
         studentId: el("facStudent").value, callDate: el("facDate").value, connectionStatus: el("facStatus").value, application: el("facApp").value, session: el("facSession").value,
+        facultyName: el("facFaculty").value,
         facultyRating: el("facRating").value, classTiming: el("facTiming").value, material: el("facMaterial").value, classSpeed: el("facSpeed").value,
         overallSatisfaction: el("facSatisfaction").value, comments: el("facComments").value
       }) });
@@ -356,6 +437,7 @@
       e.preventDefault();
       await apiFetch('/api/feedback/mentor', { method: "POST", body: JSON.stringify({
         studentId: el("menStudent").value, callDate: el("menDate").value, connectionStatus: el("menStatus").value, application: el("menApp").value, session: el("menSession").value,
+        mentorName: el("menMentor").value,
         mentorRating: el("menRating").value, doubtClearing: el("menDoubt").value, behaviour: el("menBehaviour").value, attention: el("menAttention").value,
         overallSatisfaction: el("menSatisfaction").value, comments: el("menComments").value
       }) });
@@ -367,10 +449,24 @@
       e.preventDefault();
       await apiFetch('/api/feedback/mentor-evaluation', { method: "POST", body: JSON.stringify({
         studentId: el("evalStudent").value, callDate: el("evalDate").value, connectionStatus: el("evalStatus").value, application: el("evalApp").value,
+        mentorName: el("evalMentor").value,
         assignmentStatus: el("evalAssignment").value, applicationKnowledge: el("evalKnowledge").value, overallFeedback: el("evalComments").value
       }) });
       closeModal("evalModal");
       await loadFeedback();
+    });
+
+    el("staffForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      await apiFetch('/api/staff', { method: "POST", body: JSON.stringify({
+        type: el("staffType").value,
+        name: el("staffName").value,
+        email: el("staffEmail").value,
+        phone: el("staffPhone").value
+      }) });
+      el("staffForm").reset();
+      closeModal("staffModal");
+      await loadStaff();
     });
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

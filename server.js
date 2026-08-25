@@ -809,6 +809,14 @@ let sessions = [
   { id: "SESS005", batchCode: "BATCH 202602", sessionNumber: 1, name: "SESSION-1", topic: "Excel & Analytics Foundations", date: "2026-02-05", timing: "11:30 AM", faculty: "Prof. S. R. Sen", status: "Completed" }
 ];
 
+let staffMembers = [
+  { id: "FAC001", type: "Faculty", name: "Dr. Amit Verma", email: "amit.verma@dvanalytics.in", phone: "+91 98765 20101", status: "Active" },
+  { id: "FAC002", type: "Faculty", name: "Mrs. Anjali Roy", email: "anjali.roy@dvanalytics.in", phone: "+91 98765 20102", status: "Active" },
+  { id: "FAC003", type: "Faculty", name: "Prof. S. R. Sen", email: "sr.sen@dvanalytics.in", phone: "+91 98765 20103", status: "Active" },
+  { id: "MEN001", type: "Mentor", name: "Rohan Das", email: "rohan.das@dvanalytics.in", phone: "+91 98765 30101", status: "Active" },
+  { id: "MEN002", type: "Mentor", name: "Priya Nair", email: "priya.nair@dvanalytics.in", phone: "+91 98765 30102", status: "Active" }
+];
+
 // Feedback Triad Collections based on Sheet 2 (STUDENT FEEDBACK)
 let facultyFeedbackLogs = [
   {
@@ -822,6 +830,7 @@ let facultyFeedbackLogs = [
     feedbackType: "Faculty Feedback",
     application: "EXCEL AI",
     session: "SESSION-1",
+    facultyName: "Dr. Amit Verma",
     facultyRating: 4.5,
     classTiming: 4.0,
     material: 4.5,
@@ -840,6 +849,7 @@ let facultyFeedbackLogs = [
     feedbackType: "Faculty Feedback",
     application: "SQL",
     session: "SESSION-2",
+    facultyName: "Dr. Amit Verma",
     facultyRating: 5.0,
     classTiming: 5.0,
     material: 5.0,
@@ -858,6 +868,7 @@ let facultyFeedbackLogs = [
     feedbackType: "Faculty Feedback",
     application: "PYTHON",
     session: "SESSION-1",
+    facultyName: "Prof. S. R. Sen",
     facultyRating: 3.5,
     classTiming: 4.0,
     material: 3.0,
@@ -879,6 +890,7 @@ let mentorFeedbackLogs = [
     feedbackType: "Mentor Feedback",
     application: "EXCEL AI",
     session: "SESSION-1",
+    mentorName: "Rohan Das",
     mentorRating: 4.0,
     doubtClearing: 4.5,
     behaviour: 5.0,
@@ -897,6 +909,7 @@ let mentorFeedbackLogs = [
     feedbackType: "Mentor Feedback",
     application: "POWER BI",
     session: "SESSION-3",
+    mentorName: "Priya Nair",
     mentorRating: 4.8,
     doubtClearing: 5.0,
     behaviour: 5.0,
@@ -917,6 +930,7 @@ let mentorEvaluationLogs = [
     connectionStatus: "Yes",
     feedbackType: "Mentor Evaluation",
     application: "EXCEL AI",
+    mentorName: "Rohan Das",
     assignmentStatus: "Completed",
     applicationKnowledge: "Good",
     overallFeedback: "Student showed good understanding of Excel functions but needs to attend scheduled classes regularly."
@@ -931,6 +945,7 @@ let mentorEvaluationLogs = [
     connectionStatus: "Yes",
     feedbackType: "Mentor Evaluation",
     application: "SQL",
+    mentorName: "Rohan Das",
     assignmentStatus: "In Progress",
     applicationKnowledge: "Average",
     overallFeedback: "Pending assignment submission for S2-S6. Struggled with subqueries during evaluation."
@@ -945,6 +960,7 @@ let mentorEvaluationLogs = [
     connectionStatus: "No",
     feedbackType: "Mentor Evaluation",
     application: "PYTHON",
+    mentorName: "Rohan Das",
     assignmentStatus: "Not Started",
     applicationKnowledge: "Low",
     overallFeedback: "Call went unanswered. Follow-up scheduled for tomorrow."
@@ -1245,6 +1261,49 @@ app.get('/api/feedback', (req, res) => {
   res.json(combined.sort((a, b) => new Date(b.callDate) - new Date(a.callDate)));
 });
 
+app.get('/api/staff', (req, res) => {
+  const { type } = req.query;
+  let list = [...staffMembers];
+  if (type && type !== "All") {
+    list = list.filter(member => member.type.toLowerCase() === String(type).toLowerCase());
+  }
+  res.json(list.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name)));
+});
+
+app.post('/api/staff', (req, res) => {
+  const data = req.body;
+  const type = String(data.type || "").trim();
+  const name = String(data.name || "").trim();
+  if (!["Faculty", "Mentor"].includes(type)) {
+    return res.status(400).json({ error: "Staff type must be Faculty or Mentor" });
+  }
+  if (!name) {
+    return res.status(400).json({ error: "Staff name is required" });
+  }
+
+  const prefix = type === "Faculty" ? "FAC" : "MEN";
+  const nextNumber = staffMembers.filter(member => member.type === type).length + 1;
+  const entry = {
+    id: prefix + String(nextNumber).padStart(3, "0"),
+    type,
+    name,
+    email: data.email || "",
+    phone: data.phone || "",
+    status: data.status || "Active"
+  };
+  staffMembers.push(entry);
+  res.status(201).json(entry);
+});
+
+app.delete('/api/staff/:id', (req, res) => {
+  const index = staffMembers.findIndex(member => member.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: "Staff member not found" });
+  }
+  const [removed] = staffMembers.splice(index, 1);
+  res.json({ message: "Staff member removed", removed });
+});
+
 // Student -> Faculty Feedback
 app.post('/api/feedback/faculty', (req, res) => {
   const data = req.body;
@@ -1263,6 +1322,7 @@ app.post('/api/feedback/faculty', (req, res) => {
     feedbackType: "Faculty Feedback",
     application: data.application || "EXCEL AI",
     session: data.session || student.session || "SESSION-1",
+    facultyName: data.facultyName || student.faculty || "Not assigned",
     facultyRating: Math.max(0, Math.min(5, parseFloat(data.facultyRating) || 5)),
     classTiming: Math.max(0, Math.min(5, parseFloat(data.classTiming) || 5)),
     material: Math.max(0, Math.min(5, parseFloat(data.material) || 5)),
@@ -1293,6 +1353,7 @@ app.post('/api/feedback/mentor', (req, res) => {
     feedbackType: "Mentor Feedback",
     application: data.application || "EXCEL AI",
     session: data.session || student.session || "SESSION-1",
+    mentorName: data.mentorName || student.counselor || "Not assigned",
     mentorRating: Math.max(0, Math.min(5, parseFloat(data.mentorRating) || 5)),
     doubtClearing: Math.max(0, Math.min(5, parseFloat(data.doubtClearing) || 5)),
     behaviour: Math.max(0, Math.min(5, parseFloat(data.behaviour) || 5)),
@@ -1322,6 +1383,7 @@ app.post('/api/feedback/mentor-evaluation', (req, res) => {
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Mentor Evaluation",
     application: data.application || "EXCEL AI",
+    mentorName: data.mentorName || student.counselor || "Not assigned",
     assignmentStatus: data.assignmentStatus || "Completed", // Completed / In Progress / Not Started
     applicationKnowledge: data.applicationKnowledge || "Good", // Low / Average / Good / Best
     overallFeedback: data.overallFeedback || ""
