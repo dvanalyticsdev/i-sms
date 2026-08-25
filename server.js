@@ -1026,6 +1026,7 @@ app.get('/api/dashboard/sms', (req, res) => {
       activeStudents,
       activeBatches,
       attendanceRate: avgAttendance,
+      avgAttention,
       assignmentCompletionRate: avgAssignment,
       lmsScoreRate: avgLms,
       mcqAvg,
@@ -1047,11 +1048,12 @@ app.get('/api/dashboard/sms', (req, res) => {
   });
 });
 
-// SRM / Feedback Dashboard (Sheet 5 STU FEEDBACK DASHBOARD)
+// SRM / Feedback Dashboard
 app.get('/api/dashboard/srm', (req, res) => {
   const totalCalls = mentorEvaluationLogs.length + facultyFeedbackLogs.length + mentorFeedbackLogs.length;
-  const connectedCalls = mentorEvaluationLogs.filter(m => m.connectionStatus === 'Yes').length;
-  const connectionRate = mentorEvaluationLogs.length ? Math.round((connectedCalls / mentorEvaluationLogs.length) * 100) : 100;
+  const allFeedbackCalls = [...mentorEvaluationLogs, ...facultyFeedbackLogs, ...mentorFeedbackLogs];
+  const connectedCalls = allFeedbackCalls.filter(m => String(m.connectionStatus).toUpperCase() === 'YES').length;
+  const connectionRate = allFeedbackCalls.length ? Math.round((connectedCalls / allFeedbackCalls.length) * 100) : 100;
 
   const avgFacultyRating = facultyFeedbackLogs.length ? 
     (facultyFeedbackLogs.reduce((a, b) => a + b.facultyRating, 0) / facultyFeedbackLogs.length).toFixed(1) : "4.5";
@@ -1062,17 +1064,17 @@ app.get('/api/dashboard/srm', (req, res) => {
 
   // Knowledge distribution
   const knowledgeDist = {
-    Best: mentorEvaluationLogs.filter(m => m.applicationKnowledge === 'Best').length,
-    Good: mentorEvaluationLogs.filter(m => m.applicationKnowledge === 'Good').length,
-    Average: mentorEvaluationLogs.filter(m => m.applicationKnowledge === 'Average').length,
-    Low: mentorEvaluationLogs.filter(m => m.applicationKnowledge === 'Low').length
+    Best: mentorEvaluationLogs.filter(m => String(m.applicationKnowledge).toUpperCase() === 'BEST').length,
+    Good: mentorEvaluationLogs.filter(m => String(m.applicationKnowledge).toUpperCase() === 'GOOD').length,
+    Average: mentorEvaluationLogs.filter(m => String(m.applicationKnowledge).toUpperCase() === 'AVERAGE').length,
+    Low: mentorEvaluationLogs.filter(m => String(m.applicationKnowledge).toUpperCase() === 'LOW').length
   };
 
   // Assignment status distribution
   const assignmentDist = {
-    Completed: mentorEvaluationLogs.filter(m => m.assignmentStatus === 'Completed').length,
-    InProgress: mentorEvaluationLogs.filter(m => m.assignmentStatus === 'In Progress').length,
-    NotStarted: mentorEvaluationLogs.filter(m => m.assignmentStatus === 'Not Started').length
+    Completed: mentorEvaluationLogs.filter(m => String(m.assignmentStatus).toUpperCase() === 'COMPLETED').length,
+    InProgress: mentorEvaluationLogs.filter(m => String(m.assignmentStatus).toUpperCase() === 'IN PROGRESS').length,
+    NotStarted: mentorEvaluationLogs.filter(m => String(m.assignmentStatus).toUpperCase() === 'NOT STARTED').length
   };
 
   res.json({

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | Student Dashboard</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout-root">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap"><span class="sms-logo-text">i-SMS</span></div>
+          <div class="sms-dv-badge"><span class="sms-dv-by">by</span><img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="performance.html" class="sidebar-link is-active">Student Performance</a>
+        <a href="feedback.html" class="sidebar-link">Student Feedback</a>
+        <a href="dashboard.html" class="sidebar-link">Analytics Dashboard</a>
+      </nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="pageTitle">Student Dashboard</h1>
+          <p id="pageSubtitle">Loading scorecard...</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg>
+              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg>
+              </span>
+            </span>
+            <span class="theme-toggle__label" data-theme-label>Light</span>
+          </button>
+          <div class="topbar-profile"></div>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <section class="profile-banner" id="profileBanner"></section>
+        <section class="metric-grid" id="metricGrid"></section>
+
+        <section>
+          <div class="page-toolbar" style="margin-bottom:12px;">
+            <div class="section-title">
+              <h2>Module Dashboard</h2>
+              <p>Attendance, attention, assignments, and assessment strength by application.</p>
+            </div>
+          </div>
+          <div class="module-grid" id="moduleGrid"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <h3>Detailed Scorecard</h3>
+              <p>Edit operational inputs. Calculated percentages update automatically.</p>
+            </div>
+          </div>
+          <div class="table-responsive" style="border:0;">
+            <table class="compact-table">
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Attendance</th>
+                  <th>Attention</th>
+                  <th>Assignments</th>
+                  <th>Assessments</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="scorecardBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editRowModal">
+    <div class="modal-overlay" id="editRowOverlay"></div>
+    <div class="modal-container" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalModTitle">Edit Module</h3>
+        <button class="modal-close" id="closeRowModal">&times;</button>
+      </div>
+      <form id="editRowForm">
+        <input type="hidden" id="editModName">
+        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div class="form-group"><label for="rowAttended">Classes Attended</label><input type="number" id="rowAttended" class="form-control" min="0" max="10" required></div>
+          <div class="form-group"><label for="rowAttention">Focused Minutes</label><input type="number" id="rowAttention" class="form-control" min="0" max="1200" required></div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label>Assignments S1 to S6</label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <label><input type="checkbox" id="rowS1"> S1</label>
+              <label><input type="checkbox" id="rowS2"> S2</label>
+              <label><input type="checkbox" id="rowS3"> S3</label>
+              <label><input type="checkbox" id="rowS4"> S4</label>
+              <label><input type="checkbox" id="rowS5"> S5</label>
+              <label><input type="checkbox" id="rowS6"> S6</label>
+            </div>
+          </div>
+          <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" required></div>
+          <div class="form-group"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" required></div>
+          <div class="form-group"><label for="rowPaper">Pen and Paper %</label><input type="number" id="rowPaper" class="form-control" min="0" max="100" required></div>
+          <div class="form-group"><label for="rowMock">Mock Interview %</label><input type="number" id="rowMock" class="form-control" min="0" max="100" required></div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-secondary" id="cancelRowBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Save Scorecard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiFetch } from './app.js';
+
+    let student = null;
+    const studentId = new URLSearchParams(window.location.search).get("id");
+    const assessmentScore = m => Math.round((m.mcq + m.test + m.penAndPaper + m.mockInterview) / 4);
+    const pctClass = value => value >= 75 ? "good" : value < 60 ? "risk" : "";
+    const scoreClass = value => value >= 70 ? "good" : value < 50 ? "risk" : "info";
+
+    function badge(text, type = "completed") {
+      return `<span class="badge badge-${type}">${text}</span>`;
+    }
+
+    function metric(label, value, note) {
+      return `<div class="metric-card"><p class="metric-label">${label}</p><p class="metric-value">${value}</p><p class="metric-note">${note}</p></div>`;
+    }
+
+    function progress(label, value, klass) {
+      return `
+        <div class="progress-row">
+          <div class="progress-label"><span>${label}</span><strong>${value}%</strong></div>
+          <div class="progress-track"><div class="progress-fill ${klass}" style="width:${Math.max(0, Math.min(100, value))}%"></div></div>
+        </div>
+      `;
+    }
+
+    function assignmentDots(assignments) {
+      return ["s1", "s2", "s3", "s4", "s5", "s6"].map((key, idx) => {
+        const done = assignments?.[key];
+        return `<span class="assignment-dot ${done ? "done" : "pending"}">${idx + 1}</span>`;
+      }).join("");
+    }
+
+    function render() {
+      document.title = `i-SMS | ${student.name}`;
+      document.getElementById("pageTitle").textContent = `${student.name} Dashboard`;
+      document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch} / ${student.session}`;
+
+      const statusBadges = [
+        student.dvEliteEligible ? badge("DV Elite eligible", "elite") : badge("DV Elite pending", "pending"),
+        student.placementSupportEligible ? badge("Placement ready", "placement") : badge("Placement pending", "pending"),
+        student.attendance < 75 ? badge("Attendance risk", "risk") : badge("Attendance ok", "completed"),
+        student.attention < 60 ? badge("Focus risk", "risk") : badge("Focus ok", "completed")
+      ].join("");
+
+      document.getElementById("profileBanner").innerHTML = `
+        <div>
+          <div class="profile-title">
+            <h2>${student.name}</h2>
+            <p>${student.email || "No email recorded"} / ${student.mobile || "No mobile recorded"}</p>
+          </div>
+          <div class="status-stack">${statusBadges}</div>
+          <p style="margin:14px 0 0; color:var(--text-muted); font-size:12px; line-height:1.5;">${student.notes || "No counselor note recorded."}</p>
+        </div>
+        <div class="rule-panel">
+          <div class="rule-item"><span>Attendance Result</span><strong>${student.attendanceResult}</strong></div>
+          <div class="rule-item"><span>Attention Result</span><strong>${student.attentionResult}</strong></div>
+          <div class="rule-item"><span>DV Elite Rule</span><strong>SQL, Python, SAS, and ML score at least 70%</strong></div>
+          <div class="rule-item"><span>Placement Rule</span><strong>Mock interview average at least 70%</strong></div>
+        </div>
+      `;
+
+      document.getElementById("metricGrid").innerHTML = [
+        metric("Attendance", `${student.attendance}%`, `${student.modules.reduce((a, m) => a + m.attended, 0)} of ${student.modules.reduce((a, m) => a + m.classes, 0)} classes attended`),
+        metric("Focus Rate", `${student.attention}%`, "Class attention minutes"),
+        metric("Assignments", `${student.assignmentCompletion}%`, "S1-S6 completion"),
+        metric("LMS Score", `${student.lmsScore}%`, "Assessment pillar average")
+      ].join("");
+
+      document.getElementById("moduleGrid").innerHTML = student.modules.map(m => {
+        const score = assessmentScore(m);
+        return `
+          <article class="module-card">
+            <div class="module-card-head">
+              <div>
+                <h3>${m.name}</h3>
+                <div class="student-meta">${m.attended}/${m.classes} classes / ${m.assignmentTotal}/${m.assignmentTarget} assignments</div>
+              </div>
+              <div class="module-score">${score}%</div>
+            </div>
+            ${progress("Attendance", m.attendancePct, pctClass(m.attendancePct))}
+            ${progress("Attention", m.attentionPct, pctClass(m.attentionPct))}
+            ${progress("Assessment", score, scoreClass(score))}
+            <div class="assignment-dots">${assignmentDots(m.assignments)}</div>
+          </article>
+        `;
+      }).join("");
+
+      document.getElementById("scorecardBody").innerHTML = student.modules.map(m => {
+        const score = assessmentScore(m);
+        return `
+          <tr>
+            <td><strong>${m.name}</strong></td>
+            <td>${m.attended}/${m.classes} classes<br><span class="student-meta">${m.attendancePct}% attendance</span></td>
+            <td>${m.classAttention}/${m.classDuration} mins<br><span class="student-meta">${m.attentionPct}% focus</span></td>
+            <td><div class="assignment-dots">${assignmentDots(m.assignments)}</div><div class="student-meta">${m.assignmentPct}% complete</div></td>
+            <td><strong>${score}%</strong><br><span class="student-meta">MCQ ${m.mcq} / Test ${m.test} / Paper ${m.penAndPaper} / Mock ${m.mockInterview}</span></td>
+            <td class="table-actions"><button class="btn-secondary btn-sm btn-edit-row" data-mod="${m.name}">Edit</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".btn-edit-row").forEach(btn => btn.addEventListener("click", () => openEditModal(btn.dataset.mod)));
+    }
+
+    async function loadStudent() {
+      if (!studentId) {
+        document.getElementById("profileBanner").innerHTML = `<div class="empty-state">No student selected.</div>`;
+        return;
+      }
+      student = await apiFetch(`/api/students/${encodeURIComponent(studentId)}`);
+      render();
+    }
+
+    const editModal = document.getElementById("editRowModal");
+    const closeModal = () => editModal.classList.remove("is-open");
+    document.getElementById("closeRowModal").addEventListener("click", closeModal);
+    document.getElementById("editRowOverlay").addEventListener("click", closeModal);
+    document.getElementById("cancelRowBtn").addEventListener("click", closeModal);
+
+    function openEditModal(modName) {
+      const mod = student.modules.find(m => m.name === modName);
+      if (!mod) return;
+      document.getElementById("modalModTitle").textContent = `Edit ${mod.name}`;
+      document.getElementById("editModName").value = mod.name;
+      document.getElementById("rowAttended").value = mod.attended;
+      document.getElementById("rowAttention").value = mod.classAttention;
+      ["s1", "s2", "s3", "s4", "s5", "s6"].forEach(key => {
+        document.getElementById(`row${key.toUpperCase()}`).checked = !!mod.assignments?.[key];
+      });
+      document.getElementById("rowMcq").value = mod.mcq;
+      document.getElementById("rowTest").value = mod.test;
+      document.getElementById("rowPaper").value = mod.penAndPaper;
+      document.getElementById("rowMock").value = mod.mockInterview;
+      editModal.classList.add("is-open");
+    }
+
+    document.getElementById("editRowForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const modName = document.getElementById("editModName").value;
+      const payload = {
+        attended: parseInt(document.getElementById("rowAttended").value, 10) || 0,
+        classAttention: parseInt(document.getElementById("rowAttention").value, 10) || 0,
+        assignments: {
+          s1: document.getElementById("rowS1").checked,
+          s2: document.getElementById("rowS2").checked,
+          s3: document.getElementById("rowS3").checked,
+          s4: document.getElementById("rowS4").checked,
+          s5: document.getElementById("rowS5").checked,
+          s6: document.getElementById("rowS6").checked
+        },
+        mcq: parseInt(document.getElementById("rowMcq").value, 10) || 0,
+        test: parseInt(document.getElementById("rowTest").value, 10) || 0,
+        penAndPaper: parseInt(document.getElementById("rowPaper").value, 10) || 0,
+        mockInterview: parseInt(document.getElementById("rowMock").value, 10) || 0
+      };
+
+      student = await apiFetch(`/api/performance/${student.id}/module/${encodeURIComponent(modName)}`, {
+        method: "PUT",
+        body: JSON.stringify(payload)
+      });
+      closeModal();
+      render();
+    });
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadStudent);
+    else loadStudent();
+  </script>
+</body>
+</html>

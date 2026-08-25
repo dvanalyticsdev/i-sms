@@ -3,27 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>i-SMS | Dashboards (Sheet 4 & 5)</title>
+  <title>i-SMS | Analytics Dashboard</title>
   <script src="theme-bootstrap.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="layout-root">
-    <!-- Sidebar (Only 3 Pages) -->
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="sms-logo-wrap">
-          <div class="sms-text-wrap">
-            <span class="sms-logo-text">i-SMS</span>
-          </div>
-          <div class="sms-dv-badge">
-            <span class="sms-dv-by">by</span>
-            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
-          </div>
+          <div class="sms-text-wrap"><span class="sms-logo-text">i-SMS</span></div>
+          <div class="sms-dv-badge"><span class="sms-dv-by">by</span><img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img"></div>
         </div>
       </div>
       <nav class="sidebar-nav">
@@ -36,29 +29,17 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="main-content">
-      <!-- Topbar -->
       <header class="topbar">
         <div class="topbar-title">
-          <h1>Analytics & Operations Dashboards</h1>
-          <p>STU Performance Dashboard (Sheet 4) and STU Feedback Dashboard (Sheet 5).</p>
+          <h1>Analytics Dashboard</h1>
+          <p>Operational view of performance, feedback quality, readiness, and intervention needs.</p>
         </div>
         <div class="topbar-actions">
           <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
             <span class="theme-toggle__stack" aria-hidden="true">
-              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                  <circle cx="12" cy="12" r="4.5"></circle>
-                  <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
-                </svg>
-              </span>
-              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                  <circle cx="12" cy="12" r="4.5"></circle>
-                  <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
-                </svg>
-              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg></span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg></span>
             </span>
             <span class="theme-toggle__label" data-theme-label>Light</span>
           </button>
@@ -66,137 +47,63 @@
         </div>
       </header>
 
-      <!-- Page Content -->
       <main class="page-container">
-        <!-- Dashboard Switcher Tabs -->
-        <div class="tablist" style="margin-bottom: 16px;">
-          <button class="tab is-active" id="tabBtnPerf" data-dash="performance">
-            📊 STU PERFORMANCE DASHBOARD (Sheet 4)
-          </button>
-          <button class="tab" id="tabBtnFeedback" data-dash="feedback">
-            🤝 STU FEEDBACK DASHBOARD (Sheet 5)
-          </button>
-        </div>
+        <section class="page-toolbar">
+          <div class="section-title">
+            <h2>Leadership Summary</h2>
+            <p>Derived from the performance scorecards and feedback logs.</p>
+          </div>
+          <div class="toolbar-group">
+            <select class="filter-select" id="batchFilter"><option value="All">All batches</option></select>
+            <select class="filter-select" id="sessionFilter"><option value="All">All sessions</option></select>
+          </div>
+        </section>
 
-        <!-- ================= PANEL 1: PERFORMANCE DASHBOARD (Sheet 4) ================= -->
-        <div id="panelPerformance" style="display:block;">
-          <!-- KPI Ribbon -->
-          <section class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom:18px;">
-            <div class="stat-card">
-              <div class="stat-card-title">Batch Attendance</div>
-              <div class="stat-card-value" id="pAttendance">0%</div>
-              <div class="stat-card-subtitle">Cohort Average</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Class Attention</div>
-              <div class="stat-card-value" id="pAttention">0%</div>
-              <div class="stat-card-subtitle">Active Focus Rate</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Assignment Completion</div>
-              <div class="stat-card-value" id="pAssignment">0%</div>
-              <div class="stat-card-subtitle">S1-S6 Submissions</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Cohort LMS Score</div>
-              <div class="stat-card-value" id="pLmsScore">0%</div>
-              <div class="stat-card-subtitle">4-Pillar Average</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">DV Elite Qualified</div>
-              <div class="stat-card-value" id="pDvElite">0</div>
-              <div class="stat-card-subtitle">SQL, Py, SAS, ML ≥ 70%</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Placement Ready</div>
-              <div class="stat-card-value" id="pPlacement">0</div>
-              <div class="stat-card-subtitle">Mock Interview ≥ 70%</div>
-            </div>
-          </section>
+        <section class="metric-grid" id="summaryMetrics"></section>
 
-          <!-- Performance Charts -->
-          <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:18px; margin-bottom:20px;">
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Average Competency Score by Module</h3>
-              <div style="height:280px; position:relative;">
-                <canvas id="perfModuleChart"></canvas>
-              </div>
+        <section class="dashboard-grid">
+          <article class="card">
+            <div class="card-head">
+              <div><h3>Module Competency</h3><p>Average assessment score by application.</p></div>
             </div>
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Assessment 4-Pillars Average (%)</h3>
-              <div style="height:280px; position:relative;">
-                <canvas id="perfQuadrantChart"></canvas>
-              </div>
-            </div>
-          </section>
+            <div class="bar-list" id="moduleBars"></div>
+          </article>
 
-          <!-- Student Rankings / Standing -->
-          <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:18px;">
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Top Performers</h3>
-              <div id="topPerformersBody" style="display:flex; flex-direction:column; gap:8px;"></div>
+          <article class="card">
+            <div class="card-head">
+              <div><h3>Assessment Pillars</h3><p>MCQ, practical, paper, and mock interview averages.</p></div>
             </div>
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Needs Academic Focus / Intervention</h3>
-              <div id="needsFocusBody" style="display:flex; flex-direction:column; gap:8px;"></div>
-            </div>
-          </section>
-        </div>
+            <div class="bar-list" id="pillarBars"></div>
+          </article>
 
-        <!-- ================= PANEL 2: FEEDBACK DASHBOARD (Sheet 5) ================= -->
-        <div id="panelFeedback" style="display:none;">
-          <!-- Feedback KPI Ribbon -->
-          <section class="stats-grid" style="margin-bottom:18px;">
-            <div class="stat-card">
-              <div class="stat-card-title">Avg Faculty Rating</div>
-              <div class="stat-card-value" id="fFacultyRating">0.0 / 5</div>
-              <div class="stat-card-subtitle"><span class="rating-stars">★★★★★</span> Faculty Score</div>
+          <article class="card">
+            <div class="card-head">
+              <div><h3>Students Ready For Growth</h3><p>Top performers and placement-ready candidates.</p></div>
             </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Avg Mentor Rating</div>
-              <div class="stat-card-value" id="fMentorRating">0.0 / 5</div>
-              <div class="stat-card-subtitle"><span class="rating-stars">★★★★★</span> Guidance Score</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Overall Satisfaction</div>
-              <div class="stat-card-value" id="fSatisfaction">0.0 / 5</div>
-              <div class="stat-card-subtitle">Timing, Pace & Materials</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-title">Reachability %</div>
-              <div class="stat-card-value" id="fReachability">0%</div>
-              <div class="stat-card-subtitle" id="fTotalLogs">0 Feedback Logs</div>
-            </div>
-          </section>
+            <div class="insight-list" id="topPerformers"></div>
+          </article>
 
-          <!-- Feedback Charts -->
-          <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:18px; margin-bottom:20px;">
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Student Concept Knowledge Distribution</h3>
-              <div style="height:260px; position:relative;">
-                <canvas id="fKnowledgeChart"></canvas>
-              </div>
+          <article class="card">
+            <div class="card-head">
+              <div><h3>Intervention Queue</h3><p>Students with low attendance, focus, or LMS score.</p></div>
             </div>
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Assignment Progress Status</h3>
-              <div style="height:260px; position:relative;">
-                <canvas id="fAssignmentChart"></canvas>
-              </div>
-            </div>
-          </section>
+            <div class="insight-list" id="needsFocus"></div>
+          </article>
 
-          <!-- Feedback Feeds -->
-          <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:18px;">
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Recent Mentor Call Evaluations</h3>
-              <div id="fRecentEvals" style="display:flex; flex-direction:column; gap:8px;"></div>
+          <article class="card">
+            <div class="card-head">
+              <div><h3>Feedback Health</h3><p>Student and mentor feedback quality signals.</p></div>
             </div>
-            <div class="card" style="padding:18px;">
-              <h3 style="margin-top:0; margin-bottom:12px; font-size:14px; font-weight:800;">Recent Student Reviews</h3>
-              <div id="fRecentReviews" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <div class="metric-grid" style="grid-template-columns: repeat(2, 1fr);" id="feedbackHealth"></div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div><h3>Knowledge And Assignments</h3><p>Mentor evaluation distribution.</p></div>
             </div>
-          </section>
-        </div>
+            <div class="bar-list" id="feedbackBars"></div>
+          </article>
+        </section>
       </main>
     </div>
   </div>
@@ -204,228 +111,112 @@
   <script type="module">
     import { apiFetch } from './app.js';
 
-    let perfModChartInstance = null;
-    let perfQuadChartInstance = null;
-    let fKnowledgeChartInstance = null;
-    let fAssignChartInstance = null;
+    const maxWidth = value => `${Math.max(0, Math.min(100, value))}%`;
+
+    function metric(label, value, note) {
+      return `<div class="metric-card"><p class="metric-label">${label}</p><p class="metric-value">${value}</p><p class="metric-note">${note}</p></div>`;
+    }
+
+    function barRow(label, value, colorClass = "") {
+      return `
+        <div class="bar-row">
+          <strong style="font-size:12px;">${label}</strong>
+          <div class="progress-track"><div class="progress-fill ${colorClass}" style="width:${maxWidth(value)}"></div></div>
+          <strong>${value}%</strong>
+        </div>
+      `;
+    }
+
+    function countBar(label, value, max, colorClass = "") {
+      const pct = max ? Math.round((value / max) * 100) : 0;
+      return `
+        <div class="bar-row">
+          <strong style="font-size:12px;">${label}</strong>
+          <div class="progress-track"><div class="progress-fill ${colorClass}" style="width:${maxWidth(pct)}"></div></div>
+          <strong>${value}</strong>
+        </div>
+      `;
+    }
+
+    function insightRow(item, type) {
+      const badge = type === "risk" ? "risk" : "completed";
+      return `
+        <div class="insight-row">
+          <div>
+            <strong style="color:var(--heading);">${item.name}</strong>
+            <div class="student-meta">${item.batch} / ${item.session} / Attendance ${item.attendance}%</div>
+          </div>
+          <span class="badge badge-${badge}">${item.performance}% LMS</span>
+        </div>
+      `;
+    }
+
+    async function populateFilters() {
+      const students = await apiFetch('/api/students');
+      const batches = [...new Set(students.map(s => s.batch))];
+      const sessions = [...new Set(students.map(s => s.session))];
+      document.getElementById("batchFilter").innerHTML = `<option value="All">All batches</option>${batches.map(b => `<option value="${b}">${b}</option>`).join("")}`;
+      document.getElementById("sessionFilter").innerHTML = `<option value="All">All sessions</option>${sessions.map(s => `<option value="${s}">${s}</option>`).join("")}`;
+    }
+
+    async function loadDashboard() {
+      const params = new URLSearchParams();
+      const batch = document.getElementById("batchFilter").value;
+      const session = document.getElementById("sessionFilter").value;
+      if (batch !== "All") params.set("batch", batch);
+      if (session !== "All") params.set("session", session);
+
+      const perf = await apiFetch(`/api/dashboard/sms?${params.toString()}`);
+      const feedback = await apiFetch('/api/dashboard/srm');
+      const s = perf.stats;
+
+      document.getElementById("summaryMetrics").innerHTML = [
+        metric("Active Students", s.activeStudents, `${s.activeBatches} active batch groups`),
+        metric("Attendance", `${s.attendanceRate}%`, "Cohort average"),
+        metric("Focus Rate", `${s.avgAttention}%`, "Class attention average"),
+        metric("DV Elite / Placement", `${s.dvEliteCount} / ${s.placementCount}`, "Rule-qualified students")
+      ].join("");
+
+      document.getElementById("moduleBars").innerHTML = perf.moduleAverages.map(m => barRow(m.name, m.averageScore, m.averageScore >= 70 ? "good" : m.averageScore < 50 ? "risk" : "")).join("");
+      document.getElementById("pillarBars").innerHTML = [
+        ["MCQ", s.mcqAvg],
+        ["Practical Test", s.practicalAvg],
+        ["Pen and Paper", s.hardpaperAvg],
+        ["Mock Interview", s.mockInterviewAvg]
+      ].map(([label, value]) => barRow(label, value, value >= 70 ? "good" : value < 50 ? "risk" : "info")).join("");
+
+      document.getElementById("topPerformers").innerHTML = s.topPerformers.length ? s.topPerformers.map(i => insightRow(i, "good")).join("") : `<div class="empty-state">No students available.</div>`;
+      document.getElementById("needsFocus").innerHTML = s.weakStudents.length ? s.weakStudents.map(i => insightRow(i, "risk")).join("") : `<div class="empty-state">No active intervention queue.</div>`;
+
+      document.getElementById("feedbackHealth").innerHTML = [
+        metric("Feedback Logs", feedback.stats.totalFeedbackCount, "All triad records"),
+        metric("Reachability", `${feedback.stats.connectionRate}%`, "Connected calls"),
+        metric("Faculty Rating", `${feedback.stats.avgFacultyRating} / 5`, "Class experience"),
+        metric("Mentor Rating", `${feedback.stats.avgMentorRating} / 5`, "Support experience")
+      ].join("");
+
+      const maxKnowledge = Math.max(1, ...Object.values(feedback.knowledgeDist));
+      const maxAssignment = Math.max(1, ...Object.values(feedback.assignmentDist));
+      document.getElementById("feedbackBars").innerHTML = [
+        countBar("Best knowledge", feedback.knowledgeDist.Best, maxKnowledge, "good"),
+        countBar("Good knowledge", feedback.knowledgeDist.Good, maxKnowledge, "info"),
+        countBar("Average knowledge", feedback.knowledgeDist.Average, maxKnowledge, ""),
+        countBar("Low knowledge", feedback.knowledgeDist.Low, maxKnowledge, "risk"),
+        countBar("Completed", feedback.assignmentDist.Completed, maxAssignment, "good"),
+        countBar("In progress", feedback.assignmentDist.InProgress, maxAssignment, "info"),
+        countBar("Not started", feedback.assignmentDist.NotStarted, maxAssignment, "risk")
+      ].join("");
+    }
 
     async function init() {
-      // Bind Switcher Tabs
-      const tabPerf = document.getElementById("tabBtnPerf");
-      const tabFeed = document.getElementById("tabBtnFeedback");
-      const panelPerf = document.getElementById("panelPerformance");
-      const panelFeed = document.getElementById("panelFeedback");
-
-      tabPerf.addEventListener("click", () => {
-        tabPerf.classList.add("is-active");
-        tabFeed.classList.remove("is-active");
-        panelPerf.style.display = "block";
-        panelFeed.style.display = "none";
-      });
-
-      tabFeed.addEventListener("click", () => {
-        tabFeed.classList.add("is-active");
-        tabPerf.classList.remove("is-active");
-        panelPerf.style.display = "none";
-        panelFeed.style.display = "block";
-      });
-
-      await loadPerformanceDash();
-      await loadFeedbackDash();
+      await populateFilters();
+      document.getElementById("batchFilter").addEventListener("change", loadDashboard);
+      document.getElementById("sessionFilter").addEventListener("change", loadDashboard);
+      await loadDashboard();
     }
 
-    async function loadPerformanceDash() {
-      try {
-        const data = await apiFetch('/api/dashboard/sms');
-        const s = data.stats;
-
-        document.getElementById("pAttendance").textContent = `${s.attendanceRate}%`;
-        document.getElementById("pAttention").textContent = `${s.avgAttention || s.attendanceRate - 5}%`;
-        document.getElementById("pAssignment").textContent = `${s.assignmentCompletionRate}%`;
-        document.getElementById("pLmsScore").textContent = `${s.lmsScoreRate}%`;
-        document.getElementById("pDvElite").textContent = s.dvEliteCount;
-        document.getElementById("pPlacement").textContent = s.placementCount;
-
-        // Render Charts
-        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-        const textColor = isDark ? "#cbd5e1" : "#333333";
-        const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-
-        if (perfModChartInstance) perfModChartInstance.destroy();
-        if (perfQuadChartInstance) perfQuadChartInstance.destroy();
-
-        const ctx1 = document.getElementById("perfModuleChart").getContext("2d");
-        perfModChartInstance = new Chart(ctx1, {
-          type: 'bar',
-          data: {
-            labels: data.moduleAverages.map(m => m.name),
-            datasets: [{
-              label: 'Avg Score %',
-              data: data.moduleAverages.map(m => m.averageScore),
-              backgroundColor: 'rgba(224, 83, 34, 0.85)',
-              borderRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: textColor, font: { size: 9 } }, grid: { display: false } },
-              y: { min: 0, max: 100, ticks: { color: textColor }, grid: { color: gridColor } }
-            }
-          }
-        });
-
-        const ctx2 = document.getElementById("perfQuadrantChart").getContext("2d");
-        perfQuadChartInstance = new Chart(ctx2, {
-          type: 'doughnut',
-          data: {
-            labels: ['MCQs', 'Practical Test', 'Pen & Paper', 'Mock Interview'],
-            datasets: [{
-              data: [s.mcqAvg || 75, s.practicalAvg || 70, s.hardpaperAvg || 65, s.mockInterviewAvg || 75],
-              backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
-              borderWidth: 2,
-              borderColor: isDark ? '#191c24' : '#ffffff'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'bottom', labels: { color: textColor, font: { size: 11, weight: 'bold' } } }
-            }
-          }
-        });
-
-        // Top Performers
-        const topBody = document.getElementById("topPerformersBody");
-        topBody.innerHTML = s.topPerformers.map(st => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <div>
-              <strong style="color:var(--heading); font-size:12px;">${st.name}</strong>
-              <div style="font-size:10px; color:var(--text-muted);">${st.batch} &bull; ${st.session}</div>
-            </div>
-            <div style="text-align:right;">
-              <span class="badge badge-completed">${st.performance}% LMS</span>
-              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${st.attendance}%</div>
-            </div>
-          </div>
-        `).join('');
-
-        // Needs Focus
-        const weakBody = document.getElementById("needsFocusBody");
-        weakBody.innerHTML = s.weakStudents.map(st => `
-          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <div>
-              <strong style="color:var(--heading); font-size:12px;">${st.name}</strong>
-              <div style="font-size:10px; color:var(--text-muted);">${st.batch} &bull; ${st.session}</div>
-            </div>
-            <div style="text-align:right;">
-              <span class="badge badge-risk">${st.performance}% LMS</span>
-              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Att: ${st.attendance}%</div>
-            </div>
-          </div>
-        `).join('');
-
-      } catch (err) {
-        console.error("Error loading performance dashboard:", err);
-      }
-    }
-
-    async function loadFeedbackDash() {
-      try {
-        const data = await apiFetch('/api/dashboard/srm');
-        const s = data.stats;
-
-        document.getElementById("fFacultyRating").textContent = `${s.avgFacultyRating} / 5`;
-        document.getElementById("fMentorRating").textContent = `${s.avgMentorRating} / 5`;
-        document.getElementById("fSatisfaction").textContent = `${s.avgSatisfaction} / 5`;
-        document.getElementById("fReachability").textContent = `${s.connectionRate}%`;
-        document.getElementById("fTotalLogs").textContent = `${s.totalFeedbackCount} Total Logs`;
-
-        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-        const textColor = isDark ? "#cbd5e1" : "#333333";
-
-        if (fKnowledgeChartInstance) fKnowledgeChartInstance.destroy();
-        if (fAssignChartInstance) fAssignChartInstance.destroy();
-
-        const ctx1 = document.getElementById("fKnowledgeChart").getContext("2d");
-        fKnowledgeChartInstance = new Chart(ctx1, {
-          type: 'doughnut',
-          data: {
-            labels: ['Best', 'Good', 'Average', 'Low'],
-            datasets: [{
-              data: [data.knowledgeDist.Best || 0, data.knowledgeDist.Good || 0, data.knowledgeDist.Average || 0, data.knowledgeDist.Low || 0],
-              backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
-              borderWidth: 2,
-              borderColor: isDark ? '#191c24' : '#ffffff'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'bottom', labels: { color: textColor, font: { size: 11, weight: 'bold' } } }
-            }
-          }
-        });
-
-        const ctx2 = document.getElementById("fAssignmentChart").getContext("2d");
-        fAssignChartInstance = new Chart(ctx2, {
-          type: 'bar',
-          data: {
-            labels: ['Completed', 'In Progress', 'Not Started'],
-            datasets: [{
-              data: [data.assignmentDist.Completed || 0, data.assignmentDist.InProgress || 0, data.assignmentDist.NotStarted || 0],
-              backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-              borderRadius: 4
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { ticks: { color: textColor }, grid: { display: false } },
-              y: { ticks: { color: textColor, stepSize: 1 }, grid: { color: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" } }
-            }
-          }
-        });
-
-        // Feeds
-        const evalsBody = document.getElementById("fRecentEvals");
-        evalsBody.innerHTML = data.recentEvaluations.map(e => `
-          <div style="background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-              <strong>${e.studentName} (${e.application})</strong>
-              <span class="badge ${e.applicationKnowledge === 'Best' ? 'badge-knowledge-best' : 'badge-knowledge-good'}">${e.applicationKnowledge} Knowledge</span>
-            </div>
-            <div style="font-size:11px; color:var(--text); font-style:italic;">"${e.overallFeedback}"</div>
-          </div>
-        `).join('');
-
-        const reviewsBody = document.getElementById("fRecentReviews");
-        const allReviews = [
-          ...data.recentFacultyFeedback.map(f => ({ ...f, type: 'Faculty' })),
-          ...data.recentMentorFeedback.map(m => ({ ...m, type: 'Mentor' }))
-        ];
-        reviewsBody.innerHTML = allReviews.map(r => `
-          <div style="background:var(--surface-muted); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
-              <strong>${r.studentName} (${r.application})</strong>
-              <span class="badge badge-completed">${r.type}: ★ ${r.facultyRating || r.mentorRating}/5</span>
-            </div>
-            <div style="font-size:11px; color:var(--text); font-style:italic;">"${r.comments || 'Satisfactory'}"</div>
-          </div>
-        `).join('');
-
-      } catch (err) {
-        console.error("Error loading feedback dashboard:", err);
-      }
-    }
-
-    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
   </script>
 </body>
 </html>

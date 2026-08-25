@@ -3,74 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>i-SMS | Student Feedback (Sheet 2)</title>
+  <title>i-SMS | Feedback Workspace</title>
   <script src="theme-bootstrap.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <style>
-    .sheet-section {
-      margin-bottom: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-    }
-    .sheet-header-title {
-      background: var(--surface-muted);
-      padding: 10px 14px;
-      font-weight: 900;
-      font-size: 11px;
-      letter-spacing: 0.8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-    }
-    .sheet-tag-left {
-      color: var(--text-muted);
-      font-weight: 700;
-      margin-right: 8px;
-    }
-    .sheet-tag-right {
-      color: var(--primary);
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-    .sheet-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-    }
-    .sheet-table th, .sheet-table td {
-      border: 1px solid var(--border);
-      padding: 6px 8px;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .sheet-table th {
-      background: var(--surface-muted);
-      font-weight: 800;
-      color: var(--heading);
-      text-transform: uppercase;
-      font-size: 10px;
-    }
-  </style>
 </head>
 <body>
   <div class="layout-root">
-    <!-- Sidebar (Only 3 Pages) -->
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="sms-logo-wrap">
-          <div class="sms-text-wrap">
-            <span class="sms-logo-text">i-SMS</span>
-          </div>
-          <div class="sms-dv-badge">
-            <span class="sms-dv-by">by</span>
-            <img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img" />
-          </div>
+          <div class="sms-text-wrap"><span class="sms-logo-text">i-SMS</span></div>
+          <div class="sms-dv-badge"><span class="sms-dv-by">by</span><img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img"></div>
         </div>
       </div>
       <nav class="sidebar-nav">
@@ -83,29 +29,17 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="main-content">
-      <!-- Topbar -->
       <header class="topbar">
         <div class="topbar-title">
-          <h1>Student Feedback (Sheet 2)</h1>
-          <p>360° Feedback Triad: Faculty Feedback, Mentor Feedback, and Mentor to Student Feedback.</p>
+          <h1>Feedback Workspace</h1>
+          <p>Manage the 360-degree triad: student-to-faculty, student-to-mentor, and mentor-to-student evaluation.</p>
         </div>
         <div class="topbar-actions">
           <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
             <span class="theme-toggle__stack" aria-hidden="true">
-              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                  <circle cx="12" cy="12" r="4.5"></circle>
-                  <path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
-                </svg>
-              </span>
-              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                  <circle cx="12" cy="12" r="4.5"></circle>
-                  <path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path>
-                </svg>
-              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg></span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg></span>
             </span>
             <span class="theme-toggle__label" data-theme-label>Light</span>
           </button>
@@ -113,311 +47,111 @@
         </div>
       </header>
 
-      <!-- Page Content -->
       <main class="page-container">
-        <!-- Section 1: Student to Give Faculty Feedback -->
-        <div class="sheet-section">
-          <div class="sheet-header-title">
-            <div>
-              <span class="sheet-tag-left">STUDENT TO GIVE</span>
-              <span class="sheet-tag-right">FACULTY FEEDBACK</span>
-            </div>
-            <button class="btn-primary" id="btnAddFacultyRow" style="padding:4px 10px; font-size:10px; border-radius:var(--radius-sm); cursor:pointer;">
-              + Add Faculty Feedback
-            </button>
+        <section class="page-toolbar">
+          <div class="section-title">
+            <h2>Feedback Triad</h2>
+            <p>Fast entry forms and recent records, not spreadsheet rows.</p>
           </div>
-          <div class="table-responsive">
-            <table class="sheet-table">
-              <thead>
-                <tr>
-                  <th>STU NAME</th>
-                  <th>LMS ID</th>
-                  <th>COURSE</th>
-                  <th>BATCH</th>
-                  <th>CALL DATE</th>
-                  <th>CONNECTION STATUS</th>
-                  <th>FEEDBACK TYPE</th>
-                  <th>APPLICATION</th>
-                  <th>SESSION</th>
-                  <th>FACULTY FEED BACK</th>
-                  <th>CLASS TIMING</th>
-                  <th>MATERIAL</th>
-                  <th>CLASS SPEED</th>
-                  <th>OVERALL CLASS SATISFACTION</th>
-                  <th>OVERALL COMMENTS</th>
-                </tr>
-              </thead>
-              <tbody id="facultyFeedbackBody">
-                <tr><td colspan="15">Loading Faculty Feedback...</td></tr>
-              </tbody>
-            </table>
+          <div class="toolbar-group">
+            <select class="filter-select" id="studentFilter"><option value="All">All students</option></select>
+            <select class="filter-select" id="applicationFilter"><option value="All">All applications</option></select>
           </div>
-        </div>
+        </section>
 
-        <!-- Section 2: Student to Give Mentor Feedback -->
-        <div class="sheet-section">
-          <div class="sheet-header-title">
-            <div>
-              <span class="sheet-tag-left">STUDENT TO GIVE</span>
-              <span class="sheet-tag-right">MENTOR FEEDBACK</span>
-            </div>
-            <button class="btn-primary" id="btnAddMentorRow" style="padding:4px 10px; font-size:10px; border-radius:var(--radius-sm); background:#2563eb; border-color:#2563eb; cursor:pointer;">
-              + Add Mentor Feedback
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="sheet-table">
-              <thead>
-                <tr>
-                  <th>STU NAME</th>
-                  <th>LMS ID</th>
-                  <th>COURSE</th>
-                  <th>BATCH</th>
-                  <th>CALL DATE</th>
-                  <th>CONNECTION STATUS</th>
-                  <th>FEEDBACK TYPE</th>
-                  <th>APPLICATION</th>
-                  <th>SESSION</th>
-                  <th>MENTOR BACK</th>
-                  <th>DOUBT CLEARING SUPPORT</th>
-                  <th>BEHAVIOUR</th>
-                  <th>ATTENTION</th>
-                  <th>OVERALL CLASS SATISFACTION</th>
-                  <th>OVERALL COMMENTS</th>
-                </tr>
-              </thead>
-              <tbody id="mentorFeedbackBody">
-                <tr><td colspan="15">Loading Mentor Feedback...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <section class="metric-grid" id="feedbackMetrics"></section>
 
-        <!-- Section 3: Mentor to Give Student Feedback -->
-        <div class="sheet-section">
-          <div class="sheet-header-title">
-            <div>
-              <span class="sheet-tag-left">MENTOR TO GIVE</span>
-              <span class="sheet-tag-right">STUDENT FEEDBACK</span>
+        <section class="card feedback-tabs-card">
+          <div class="page-toolbar" style="margin-bottom:14px;">
+            <div class="tablist feedback-tablist" style="margin:0;">
+              <button class="tab is-active" data-feedback-tab="faculty">Faculty Feedback</button>
+              <button class="tab" data-feedback-tab="mentor">Mentor Feedback</button>
+              <button class="tab" data-feedback-tab="evaluation">Student Evaluation</button>
             </div>
-            <button class="btn-primary" id="btnAddEvalRow" style="padding:4px 10px; font-size:10px; border-radius:var(--radius-sm); background:#059669; border-color:#059669; cursor:pointer;">
-              + Add Student Evaluation
-            </button>
+            <button class="btn-primary btn-sm" id="activeAddBtn">Add Record</button>
           </div>
-          <div class="table-responsive">
-            <table class="sheet-table">
+
+          <div class="card-head">
+            <div>
+              <h3 id="activeTitle">Faculty Feedback</h3>
+              <p id="activeDescription">Student rates class delivery, pace, material, and satisfaction.</p>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="border:0;">
+            <table class="compact-table feedback-list-table">
               <thead>
-                <tr>
-                  <th>STU NAME</th>
-                  <th>LMS ID</th>
-                  <th>COURSE</th>
-                  <th>BATCH</th>
-                  <th>CALL DATE</th>
-                  <th>CONNECTION STATUS</th>
-                  <th>FEEDBACK TYPE</th>
-                  <th>APPLICATION</th>
-                  <th>ASSIGNMENT COMPLETE %</th>
-                  <th>APPLICATION KNOWLEDGE</th>
-                  <th>OVERALL FEEDBACK</th>
-                </tr>
+                <tr id="feedbackHead"></tr>
               </thead>
-              <tbody id="mentorEvalBody">
-                <tr><td colspan="11">Loading Mentor Evaluation Log...</td></tr>
-              </tbody>
+              <tbody id="feedbackBody"></tbody>
             </table>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   </div>
 
-  <!-- Modal 1: Add Faculty Feedback -->
-  <div class="modal-backdrop" id="facModal">
-    <div class="modal-overlay" id="facOverlay"></div>
-    <div class="modal-container" style="max-width: 560px;">
-      <div class="modal-header">
-        <h3 class="modal-title">STUDENT TO GIVE FACULTY FEEDBACK</h3>
-        <button class="modal-close" id="closeFacModal">&times;</button>
-      </div>
-      <form id="facForm">
-        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label for="facStu">Student *</label>
-            <select id="facStu" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <label for="facDate">Call Date *</label>
-            <input type="date" id="facDate" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label for="facStatus">Connection Status *</label>
-            <select id="facStatus" class="form-control">
-              <option value="YES">YES</option>
-              <option value="NO">NO</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="facApp">Application *</label>
-            <select id="facApp" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <label for="facSession">Session *</label>
-            <input type="text" id="facSession" class="form-control" value="SESSION-1" required>
-          </div>
-          <div class="form-group">
-            <label for="facScore">Faculty Feed Back (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="facScore" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="facTiming">Class Timing (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="facTiming" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="facMat">Material (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="facMat" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="facSpeed">Class Speed (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="facSpeed" class="form-control" value="4" required>
-          </div>
-          <div class="form-group">
-            <label for="facSat">Overall Satisfaction (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="facSat" class="form-control" value="5" required>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label for="facComments">Overall Comments</label>
-            <input type="text" id="facComments" class="form-control" placeholder="Comments...">
-          </div>
+  <div class="modal-backdrop" id="facultyModal">
+    <div class="modal-overlay" data-close="facultyModal"></div>
+    <div class="modal-container">
+      <div class="modal-header"><h3 class="modal-title">Add Faculty Feedback</h3><button class="modal-close" data-close="facultyModal">&times;</button></div>
+      <form id="facultyForm">
+        <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Student</label><select id="facStudent" class="form-control" required></select></div>
+          <div class="form-group"><label>Call Date</label><input id="facDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Connection</label><select id="facStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
+          <div class="form-group"><label>Application</label><select id="facApp" class="form-control" required></select></div>
+          <div class="form-group"><label>Session</label><input id="facSession" class="form-control" value="SESSION-1" required></div>
+          <div class="form-group"><label>Faculty Rating</label><input id="facRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Class Timing</label><input id="facTiming" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Material</label><input id="facMaterial" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Class Speed</label><input id="facSpeed" type="number" min="0" max="5" step="0.1" class="form-control" value="4"></div>
+          <div class="form-group"><label>Satisfaction</label><input id="facSatisfaction" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Comments</label><textarea id="facComments" class="form-control" rows="2"></textarea></div>
         </div>
-        <div class="modal-foot">
-          <button type="button" class="btn-secondary" id="cancelFacBtn">Cancel</button>
-          <button type="submit" class="btn-primary">Save Feedback</button>
-        </div>
+        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="facultyModal">Cancel</button><button class="btn-primary" type="submit">Save</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Modal 2: Add Mentor Feedback -->
-  <div class="modal-backdrop" id="menModal">
-    <div class="modal-overlay" id="menOverlay"></div>
-    <div class="modal-container" style="max-width: 560px;">
-      <div class="modal-header">
-        <h3 class="modal-title">STUDENT TO GIVE MENTOR FEEDBACK</h3>
-        <button class="modal-close" id="closeMenModal">&times;</button>
-      </div>
-      <form id="menForm">
-        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label for="menStu">Student *</label>
-            <select id="menStu" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <label for="menDate">Call Date *</label>
-            <input type="date" id="menDate" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label for="menStatus">Connection Status *</label>
-            <select id="menStatus" class="form-control">
-              <option value="YES">YES</option>
-              <option value="NO">NO</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="menApp">Application *</label>
-            <select id="menApp" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <label for="menSession">Session *</label>
-            <input type="text" id="menSession" class="form-control" value="SESSION-1" required>
-          </div>
-          <div class="form-group">
-            <label for="menScore">Mentor Back (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="menScore" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="menDoubt">Doubt Clearing (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="menDoubt" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="menBehav">Behaviour (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="menBehav" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="menAtt">Attention (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="menAtt" class="form-control" value="5" required>
-          </div>
-          <div class="form-group">
-            <label for="menSat">Overall Satisfaction (0-5) *</label>
-            <input type="number" step="0.1" min="0" max="5" id="menSat" class="form-control" value="5" required>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label for="menComments">Overall Comments</label>
-            <input type="text" id="menComments" class="form-control" placeholder="Comments...">
-          </div>
+  <div class="modal-backdrop" id="mentorModal">
+    <div class="modal-overlay" data-close="mentorModal"></div>
+    <div class="modal-container">
+      <div class="modal-header"><h3 class="modal-title">Add Mentor Feedback</h3><button class="modal-close" data-close="mentorModal">&times;</button></div>
+      <form id="mentorForm">
+        <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Student</label><select id="menStudent" class="form-control" required></select></div>
+          <div class="form-group"><label>Call Date</label><input id="menDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Connection</label><select id="menStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
+          <div class="form-group"><label>Application</label><select id="menApp" class="form-control" required></select></div>
+          <div class="form-group"><label>Session</label><input id="menSession" class="form-control" value="SESSION-1" required></div>
+          <div class="form-group"><label>Mentor Rating</label><input id="menRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Doubt Support</label><input id="menDoubt" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Behaviour</label><input id="menBehaviour" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Attention</label><input id="menAttention" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Satisfaction</label><input id="menSatisfaction" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Comments</label><textarea id="menComments" class="form-control" rows="2"></textarea></div>
         </div>
-        <div class="modal-foot">
-          <button type="button" class="btn-secondary" id="cancelMenBtn">Cancel</button>
-          <button type="submit" class="btn-primary" style="background:#2563eb; border-color:#2563eb;">Save Feedback</button>
-        </div>
+        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="mentorModal">Cancel</button><button class="btn-primary" type="submit" style="background:#2563eb; border-color:#2563eb;">Save</button></div>
       </form>
     </div>
   </div>
 
-  <!-- Modal 3: Add Mentor to Student Evaluation -->
   <div class="modal-backdrop" id="evalModal">
-    <div class="modal-overlay" id="evalOverlay"></div>
-    <div class="modal-container" style="max-width: 560px;">
-      <div class="modal-header">
-        <h3 class="modal-title">MENTOR TO GIVE STUDENT FEEDBACK</h3>
-        <button class="modal-close" id="closeEvalModal">&times;</button>
-      </div>
+    <div class="modal-overlay" data-close="evalModal"></div>
+    <div class="modal-container">
+      <div class="modal-header"><h3 class="modal-title">Add Student Evaluation</h3><button class="modal-close" data-close="evalModal">&times;</button></div>
       <form id="evalForm">
-        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label for="evalStu">Student *</label>
-            <select id="evalStu" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <label for="evalDate">Call Date *</label>
-            <input type="date" id="evalDate" class="form-control" required>
-          </div>
-          <div class="form-group">
-            <label for="evalStatus">Connection Status *</label>
-            <select id="evalStatus" class="form-control">
-              <option value="YES">YES</option>
-              <option value="NO">NO</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="evalApp">Application *</label>
-            <select id="evalApp" class="form-control" required></select>
-          </div>
-          <div class="form-group">
-            <label for="evalAssign">Assignment Complete % *</label>
-            <select id="evalAssign" class="form-control" required>
-              <option value="COMPLETED">COMPLETED</option>
-              <option value="IN PROGRESS">IN PROGRESS</option>
-              <option value="NOT STARTED">NOT STARTED</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="evalKnowledge">Application Knowledge *</label>
-            <select id="evalKnowledge" class="form-control" required>
-              <option value="BEST">BEST</option>
-              <option value="GOOD" selected>GOOD</option>
-              <option value="AVERAGE">AVERAGE</option>
-              <option value="LOW">LOW</option>
-            </select>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label for="evalRemarks">Overall Feedback *</label>
-            <textarea id="evalRemarks" class="form-control" rows="2" required></textarea>
-          </div>
+        <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Student</label><select id="evalStudent" class="form-control" required></select></div>
+          <div class="form-group"><label>Call Date</label><input id="evalDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Connection</label><select id="evalStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
+          <div class="form-group"><label>Application</label><select id="evalApp" class="form-control" required></select></div>
+          <div class="form-group"><label>Assignment Status</label><select id="evalAssignment" class="form-control"><option>COMPLETED</option><option>IN PROGRESS</option><option>NOT STARTED</option></select></div>
+          <div class="form-group"><label>Knowledge</label><select id="evalKnowledge" class="form-control"><option>BEST</option><option selected>GOOD</option><option>AVERAGE</option><option>LOW</option></select></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Overall Feedback</label><textarea id="evalComments" class="form-control" rows="3" required></textarea></div>
         </div>
-        <div class="modal-foot">
-          <button type="button" class="btn-secondary" id="cancelEvalBtn">Cancel</button>
-          <button type="submit" class="btn-primary" style="background:#059669; border-color:#059669;">Save Feedback</button>
-        </div>
+        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="evalModal">Cancel</button><button class="btn-primary" type="submit" style="background:#059669; border-color:#059669;">Save</button></div>
       </form>
     </div>
   </div>
@@ -425,180 +159,210 @@
   <script type="module">
     import { apiFetch } from './app.js';
 
-    let allStudents = [];
-    let allModules = [];
+    let students = [];
+    let modules = [];
+    let faculty = [];
+    let mentor = [];
+    let evals = [];
+    let activeTab = "faculty";
 
-    async function init() {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById("facDate").value = today;
-      document.getElementById("menDate").value = today;
-      document.getElementById("evalDate").value = today;
-
-      allStudents = await apiFetch('/api/students');
-      allModules = await apiFetch('/api/modules');
-
-      const stuOptions = allStudents.map(s => `<option value="${s.id}">${s.name} (${s.id}) - ${s.batch}</option>`).join('');
-      document.getElementById("facStu").innerHTML = stuOptions;
-      document.getElementById("menStu").innerHTML = stuOptions;
-      document.getElementById("evalStu").innerHTML = stuOptions;
-
-      const modOptions = allModules.map(m => `<option value="${m}">${m}</option>`).join('');
-      document.getElementById("facApp").innerHTML = modOptions;
-      document.getElementById("menApp").innerHTML = modOptions;
-      document.getElementById("evalApp").innerHTML = modOptions;
-
-      await loadAllSections();
-    }
-
-    async function loadAllSections() {
-      const facData = await apiFetch('/api/feedback?type=Faculty');
-      const menData = await apiFetch('/api/feedback?type=Mentor');
-      const evalData = await apiFetch('/api/feedback?type=Evaluation');
-
-      // Section 1
-      const facBody = document.getElementById("facultyFeedbackBody");
-      facBody.innerHTML = facData.length ? facData.map(f => `
-        <tr>
-          <td style="font-weight:800; color:var(--heading);">${f.studentName}</td>
-          <td><code>${f.studentId}</code></td>
-          <td>${f.course}</td>
-          <td>${f.batch}</td>
-          <td>${f.callDate}</td>
-          <td><span class="badge ${f.connectionStatus.toUpperCase() === 'YES' ? 'badge-completed' : 'badge-risk'}">${f.connectionStatus.toUpperCase()}</span></td>
-          <td>${f.feedbackType.toUpperCase()}</td>
-          <td style="font-weight:700;">${f.application}</td>
-          <td>${f.session}</td>
-          <td><strong>${f.facultyRating}</strong></td>
-          <td>${f.classTiming}</td>
-          <td>${f.material}</td>
-          <td>${f.classSpeed}</td>
-          <td style="font-weight:800; color:var(--primary);">${f.overallSatisfaction}</td>
-          <td style="text-align:left;">${f.comments || '--'}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="15">No Faculty Feedback records</td></tr>';
-
-      // Section 2
-      const menBody = document.getElementById("mentorFeedbackBody");
-      menBody.innerHTML = menData.length ? menData.map(m => `
-        <tr>
-          <td style="font-weight:800; color:var(--heading);">${m.studentName}</td>
-          <td><code>${m.studentId}</code></td>
-          <td>${m.course}</td>
-          <td>${m.batch}</td>
-          <td>${m.callDate}</td>
-          <td><span class="badge ${m.connectionStatus.toUpperCase() === 'YES' ? 'badge-completed' : 'badge-risk'}">${m.connectionStatus.toUpperCase()}</span></td>
-          <td>${m.feedbackType.toUpperCase()}</td>
-          <td style="font-weight:700;">${m.application}</td>
-          <td>${m.session}</td>
-          <td><strong>${m.mentorRating}</strong></td>
-          <td>${m.doubtClearing}</td>
-          <td>${m.behaviour}</td>
-          <td>${m.attention}</td>
-          <td style="font-weight:800; color:var(--primary);">${m.overallSatisfaction}</td>
-          <td style="text-align:left;">${m.comments || '--'}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="15">No Mentor Feedback records</td></tr>';
-
-      // Section 3
-      const evalBody = document.getElementById("mentorEvalBody");
-      evalBody.innerHTML = evalData.length ? evalData.map(e => `
-        <tr>
-          <td style="font-weight:800; color:var(--heading);">${e.studentName}</td>
-          <td><code>${e.studentId}</code></td>
-          <td>${e.course}</td>
-          <td>${e.batch}</td>
-          <td>${e.callDate}</td>
-          <td><span class="badge ${e.connectionStatus.toUpperCase() === 'YES' ? 'badge-completed' : 'badge-risk'}">${e.connectionStatus.toUpperCase()}</span></td>
-          <td>${e.feedbackType.toUpperCase()}</td>
-          <td style="font-weight:700;">${e.application}</td>
-          <td><strong>${e.assignmentStatus.toUpperCase()}</strong></td>
-          <td><span class="badge ${e.applicationKnowledge.toUpperCase() === 'BEST' ? 'badge-knowledge-best' : (e.applicationKnowledge.toUpperCase() === 'GOOD' ? 'badge-knowledge-good' : 'badge-knowledge-low')}"><strong>${e.applicationKnowledge.toUpperCase()}</strong></span></td>
-          <td style="text-align:left;">${e.overallFeedback || '--'}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="11">No Student Feedback evaluation records</td></tr>';
-    }
-
-    // Modals Wiring
-    const setupModal = (modalId, overlayId, closeId, cancelId) => {
-      const modal = document.getElementById(modalId);
-      const close = () => modal.classList.remove("is-open");
-      document.getElementById(closeId).addEventListener("click", close);
-      document.getElementById(overlayId).addEventListener("click", close);
-      document.getElementById(cancelId).addEventListener("click", close);
-      return { open: () => modal.classList.add("is-open"), close };
+    const tabConfig = {
+      faculty: {
+        title: "Faculty Feedback",
+        description: "Student rates class delivery, pace, material, and satisfaction.",
+        modal: "facultyModal",
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Faculty", "Timing", "Material", "Speed", "Satisfaction", "Comments"]
+      },
+      mentor: {
+        title: "Mentor Feedback",
+        description: "Student rates mentoring, doubt support, behaviour, and attention.",
+        modal: "mentorModal",
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Mentor", "Doubt Support", "Behaviour", "Attention", "Satisfaction", "Comments"]
+      },
+      evaluation: {
+        title: "Student Evaluation",
+        description: "Mentor records assignment status, knowledge level, and call note.",
+        modal: "evalModal",
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Assignment Status", "Knowledge", "Overall Feedback"]
+      }
     };
 
-    const facModalCtrl = setupModal("facModal", "facOverlay", "closeFacModal", "cancelFacBtn");
-    const menModalCtrl = setupModal("menModal", "menOverlay", "closeMenModal", "cancelMenBtn");
-    const evalModalCtrl = setupModal("evalModal", "evalOverlay", "closeEvalModal", "cancelEvalBtn");
+    const el = id => document.getElementById(id);
+    const today = () => new Date().toISOString().split("T")[0];
+    const closeModal = id => el(id).classList.remove("is-open");
+    const openModal = id => el(id).classList.add("is-open");
+    const up = value => String(value || "").toUpperCase();
+    const matchesFilters = item => {
+      const student = el("studentFilter").value;
+      const application = el("applicationFilter").value;
+      return (student === "All" || item.studentId === student) && (application === "All" || up(item.application) === up(application));
+    };
 
-    document.getElementById("btnAddFacultyRow").addEventListener("click", facModalCtrl.open);
-    document.getElementById("btnAddMentorRow").addEventListener("click", menModalCtrl.open);
-    document.getElementById("btnAddEvalRow").addEventListener("click", evalModalCtrl.open);
+    function renderMetrics() {
+      const all = [...faculty, ...mentor, ...evals].filter(matchesFilters);
+      const connected = all.filter(i => up(i.connectionStatus) === "YES").length;
+      const avgRating = arr => arr.length ? (arr.reduce((a, b) => a + Number(b.facultyRating || b.mentorRating || 0), 0) / arr.length).toFixed(1) : "0.0";
+      el("feedbackMetrics").innerHTML = [
+        ["Total Logs", all.length, "Across the selected filters"],
+        ["Reachability", `${all.length ? Math.round((connected / all.length) * 100) : 0}%`, "Connected calls"],
+        ["Faculty Rating", `${avgRating(faculty.filter(matchesFilters))} / 5`, "Average class experience"],
+        ["Mentor Rating", `${avgRating(mentor.filter(matchesFilters))} / 5`, "Average support experience"]
+      ].map(m => `<div class="metric-card"><p class="metric-label">${m[0]}</p><p class="metric-value">${m[1]}</p><p class="metric-note">${m[2]}</p></div>`).join("");
+    }
 
-    document.getElementById("facForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      await apiFetch('/api/feedback/faculty', {
-        method: 'POST',
-        body: JSON.stringify({
-          studentId: document.getElementById("facStu").value,
-          callDate: document.getElementById("facDate").value,
-          connectionStatus: document.getElementById("facStatus").value,
-          application: document.getElementById("facApp").value,
-          session: document.getElementById("facSession").value,
-          facultyRating: document.getElementById("facScore").value,
-          classTiming: document.getElementById("facTiming").value,
-          material: document.getElementById("facMat").value,
-          classSpeed: document.getElementById("facSpeed").value,
-          overallSatisfaction: document.getElementById("facSat").value,
-          comments: document.getElementById("facComments").value
-        })
+    function activeRows() {
+      if (activeTab === "faculty") return faculty.filter(matchesFilters);
+      if (activeTab === "mentor") return mentor.filter(matchesFilters);
+      return evals.filter(matchesFilters);
+    }
+
+    function connectionBadge(value) {
+      return `<span class="badge badge-${up(value) === "YES" ? "completed" : "risk"}">${up(value)}</span>`;
+    }
+
+    function renderFacultyRow(item) {
+      return `
+        <tr>
+          <td><strong>${item.studentName}</strong></td>
+          <td><code>${item.studentId}</code></td>
+          <td>${item.course}</td>
+          <td>${item.batch}</td>
+          <td>${item.callDate}</td>
+          <td>${connectionBadge(item.connectionStatus)}</td>
+          <td>${item.application}</td>
+          <td>${item.session}</td>
+          <td><strong>${item.facultyRating} / 5</strong></td>
+          <td>${item.classTiming}</td>
+          <td>${item.material}</td>
+          <td>${item.classSpeed}</td>
+          <td><strong>${item.overallSatisfaction}</strong></td>
+          <td class="feedback-comment-cell">${item.comments || "--"}</td>
+        </tr>
+      `;
+    }
+
+    function renderMentorRow(item) {
+      return `
+        <tr>
+          <td><strong>${item.studentName}</strong></td>
+          <td><code>${item.studentId}</code></td>
+          <td>${item.course}</td>
+          <td>${item.batch}</td>
+          <td>${item.callDate}</td>
+          <td>${connectionBadge(item.connectionStatus)}</td>
+          <td>${item.application}</td>
+          <td>${item.session}</td>
+          <td><strong>${item.mentorRating} / 5</strong></td>
+          <td>${item.doubtClearing}</td>
+          <td>${item.behaviour}</td>
+          <td>${item.attention}</td>
+          <td><strong>${item.overallSatisfaction}</strong></td>
+          <td class="feedback-comment-cell">${item.comments || "--"}</td>
+        </tr>
+      `;
+    }
+
+    function renderEvaluationRow(item) {
+      const knowledgeClass = up(item.applicationKnowledge) === "LOW" ? "knowledge-low" : up(item.applicationKnowledge) === "AVERAGE" ? "knowledge-avg" : up(item.applicationKnowledge) === "BEST" ? "knowledge-best" : "knowledge-good";
+      return `
+        <tr>
+          <td><strong>${item.studentName}</strong></td>
+          <td><code>${item.studentId}</code></td>
+          <td>${item.course}</td>
+          <td>${item.batch}</td>
+          <td>${item.callDate}</td>
+          <td>${connectionBadge(item.connectionStatus)}</td>
+          <td>${item.application}</td>
+          <td><strong>${up(item.assignmentStatus)}</strong></td>
+          <td><span class="badge badge-${knowledgeClass}">${up(item.applicationKnowledge)}</span></td>
+          <td class="feedback-comment-cell">${item.overallFeedback || "--"}</td>
+        </tr>
+      `;
+    }
+
+    function renderActiveTab() {
+      const config = tabConfig[activeTab];
+      const rows = activeRows();
+      el("activeTitle").textContent = config.title;
+      el("activeDescription").textContent = config.description;
+      el("activeAddBtn").textContent = `Add ${config.title}`;
+      el("feedbackHead").innerHTML = config.headers.map(header => `<th>${header}</th>`).join("");
+      el("feedbackBody").innerHTML = rows.length ? rows.map(item => {
+        if (activeTab === "faculty") return renderFacultyRow(item);
+        if (activeTab === "mentor") return renderMentorRow(item);
+        return renderEvaluationRow(item);
+      }).join("") : `<tr><td colspan="${config.headers.length}"><div class="empty-state">No ${config.title.toLowerCase()} records match the current filters.</div></td></tr>`;
+
+      document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
+        btn.classList.toggle("is-active", btn.dataset.feedbackTab === activeTab);
       });
-      facModalCtrl.close();
-      loadAllSections();
+      renderMetrics();
+    }
+
+    async function loadFeedback() {
+      faculty = await apiFetch('/api/feedback?type=Faculty');
+      mentor = await apiFetch('/api/feedback?type=Mentor');
+      evals = await apiFetch('/api/feedback?type=Evaluation');
+      renderActiveTab();
+    }
+
+    async function init() {
+      students = await apiFetch('/api/students');
+      modules = await apiFetch('/api/modules');
+      const studentOptions = students.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join("");
+      const moduleOptions = modules.map(m => `<option value="${m}">${m}</option>`).join("");
+      ["facStudent", "menStudent", "evalStudent"].forEach(id => el(id).innerHTML = studentOptions);
+      ["facApp", "menApp", "evalApp"].forEach(id => el(id).innerHTML = moduleOptions);
+      el("studentFilter").innerHTML = `<option value="All">All students</option>${studentOptions}`;
+      el("applicationFilter").innerHTML = `<option value="All">All applications</option>${moduleOptions}`;
+      ["facDate", "menDate", "evalDate"].forEach(id => el(id).value = today());
+      document.querySelectorAll("[data-close]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.close)));
+      document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeTab = btn.dataset.feedbackTab;
+          renderActiveTab();
+        });
+      });
+      el("activeAddBtn").addEventListener("click", () => openModal(tabConfig[activeTab].modal));
+      el("studentFilter").addEventListener("change", renderActiveTab);
+      el("applicationFilter").addEventListener("change", renderActiveTab);
+      await loadFeedback();
+    }
+
+    el("facultyForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      await apiFetch('/api/feedback/faculty', { method: "POST", body: JSON.stringify({
+        studentId: el("facStudent").value, callDate: el("facDate").value, connectionStatus: el("facStatus").value, application: el("facApp").value, session: el("facSession").value,
+        facultyRating: el("facRating").value, classTiming: el("facTiming").value, material: el("facMaterial").value, classSpeed: el("facSpeed").value,
+        overallSatisfaction: el("facSatisfaction").value, comments: el("facComments").value
+      }) });
+      closeModal("facultyModal");
+      await loadFeedback();
     });
 
-    document.getElementById("menForm").addEventListener("submit", async (e) => {
+    el("mentorForm").addEventListener("submit", async e => {
       e.preventDefault();
-      await apiFetch('/api/feedback/mentor', {
-        method: 'POST',
-        body: JSON.stringify({
-          studentId: document.getElementById("menStu").value,
-          callDate: document.getElementById("menDate").value,
-          connectionStatus: document.getElementById("menStatus").value,
-          application: document.getElementById("menApp").value,
-          session: document.getElementById("menSession").value,
-          mentorRating: document.getElementById("menScore").value,
-          doubtClearing: document.getElementById("menDoubt").value,
-          behaviour: document.getElementById("menBehav").value,
-          attention: document.getElementById("menAtt").value,
-          overallSatisfaction: document.getElementById("menSat").value,
-          comments: document.getElementById("menComments").value
-        })
-      });
-      menModalCtrl.close();
-      loadAllSections();
+      await apiFetch('/api/feedback/mentor', { method: "POST", body: JSON.stringify({
+        studentId: el("menStudent").value, callDate: el("menDate").value, connectionStatus: el("menStatus").value, application: el("menApp").value, session: el("menSession").value,
+        mentorRating: el("menRating").value, doubtClearing: el("menDoubt").value, behaviour: el("menBehaviour").value, attention: el("menAttention").value,
+        overallSatisfaction: el("menSatisfaction").value, comments: el("menComments").value
+      }) });
+      closeModal("mentorModal");
+      await loadFeedback();
     });
 
-    document.getElementById("evalForm").addEventListener("submit", async (e) => {
+    el("evalForm").addEventListener("submit", async e => {
       e.preventDefault();
-      await apiFetch('/api/feedback/mentor-evaluation', {
-        method: 'POST',
-        body: JSON.stringify({
-          studentId: document.getElementById("evalStu").value,
-          callDate: document.getElementById("evalDate").value,
-          connectionStatus: document.getElementById("evalStatus").value,
-          application: document.getElementById("evalApp").value,
-          assignmentStatus: document.getElementById("evalAssign").value,
-          applicationKnowledge: document.getElementById("evalKnowledge").value,
-          overallFeedback: document.getElementById("evalRemarks").value
-        })
-      });
-      evalModalCtrl.close();
-      loadAllSections();
+      await apiFetch('/api/feedback/mentor-evaluation', { method: "POST", body: JSON.stringify({
+        studentId: el("evalStudent").value, callDate: el("evalDate").value, connectionStatus: el("evalStatus").value, application: el("evalApp").value,
+        assignmentStatus: el("evalAssignment").value, applicationKnowledge: el("evalKnowledge").value, overallFeedback: el("evalComments").value
+      }) });
+      closeModal("evalModal");
+      await loadFeedback();
     });
 
-    if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
   </script>
 </body>
 </html>
