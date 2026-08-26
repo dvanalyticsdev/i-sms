@@ -106,6 +106,8 @@
           <div class="form-group"><label>Session</label><input id="facSession" class="form-control" value="SESSION-1" required></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Faculty Name</label><select id="facFaculty" class="form-control" required></select></div>
           <div class="form-group"><label>Faculty Rating</label><input id="facRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Assignment Rating</label><input id="facAssignmentRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Video Uploaded</label><select id="facVideoUploaded" class="form-control"><option value="On Time">On Time</option><option value="Delay">Delay</option></select></div>
           <div class="form-group"><label>Class Timing</label><input id="facTiming" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Material</label><input id="facMaterial" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Class Speed</label><input id="facSpeed" type="number" min="0" max="5" step="0.1" class="form-control" value="4"></div>
@@ -193,7 +195,7 @@
         title: "Faculty Feedback",
         description: "Student rates class delivery, pace, material, and satisfaction.",
         modal: "facultyModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Faculty Name", "Faculty Rating", "Timing", "Material", "Speed", "Satisfaction", "Comments"]
+        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Faculty Name", "Faculty Rating", "Assignment Rating", "Video Uploaded", "Timing", "Material", "Speed", "Satisfaction", "Comments"]
       },
       mentor: {
         title: "Mentor Feedback",
@@ -266,7 +268,13 @@
     }
 
     function connectionBadge(value) {
-      return `<span class="badge badge-${up(value) === "YES" ? "completed" : "risk"}">${up(value)}</span>`;
+      const isYes = up(value) === "YES";
+      return `<span class="badge ${isYes ? "badge-completed" : "badge-risk"}">${up(value)}</span>`;
+    }
+
+    function videoBadge(value) {
+      const isDelay = String(value || "").toLowerCase().includes("delay");
+      return `<span class="badge ${isDelay ? "badge-risk" : "badge-completed"}">${isDelay ? "DELAY" : "ON TIME"}</span>`;
     }
 
     function renderFacultyRow(item) {
@@ -282,6 +290,8 @@
           <td>${item.session}</td>
           <td><strong>${item.facultyName || "Not assigned"}</strong></td>
           <td><strong>${item.facultyRating} / 5</strong></td>
+          <td><strong>${item.assignmentRating !== undefined ? item.assignmentRating : 5} / 5</strong></td>
+          <td>${videoBadge(item.videoUploaded)}</td>
           <td>${item.classTiming}</td>
           <td>${item.material}</td>
           <td>${item.classSpeed}</td>
@@ -314,7 +324,11 @@
     }
 
     function renderEvaluationRow(item) {
-      const knowledgeClass = up(item.applicationKnowledge) === "LOW" ? "knowledge-low" : up(item.applicationKnowledge) === "AVERAGE" ? "knowledge-avg" : up(item.applicationKnowledge) === "BEST" ? "knowledge-best" : "knowledge-good";
+      const k = up(item.applicationKnowledge);
+      const isGood = k === "BEST" || k === "GOOD";
+      const knowledgeClass = isGood ? "badge-completed" : "badge-risk";
+      const assignStatus = up(item.assignmentStatus);
+      const isAssignDone = assignStatus === "COMPLETED";
       return `
         <tr>
           <td><strong>${item.studentName}</strong></td>
@@ -325,8 +339,8 @@
           <td>${connectionBadge(item.connectionStatus)}</td>
           <td>${item.application}</td>
           <td><strong>${item.mentorName || "Not assigned"}</strong></td>
-          <td><strong>${up(item.assignmentStatus)}</strong></td>
-          <td><span class="badge badge-${knowledgeClass}">${up(item.applicationKnowledge)}</span></td>
+          <td><span class="badge ${isAssignDone ? "badge-completed" : "badge-risk"}">${assignStatus}</span></td>
+          <td><span class="badge ${knowledgeClass}">${k}</span></td>
           <td class="feedback-comment-cell">${item.overallFeedback || "--"}</td>
         </tr>
       `;
@@ -426,7 +440,10 @@
       await apiFetch('/api/feedback/faculty', { method: "POST", body: JSON.stringify({
         studentId: el("facStudent").value, callDate: el("facDate").value, connectionStatus: el("facStatus").value, application: el("facApp").value, session: el("facSession").value,
         facultyName: el("facFaculty").value,
-        facultyRating: el("facRating").value, classTiming: el("facTiming").value, material: el("facMaterial").value, classSpeed: el("facSpeed").value,
+        facultyRating: el("facRating").value,
+        assignmentRating: el("facAssignmentRating").value,
+        videoUploaded: el("facVideoUploaded").value,
+        classTiming: el("facTiming").value, material: el("facMaterial").value, classSpeed: el("facSpeed").value,
         overallSatisfaction: el("facSatisfaction").value, comments: el("facComments").value
       }) });
       closeModal("facultyModal");

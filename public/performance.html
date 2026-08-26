@@ -115,7 +115,7 @@
 
     function statusFor(student) {
       if (student.attendance < 75 || student.attention < 60 || student.lmsScore < 60) return { label: "Needs focus", type: "risk" };
-      if (student.dvEliteEligible || student.placementSupportEligible) return { label: "Ready", type: "placement" };
+      if (student.dvEliteEligible || student.placementSupportEligible) return { label: "Ready", type: "completed" };
       return { label: "On track", type: "completed" };
     }
 
@@ -138,9 +138,9 @@
 
     function readiness(student) {
       const items = [];
-      if (student.dvEliteEligible) items.push(badge("DV Elite", "elite"));
-      if (student.placementSupportEligible) items.push(badge("Placement", "placement"));
-      return items.length ? items.join(" ") : badge("Pending", "pending");
+      if (student.dvEliteEligible) items.push(badge("DV Elite", "completed"));
+      if (student.placementSupportEligible) items.push(badge("Placement", "completed"));
+      return items.length ? items.join(" ") : badge("Pending", "risk");
     }
 
     function renderRows() {

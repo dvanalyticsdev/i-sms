@@ -41,7 +41,8 @@ function computeModuleMetrics(m) {
   const test = Math.max(0, Math.min(100, Math.round(m.test ?? 0)));
   const penAndPaper = Math.max(0, Math.min(100, Math.round(m.penAndPaper ?? 0)));
   const mockInterview = Math.max(0, Math.min(100, Math.round(m.mockInterview ?? 0)));
-  const overallScore = Math.round((mcq + test + penAndPaper + mockInterview) / 4);
+  // Core Application LMS Pillars: MCQ, Practical Test, and Attendance %
+  const overallScore = Math.round((mcq + test + attendancePct) / 3);
 
   return {
     name: m.name,
@@ -83,17 +84,20 @@ function computeStudentAggregates(student) {
   const avgTest = modules.length ? Math.round(modules.reduce((a, b) => a + b.test, 0) / modules.length) : 0;
   const avgPenPaper = modules.length ? Math.round(modules.reduce((a, b) => a + b.penAndPaper, 0) / modules.length) : 0;
   const avgMock = modules.length ? Math.round(modules.reduce((a, b) => a + b.mockInterview, 0) / modules.length) : 0;
-  const lmsScore = Math.round((avgMcq + avgTest + avgPenPaper + avgMock) / 4);
+  
+  // Core Application LMS Score: MCQ, Practical Test, and Attendance %
+  const lmsScore = Math.round((avgMcq + avgTest + overallAttendance) / 3);
 
-  // Rule 1: DV ELITE (Scored >= 70% in SQL, Python, SAS, and ML)
+  // Dedicated Readiness & Placement Evaluations (Pen & Paper and Mock Interview)
+  // Rule 1: DV ELITE (Overall Application LMS >= 70%, SQL, Python, SAS, ML >= 70%, Pen & Paper >= 70%, Attendance >= 75%)
   const eliteModules = ["SQL", "PYTHON", "SAS", "ML"];
-  const dvEliteEligible = eliteModules.every(modName => {
+  const dvEliteEligible = overallAttendance >= 75 && avgPenPaper >= 70 && eliteModules.every(modName => {
     const mod = modules.find(m => m.name.toUpperCase() === modName);
     return mod && mod.overallScore >= 70;
   });
 
-  // Rule 2: PLACEMENT SUPPORT (Scored >= 70% in Mock Interview)
-  const placementSupportEligible = avgMock >= 70;
+  // Rule 2: PLACEMENT SUPPORT (Mock Interview >= 70%, Pen & Paper >= 70%, Attendance >= 75%)
+  const placementSupportEligible = overallAttendance >= 75 && avgMock >= 70 && avgPenPaper >= 70;
 
   // Attendance Result Tag
   let attendanceResult = "REGULAR ATTENDANCE";
@@ -130,6 +134,18 @@ function computeStudentAggregates(student) {
       practical: avgTest,
       hardpaper: avgPenPaper,
       mockInterview: avgMock
+    },
+    coreLms: {
+      mcq: avgMcq,
+      practical: avgTest,
+      attendance: overallAttendance,
+      lmsScore
+    },
+    readinessAssessments: {
+      penAndPaper: avgPenPaper,
+      mockInterview: avgMock,
+      dvEliteEligible,
+      placementSupportEligible
     },
     lmsScore,
     dvEliteEligible,
@@ -869,152 +885,52 @@ let staffMembers = [
 
 // Feedback Triad Collections based on Sheet 2 (STUDENT FEEDBACK)
 let facultyFeedbackLogs = [
-  {
-    id: "FF001",
-    studentId: "LMS1001",
-    studentName: "MR DEV",
-    course: "APIDS",
-    batch: "BATCH 202601",
-    callDate: "2026-08-25",
-    connectionStatus: "Yes",
-    feedbackType: "Faculty Feedback",
-    application: "EXCEL AI",
-    session: "SESSION-1",
-    facultyName: "Dr. Amit Verma",
-    facultyRating: 4.5,
-    classTiming: 4.0,
-    material: 4.5,
-    classSpeed: 3.5,
-    overallSatisfaction: 4.2,
-    comments: "Faculty was clear with formulas. Speed was slightly fast in intermediate lessons."
-  },
-  {
-    id: "FF002",
-    studentId: "LMS1002",
-    studentName: "Aarav Sharma",
-    course: "APIDS",
-    batch: "BATCH 202601",
-    callDate: "2026-08-24",
-    connectionStatus: "Yes",
-    feedbackType: "Faculty Feedback",
-    application: "SQL",
-    session: "SESSION-2",
-    facultyName: "Dr. Amit Verma",
-    facultyRating: 5.0,
-    classTiming: 5.0,
-    material: 5.0,
-    classSpeed: 4.8,
-    overallSatisfaction: 5.0,
-    comments: "Excellent practical query exercises and hands-on DB environment."
-  },
-  {
-    id: "FF003",
-    studentId: "LMS1005",
-    studentName: "Kabir Mehta",
-    course: "APIDS",
-    batch: "BATCH 202602",
-    callDate: "2026-08-20",
-    connectionStatus: "Yes",
-    feedbackType: "Faculty Feedback",
-    application: "PYTHON",
-    session: "SESSION-1",
-    facultyName: "Prof. S. R. Sen",
-    facultyRating: 3.5,
-    classTiming: 4.0,
-    material: 3.0,
-    classSpeed: 2.5,
-    overallSatisfaction: 3.0,
-    comments: "Felt difficult to catch up after missing class due to sickness."
-  }
+  { id: "FF001", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-25", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "EXCEL AI", session: "SESSION-1", facultyName: "Dr. Amit Verma", facultyRating: 4.5, assignmentRating: 4.0, videoUploaded: "On Time", classTiming: 4.0, material: 4.5, classSpeed: 3.5, overallSatisfaction: 4.2, comments: "Faculty was clear with formulas. Speed was slightly fast in intermediate lessons." },
+  { id: "FF002", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-24", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "SQL", session: "SESSION-2", facultyName: "Dr. Amit Verma", facultyRating: 5.0, assignmentRating: 5.0, videoUploaded: "On Time", classTiming: 5.0, material: 5.0, classSpeed: 4.8, overallSatisfaction: 5.0, comments: "Excellent practical query exercises and hands-on DB environment." },
+  { id: "FF003", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-08-20", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "PYTHON", session: "SESSION-1", facultyName: "Prof. S. R. Sen", facultyRating: 3.5, assignmentRating: 3.0, videoUploaded: "Delay", classTiming: 4.0, material: 3.0, classSpeed: 2.5, overallSatisfaction: 3.0, comments: "Felt difficult to catch up after missing class due to sickness." },
+  { id: "FF004", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-14", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "POWER BI", session: "SESSION-3", facultyName: "Dr. Amit Verma", facultyRating: 4.8, assignmentRating: 4.5, videoUploaded: "On Time", classTiming: 4.5, material: 4.7, classSpeed: 4.5, overallSatisfaction: 4.8, comments: "Great interactive visual demos." },
+  { id: "FF005", studentId: "LMS1004", studentName: "Sneha Patel", course: "APIDS", batch: "BATCH 202602", callDate: "2026-07-28", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "PYTHON", session: "SESSION-1", facultyName: "Mrs. Anjali Roy", facultyRating: 5.0, assignmentRating: 5.0, videoUploaded: "On Time", classTiming: 5.0, material: 4.8, classSpeed: 4.6, overallSatisfaction: 4.9, comments: "Very supportive and structured explanation of OOPs." },
+  { id: "FF006", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-07-15", connectionStatus: "No", feedbackType: "Faculty Feedback", application: "SQL", session: "SESSION-2", facultyName: "Dr. Amit Verma", facultyRating: 0, assignmentRating: 0, videoUploaded: "Delay", classTiming: 0, material: 0, classSpeed: 0, overallSatisfaction: 0, comments: "Call disconnected after ringing." },
+  { id: "FF007", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-06-18", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "POWER BI", session: "SESSION-3", facultyName: "Dr. Amit Verma", facultyRating: 4.9, assignmentRating: 5.0, videoUploaded: "On Time", classTiming: 5.0, material: 5.0, classSpeed: 4.7, overallSatisfaction: 4.9, comments: "Comprehensive DAX explanations." },
+  { id: "FF008", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-05-22", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "EXCEL AI", session: "SESSION-1", facultyName: "Prof. S. R. Sen", facultyRating: 4.0, assignmentRating: 3.5, videoUploaded: "Delay", classTiming: 4.0, material: 3.8, classSpeed: 3.5, overallSatisfaction: 3.9, comments: "Covered basic calculations well." },
+  { id: "FF009", studentId: "LMS1004", studentName: "Sneha Patel", course: "APIDS", batch: "BATCH 202602", callDate: "2026-04-12", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "SQL", session: "SESSION-1", facultyName: "Mrs. Anjali Roy", facultyRating: 4.7, assignmentRating: 4.5, videoUploaded: "On Time", classTiming: 4.5, material: 4.9, classSpeed: 4.5, overallSatisfaction: 4.7, comments: "Query optimization tips were very helpful." },
+  { id: "FF010", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2026-03-10", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "EXCEL AI", session: "SESSION-1", facultyName: "Dr. Amit Verma", facultyRating: 4.6, assignmentRating: 4.0, videoUploaded: "On Time", classTiming: 4.5, material: 4.5, classSpeed: 4.2, overallSatisfaction: 4.5, comments: "Well paced session on lookup formulas." },
+  { id: "FF011", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-02-14", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "PYTHON", session: "SESSION-4", facultyName: "Dr. Amit Verma", facultyRating: 3.8, assignmentRating: 3.0, videoUploaded: "Delay", classTiming: 4.0, material: 3.5, classSpeed: 3.0, overallSatisfaction: 3.6, comments: "Need slower pace for complex algorithms." },
+  { id: "FF012", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-01-22", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "EXCEL AI", session: "SESSION-1", facultyName: "Dr. Amit Verma", facultyRating: 5.0, assignmentRating: 5.0, videoUploaded: "On Time", classTiming: 5.0, material: 5.0, classSpeed: 4.9, overallSatisfaction: 5.0, comments: "Great start to the batch." },
+  { id: "FF013", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2025-12-15", connectionStatus: "No", feedbackType: "Faculty Feedback", application: "EXCEL AI", session: "SESSION-1", facultyName: "Prof. S. R. Sen", facultyRating: 0, assignmentRating: 0, videoUploaded: "Delay", classTiming: 0, material: 0, classSpeed: 0, overallSatisfaction: 0, comments: "Student switched off phone." },
+  { id: "FF014", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2025-11-20", connectionStatus: "Yes", feedbackType: "Faculty Feedback", application: "EXCEL AI", session: "SESSION-1", facultyName: "Dr. Amit Verma", facultyRating: 4.5, assignmentRating: 4.0, videoUploaded: "On Time", classTiming: 4.5, material: 4.5, classSpeed: 4.0, overallSatisfaction: 4.5, comments: "Orientation call went smoothly." }
 ];
 
 let mentorFeedbackLogs = [
-  {
-    id: "MF001",
-    studentId: "LMS1001",
-    studentName: "MR DEV",
-    course: "APIDS",
-    batch: "BATCH 202601",
-    callDate: "2026-08-25",
-    connectionStatus: "Yes",
-    feedbackType: "Mentor Feedback",
-    application: "EXCEL AI",
-    session: "SESSION-1",
-    mentorName: "Rohan Das",
-    mentorRating: 4.0,
-    doubtClearing: 4.5,
-    behaviour: 5.0,
-    attention: 3.5,
-    overallSatisfaction: 4.2,
-    comments: "Mentor is patient and resolved doubts on VLOOKUP and XLOOKUP."
-  },
-  {
-    id: "MF002",
-    studentId: "LMS1003",
-    studentName: "Ishita Roy",
-    course: "APIDS",
-    batch: "BATCH 202601",
-    callDate: "2026-08-22",
-    connectionStatus: "Yes",
-    feedbackType: "Mentor Feedback",
-    application: "POWER BI",
-    session: "SESSION-3",
-    mentorName: "Priya Nair",
-    mentorRating: 4.8,
-    doubtClearing: 5.0,
-    behaviour: 5.0,
-    attention: 4.8,
-    overallSatisfaction: 4.9,
-    comments: "Great support during the Power BI dashboard project."
-  }
+  { id: "MF001", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-25", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", mentorRating: 4.0, doubtClearing: 4.5, behaviour: 5.0, attention: 3.5, overallSatisfaction: 4.2, comments: "Mentor is patient and resolved doubts on VLOOKUP and XLOOKUP." },
+  { id: "MF002", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-22", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "POWER BI", session: "SESSION-3", mentorName: "Priya Nair", mentorRating: 4.8, doubtClearing: 5.0, behaviour: 5.0, attention: 4.8, overallSatisfaction: 4.9, comments: "Great support during the Power BI dashboard project." },
+  { id: "MF003", studentId: "LMS1004", studentName: "Sneha Patel", course: "APIDS", batch: "BATCH 202602", callDate: "2026-08-16", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "PYTHON", session: "SESSION-1", mentorName: "Priya Nair", mentorRating: 5.0, doubtClearing: 5.0, behaviour: 5.0, attention: 5.0, overallSatisfaction: 5.0, comments: "Cleared syntax doubts immediately." },
+  { id: "MF004", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-08", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "SQL", session: "SESSION-2", mentorName: "Rohan Das", mentorRating: 5.0, doubtClearing: 5.0, behaviour: 5.0, attention: 5.0, overallSatisfaction: 5.0, comments: "Excellent mentor guidance." },
+  { id: "MF005", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-07-20", connectionStatus: "No", feedbackType: "Mentor Feedback", application: "PYTHON", session: "SESSION-1", mentorName: "Rohan Das", mentorRating: 0, doubtClearing: 0, behaviour: 0, attention: 0, overallSatisfaction: 0, comments: "Did not answer regular mentor check-in call." },
+  { id: "MF006", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-06-25", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "PYTHON", session: "SESSION-4", mentorName: "Rohan Das", mentorRating: 3.8, doubtClearing: 4.0, behaviour: 4.5, attention: 3.5, overallSatisfaction: 3.8, comments: "Mentor reviewed pending assignments." },
+  { id: "MF007", studentId: "LMS1004", studentName: "Sneha Patel", course: "APIDS", batch: "BATCH 202602", callDate: "2026-05-18", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "SQL", session: "SESSION-1", mentorName: "Priya Nair", mentorRating: 4.9, doubtClearing: 5.0, behaviour: 5.0, attention: 4.8, overallSatisfaction: 4.9, comments: "Assisted with mock DB project setup." },
+  { id: "MF008", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2026-04-20", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "SQL", session: "SESSION-2", mentorName: "Priya Nair", mentorRating: 4.7, doubtClearing: 4.8, behaviour: 5.0, attention: 4.6, overallSatisfaction: 4.8, comments: "Very clear instructions on index tuning." },
+  { id: "MF009", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-03-15", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", mentorRating: 4.9, doubtClearing: 5.0, behaviour: 5.0, attention: 4.9, overallSatisfaction: 4.9, comments: "Prompt feedback on assignment solutions." },
+  { id: "MF010", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-02-24", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", mentorRating: 3.6, doubtClearing: 4.0, behaviour: 4.0, attention: 3.0, overallSatisfaction: 3.5, comments: "Discussed missing assignment schedule." },
+  { id: "MF011", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-01-18", connectionStatus: "No", feedbackType: "Mentor Feedback", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", mentorRating: 0, doubtClearing: 0, behaviour: 0, attention: 0, overallSatisfaction: 0, comments: "Call busy." },
+  { id: "MF012", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2025-12-22", connectionStatus: "Yes", feedbackType: "Mentor Feedback", application: "EXCEL AI", session: "SESSION-1", mentorName: "Priya Nair", mentorRating: 4.6, doubtClearing: 4.8, behaviour: 5.0, attention: 4.5, overallSatisfaction: 4.7, comments: "Initial onboarding mentor discussion." }
 ];
 
 let mentorEvaluationLogs = [
-  {
-    id: "ME001",
-    studentId: "LMS1001",
-    studentName: "MR DEV",
-    course: "APIDS",
-    batch: "BATCH 202601",
-    callDate: "2026-08-25",
-    connectionStatus: "Yes",
-    feedbackType: "Mentor Evaluation",
-    application: "EXCEL AI",
-    mentorName: "Rohan Das",
-    assignmentStatus: "Completed",
-    applicationKnowledge: "Good",
-    overallFeedback: "Student showed good understanding of Excel functions but needs to attend scheduled classes regularly."
-  },
-  {
-    id: "ME002",
-    studentId: "LMS1001",
-    studentName: "MR DEV",
-    course: "APIDS",
-    batch: "BATCH 202601",
-    callDate: "2026-08-24",
-    connectionStatus: "Yes",
-    feedbackType: "Mentor Evaluation",
-    application: "SQL",
-    mentorName: "Rohan Das",
-    assignmentStatus: "In Progress",
-    applicationKnowledge: "Average",
-    overallFeedback: "Pending assignment submission for S2-S6. Struggled with subqueries during evaluation."
-  },
-  {
-    id: "ME003",
-    studentId: "LMS1005",
-    studentName: "Kabir Mehta",
-    course: "APIDS",
-    batch: "BATCH 202602",
-    callDate: "2026-08-21",
-    connectionStatus: "No",
-    feedbackType: "Mentor Evaluation",
-    application: "PYTHON",
-    mentorName: "Rohan Das",
-    assignmentStatus: "Not Started",
-    applicationKnowledge: "Low",
-    overallFeedback: "Call went unanswered. Follow-up scheduled for tomorrow."
-  }
+  { id: "ME001", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-25", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", assignmentStatus: "Completed", applicationKnowledge: "Good", overallFeedback: "Student showed good understanding of Excel functions but needs to attend scheduled classes regularly." },
+  { id: "ME002", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-24", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "SQL", session: "SESSION-2", mentorName: "Rohan Das", assignmentStatus: "In Progress", applicationKnowledge: "Average", overallFeedback: "Pending assignment submission for S2-S6. Struggled with subqueries during evaluation." },
+  { id: "ME003", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-08-21", connectionStatus: "No", feedbackType: "Mentor Evaluation", application: "PYTHON", session: "SESSION-1", mentorName: "Rohan Das", assignmentStatus: "Not Started", applicationKnowledge: "Low", overallFeedback: "Call went unanswered. Follow-up scheduled for tomorrow." },
+  { id: "ME004", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-08-18", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "PYTHON", session: "SESSION-4", mentorName: "Rohan Das", assignmentStatus: "Completed", applicationKnowledge: "Best", overallFeedback: "Excellent grasp of object-oriented design and Pandas manipulation." },
+  { id: "ME005", studentId: "LMS1004", studentName: "Sneha Patel", course: "APIDS", batch: "BATCH 202602", callDate: "2026-08-11", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "SQL", session: "SESSION-1", mentorName: "Priya Nair", assignmentStatus: "Completed", applicationKnowledge: "Best", overallFeedback: "Demonstrated accurate query joins, window functions, and clean formatting." },
+  { id: "ME006", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2026-07-22", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "POWER BI", session: "SESSION-3", mentorName: "Priya Nair", assignmentStatus: "Completed", applicationKnowledge: "Good", overallFeedback: "Dashboard interactive charts properly constructed and published." },
+  { id: "ME007", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-07-08", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "POWER BI", session: "SESSION-3", mentorName: "Rohan Das", assignmentStatus: "Completed", applicationKnowledge: "Average", overallFeedback: "Understands visual tiles, needs to practice DAX measures." },
+  { id: "ME008", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-06-14", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", assignmentStatus: "In Progress", applicationKnowledge: "Average", overallFeedback: "Needs to complete S2 and S3 workbook submissions." },
+  { id: "ME009", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2026-05-10", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "SQL", session: "SESSION-2", mentorName: "Rohan Das", assignmentStatus: "Completed", applicationKnowledge: "Best", overallFeedback: "Scored high in live coding query problem." },
+  { id: "ME010", studentId: "LMS1004", studentName: "Sneha Patel", course: "APIDS", batch: "BATCH 202602", callDate: "2026-04-18", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "EXCEL AI", session: "SESSION-1", mentorName: "Priya Nair", assignmentStatus: "Completed", applicationKnowledge: "Good", overallFeedback: "Good application of advanced nested formulas." },
+  { id: "ME011", studentId: "LMS1003", studentName: "Ishita Roy", course: "APIDS", batch: "BATCH 202601", callDate: "2026-03-24", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "SQL", session: "SESSION-2", mentorName: "Priya Nair", assignmentStatus: "Completed", applicationKnowledge: "Good", overallFeedback: "Good work on aggregation queries." },
+  { id: "ME012", studentId: "LMS1001", studentName: "MR DEV", course: "APIDS", batch: "BATCH 202601", callDate: "2026-02-18", connectionStatus: "No", feedbackType: "Mentor Evaluation", application: "PYTHON", session: "SESSION-4", mentorName: "Rohan Das", assignmentStatus: "Not Started", applicationKnowledge: "Low", overallFeedback: "Unreachable on scheduled evaluation slot." },
+  { id: "ME013", studentId: "LMS1005", studentName: "Kabir Mehta", course: "APIDS", batch: "BATCH 202602", callDate: "2026-01-28", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", assignmentStatus: "In Progress", applicationKnowledge: "Average", overallFeedback: "Initial progress check completed." },
+  { id: "ME014", studentId: "LMS1002", studentName: "Aarav Sharma", course: "APIDS", batch: "BATCH 202601", callDate: "2025-12-10", connectionStatus: "Yes", feedbackType: "Mentor Evaluation", application: "EXCEL AI", session: "SESSION-1", mentorName: "Rohan Das", assignmentStatus: "Completed", applicationKnowledge: "Best", overallFeedback: "Flawless performance in baseline review." }
 ];
 
 let upcomingClasses = [
@@ -1372,6 +1288,8 @@ app.post('/api/feedback/faculty', (req, res) => {
     session: data.session || student.session || "SESSION-1",
     facultyName: data.facultyName || student.faculty || "Not assigned",
     facultyRating: Math.max(0, Math.min(5, parseFloat(data.facultyRating) || 5)),
+    assignmentRating: Math.max(0, Math.min(5, parseFloat(data.assignmentRating) || 5)),
+    videoUploaded: String(data.videoUploaded || "On Time").trim() === "Delay" ? "Delay" : "On Time",
     classTiming: Math.max(0, Math.min(5, parseFloat(data.classTiming) || 5)),
     material: Math.max(0, Math.min(5, parseFloat(data.material) || 5)),
     classSpeed: Math.max(0, Math.min(5, parseFloat(data.classSpeed) || 5)),
@@ -1450,11 +1368,32 @@ app.post('/api/feedback/mentor-evaluation', (req, res) => {
   res.status(201).json(entry);
 });
 
+// Helper to get ISO week string and label
+function getWeekInfo(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return { key: "Unknown", label: "Unknown" };
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getUTCDay() + 6) % 7;
+  target.setUTCDate(target.getUTCDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setUTCMonth(0, 1);
+  if (target.getUTCDay() !== 4) {
+    target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
+  }
+  const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
+  const year = d.getUTCFullYear();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return {
+    key: `${year}-W${String(weekNumber).padStart(2, '0')}`,
+    label: `W${weekNumber} (${monthNames[d.getUTCMonth()]})`
+  };
+}
+
 // 7. Dashboards & Analytics APIs
 // Executive SMS Dashboard
 app.get('/api/dashboard/sms', (req, res) => {
   refreshStudents();
-  const { batch, session } = req.query;
+  const { batch, session, datePreset, startDate, endDate } = req.query;
   let list = [...students];
   if (batch && batch !== 'All') {
     list = list.filter(s => s.batch === batch);
@@ -1463,12 +1402,17 @@ app.get('/api/dashboard/sms', (req, res) => {
     list = list.filter(s => s.session === session);
   }
 
+  const totalCohortStudents = students.length;
   const total = list.length;
+  const selectedStudentsPct = totalCohortStudents > 0 ? Math.round((total / totalCohortStudents) * 100) : 0;
   const activeStudents = list.filter(s => s.status === 'Active').length;
+  const activeStudentsPct = total > 0 ? Math.round((activeStudents / total) * 100) : 0;
   const activeBatches = [...new Set(list.map(s => s.batch))].length;
 
   const dvEliteCount = list.filter(s => s.dvEliteEligible).length;
   const placementCount = list.filter(s => s.placementSupportEligible).length;
+  const dvElitePct = total > 0 ? Math.round((dvEliteCount / total) * 100) : 0;
+  const placementPct = total > 0 ? Math.round((placementCount / total) * 100) : 0;
   const atRiskCount = list.filter(s => s.attendance < 75 || s.attention < 60).length;
 
   const avgAttendance = total ? Math.round(list.reduce((a, b) => a + b.attendance, 0) / total) : 0;
@@ -1517,10 +1461,244 @@ app.get('/api/dashboard/sms', (req, res) => {
     };
   });
 
+  // ----------------------------------------------------
+  // CALLING & TELEPHONY ANALYTICS (EXACT REQUIREMENTS)
+  // ----------------------------------------------------
+  const allCalls = [...facultyFeedbackLogs, ...mentorFeedbackLogs, ...mentorEvaluationLogs];
+  let filteredCalls = allCalls.filter(call => {
+    const student = students.find(s => s.id === call.studentId);
+    const callBatch = call.batch || (student ? student.batch : "");
+    const callSession = call.session || (student ? student.session : "");
+    if (batch && batch !== 'All' && callBatch !== batch) return false;
+    if (session && session !== 'All' && callSession !== session) return false;
+    return true;
+  });
+
+  // Filtered student IDs
+  const filteredStudentIds = new Set(list.map(s => s.id));
+  if (batch !== 'All' || session !== 'All') {
+    filteredCalls = filteredCalls.filter(c => filteredStudentIds.has(c.studentId));
+  }
+
+  // Date Filtering Support (all, today, yesterday, last7, last30, custom)
+  const maxDateInDataset = "2026-08-25"; // Anchor date for relative filters
+  const anchorTime = new Date(maxDateInDataset).getTime();
+
+  if (datePreset === 'today') {
+    filteredCalls = filteredCalls.filter(c => c.callDate === "2026-08-25");
+  } else if (datePreset === 'yesterday') {
+    filteredCalls = filteredCalls.filter(c => c.callDate === "2026-08-24");
+  } else if (datePreset === 'last7') {
+    filteredCalls = filteredCalls.filter(c => {
+      const t = new Date(c.callDate).getTime();
+      return t >= anchorTime - 7 * 86400000 && t <= anchorTime;
+    });
+  } else if (datePreset === 'last30') {
+    filteredCalls = filteredCalls.filter(c => {
+      const t = new Date(c.callDate).getTime();
+      return t >= anchorTime - 30 * 86400000 && t <= anchorTime;
+    });
+  } else if (datePreset === 'custom' || (startDate && endDate)) {
+    const start = startDate ? new Date(startDate).getTime() : 0;
+    const end = endDate ? new Date(endDate).getTime() : Infinity;
+    filteredCalls = filteredCalls.filter(c => {
+      const t = new Date(c.callDate).getTime();
+      return t >= start && t <= end;
+    });
+  }
+
+  // 1. Calling KPIs
+  const totalCallsDialed = filteredCalls.length;
+  const connectedCallsList = filteredCalls.filter(c => String(c.connectionStatus || "").toUpperCase() === 'YES');
+  const totalCallsConnected = connectedCallsList.length;
+  const uniqueStudentsConnected = new Set(connectedCallsList.map(c => c.studentId)).size;
+  const connectPercentage = totalCallsDialed > 0 ? Math.round((totalCallsConnected / totalCallsDialed) * 100) : 0;
+  const totalCallsMade = totalCallsDialed;
+  const averageCallsMade = total > 0 ? Number((totalCallsMade / total).toFixed(1)) : 0;
+
+  // 2. Trend Visualizations (Daily, Weekly, Monthly, Yearly)
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  // Daily Trend
+  const dailyMap = {};
+  filteredCalls.forEach(c => {
+    const d = c.callDate || "2026-08-25";
+    if (!dailyMap[d]) dailyMap[d] = { date: d, dialed: 0, connected: 0 };
+    dailyMap[d].dialed += 1;
+    if (String(c.connectionStatus || "").toUpperCase() === 'YES') {
+      dailyMap[d].connected += 1;
+    }
+  });
+  const dailyTrend = Object.values(dailyMap)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .map(item => {
+      const dt = new Date(item.date);
+      const label = isNaN(dt.getTime()) ? item.date : `${dt.getUTCDate()} ${monthNames[dt.getUTCMonth()]}`;
+      return {
+        ...item,
+        label,
+        connectPct: item.dialed > 0 ? Math.round((item.connected / item.dialed) * 100) : 0
+      };
+    });
+
+  // Weekly Trend
+  const weeklyMap = {};
+  filteredCalls.forEach(c => {
+    const d = c.callDate || "2026-08-25";
+    const { key, label } = getWeekInfo(d);
+    if (!weeklyMap[key]) weeklyMap[key] = { week: key, label, dialed: 0, connected: 0, sortKey: d };
+    weeklyMap[key].dialed += 1;
+    if (String(c.connectionStatus || "").toUpperCase() === 'YES') {
+      weeklyMap[key].connected += 1;
+    }
+  });
+  const weeklyTrend = Object.values(weeklyMap)
+    .sort((a, b) => new Date(a.sortKey) - new Date(b.sortKey))
+    .map(item => ({
+      week: item.week,
+      label: item.label,
+      dialed: item.dialed,
+      connected: item.connected,
+      connectPct: item.dialed > 0 ? Math.round((item.connected / item.dialed) * 100) : 0
+    }));
+
+  // Monthly Trend
+  const monthlyMap = {};
+  filteredCalls.forEach(c => {
+    const d = c.callDate || "2026-08-25";
+    const dt = new Date(d);
+    const key = isNaN(dt.getTime()) ? d.slice(0, 7) : `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+    const label = isNaN(dt.getTime()) ? key : `${monthNames[dt.getMonth()]} ${dt.getFullYear()}`;
+    if (!monthlyMap[key]) monthlyMap[key] = { month: key, label, dialed: 0, connected: 0, sortKey: d };
+    monthlyMap[key].dialed += 1;
+    if (String(c.connectionStatus || "").toUpperCase() === 'YES') {
+      monthlyMap[key].connected += 1;
+    }
+  });
+  const monthlyTrend = Object.values(monthlyMap)
+    .sort((a, b) => new Date(a.sortKey) - new Date(b.sortKey))
+    .map(item => ({
+      month: item.month,
+      label: item.label,
+      dialed: item.dialed,
+      connected: item.connected,
+      connectPct: item.dialed > 0 ? Math.round((item.connected / item.dialed) * 100) : 0
+    }));
+
+  // Yearly Trend
+  const yearlyMap = {};
+  filteredCalls.forEach(c => {
+    const d = c.callDate || "2026-08-25";
+    const dt = new Date(d);
+    const year = isNaN(dt.getTime()) ? d.slice(0, 4) : String(dt.getFullYear());
+    if (!yearlyMap[year]) yearlyMap[year] = { year, label: year, dialed: 0, connected: 0 };
+    yearlyMap[year].dialed += 1;
+    if (String(c.connectionStatus || "").toUpperCase() === 'YES') {
+      yearlyMap[year].connected += 1;
+    }
+  });
+  const yearlyTrend = Object.values(yearlyMap)
+    .sort((a, b) => a.year.localeCompare(b.year))
+    .map(item => ({
+      ...item,
+      connectPct: item.dialed > 0 ? Math.round((item.connected / item.dialed) * 100) : 0
+    }));
+
+  // 3. Batch-wise Comparison Visualizations
+  const allBatchCodes = batches.map(b => b.code);
+
+  // Attendance Comparison Batch-wise (Clustered Column Data)
+  const batchAttendanceOverall = allBatchCodes.map(batchCode => {
+    const batchStudents = students.filter(s => s.batch === batchCode);
+    const avg = batchStudents.length
+      ? Math.round(batchStudents.reduce((acc, s) => acc + s.attendance, 0) / batchStudents.length)
+      : 0;
+    return {
+      batch: batchCode,
+      attendance: avg,
+      studentCount: batchStudents.length
+    };
+  });
+
+  const batchAttendanceByModule = CURRICULUM_MODULES.map(modName => {
+    const row = { module: modName };
+    allBatchCodes.forEach(batchCode => {
+      const batchStudents = students.filter(s => s.batch === batchCode);
+      let sum = 0, count = 0;
+      batchStudents.forEach(s => {
+        const m = s.modules.find(mod => mod.name.toUpperCase() === modName.toUpperCase());
+        if (m) {
+          sum += m.attendancePct;
+          count++;
+        }
+      });
+      row[batchCode] = count ? Math.round(sum / count) : 0;
+    });
+    return row;
+  });
+
+  // Batch-wise Unique Students Called
+  const batchUniqueStudentsCalled = allBatchCodes.map(batchCode => {
+    const batchStudents = students.filter(s => s.batch === batchCode);
+    const batchStudentIds = new Set(batchStudents.map(s => s.id));
+    const batchCalls = allCalls.filter(c => batchStudentIds.has(c.studentId));
+    const uniqueCalled = new Set(batchCalls.map(c => c.studentId)).size;
+    const connectedCalls = batchCalls.filter(c => String(c.connectionStatus || "").toUpperCase() === 'YES');
+    const uniqueConnected = new Set(connectedCalls.map(c => c.studentId)).size;
+    return {
+      batch: batchCode,
+      uniqueCalled,
+      uniqueConnected,
+      totalCalls: batchCalls.length,
+      totalStudents: batchStudents.length
+    };
+  });
+
+  // Batch-wise Total Students
+  const batchTotalStudents = allBatchCodes.map(batchCode => {
+    const batchStudents = students.filter(s => s.batch === batchCode);
+    return {
+      batch: batchCode,
+      totalStudents: batchStudents.length,
+      activeStudents: batchStudents.filter(s => s.status === 'Active').length
+    };
+  });
+
+  // Assignment Completion by Application Module (For Donut Chart)
+  const assignmentCompletionByModule = CURRICULUM_MODULES.map(name => {
+    let totalSubmitted = 0;
+    let totalTarget = 0;
+    list.forEach(s => {
+      const m = s.modules.find(mod => mod.name.toUpperCase() === name.toUpperCase());
+      if (m) {
+        totalSubmitted += m.assignmentTotal;
+        totalTarget += m.assignmentTarget;
+      }
+    });
+    const completionPct = totalTarget > 0 ? Math.round((totalSubmitted / totalTarget) * 100) : 0;
+    const shortName = name === "DATA ENGINEERING" ? "DATA ENG" : name === "INTERVIEW PREP" ? "INTERVIEW" : name;
+    return {
+      module: name,
+      shortName,
+      submitted: totalSubmitted,
+      target: totalTarget,
+      completionPct
+    };
+  });
+
+  const totalSubmittedAll = assignmentCompletionByModule.reduce((acc, m) => acc + m.submitted, 0);
+  assignmentCompletionByModule.forEach(m => {
+    m.sharePct = totalSubmittedAll > 0 ? Math.round((m.submitted / totalSubmittedAll) * 100) : Math.round(100 / CURRICULUM_MODULES.length);
+  });
+
   res.json({
     stats: {
+      totalCohortStudents,
+      selectedStudents: total,
+      selectedStudentsPct,
       totalStudents: total,
       activeStudents,
+      activeStudentsPct,
       activeBatches,
       attendanceRate: avgAttendance,
       avgAttention,
@@ -1530,12 +1708,65 @@ app.get('/api/dashboard/sms', (req, res) => {
       practicalAvg,
       hardpaperAvg,
       mockInterviewAvg,
+      coreLmsPillars: {
+        mcq: mcqAvg,
+        practical: practicalAvg,
+        attendance: avgAttendance,
+        lmsScore: avgLms
+      },
+      readinessAssessments: {
+        penAndPaper: hardpaperAvg,
+        mockInterview: mockInterviewAvg,
+        dvEliteCount,
+        dvElitePct,
+        placementCount,
+        placementPct
+      },
       dvEliteCount,
+      dvElitePct,
       placementCount,
+      placementPct,
       atRiskCount,
       topPerformers,
       weakStudents,
-      classes: upcomingClasses
+      classes: upcomingClasses,
+
+      // Calling KPIs
+      totalCallsDialed,
+      totalCallsConnected,
+      uniqueStudentsConnected,
+      connectPercentage,
+      totalCallsMade,
+      averageCallsMade,
+
+      // Assignment Donut
+      assignmentDonut: assignmentCompletionByModule
+    },
+    assignmentDonut: assignmentCompletionByModule,
+    callingKpis: {
+      totalCohortStudents,
+      selectedStudents: total,
+      selectedStudentsPct,
+      totalCallsDialed,
+      totalCallsConnected,
+      totalStudents: total,
+      uniqueStudentsConnected,
+      connectPercentage,
+      totalCallsMade,
+      averageCallsMade
+    },
+    trends: {
+      daily: dailyTrend,
+      weekly: weeklyTrend,
+      monthly: monthlyTrend,
+      yearly: yearlyTrend
+    },
+    comparisons: {
+      batchAttendanceOverall,
+      batchAttendanceByModule,
+      batchUniqueStudentsCalled,
+      batchTotalStudents,
+      batches: allBatchCodes
     },
     moduleAverages,
     upcomingClasses,

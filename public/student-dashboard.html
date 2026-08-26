@@ -69,7 +69,7 @@
           <div class="card-head">
             <div>
               <h3>Detailed Scorecard</h3>
-              <p>Edit operational inputs. Calculated percentages update automatically.</p>
+              <p>Application LMS scores (MCQ, Practical, Attendance) and Career Readiness benchmarks (Paper, Mock).</p>
             </div>
           </div>
           <div class="table-responsive" style="border:0;">
@@ -80,7 +80,8 @@
                   <th>Attendance</th>
                   <th>Attention</th>
                   <th>Assignments</th>
-                  <th>Assessments</th>
+                  <th>Application LMS Score</th>
+                  <th>Readiness (Paper & Mock)</th>
                   <th></th>
                 </tr>
               </thead>
@@ -94,31 +95,50 @@
 
   <div class="modal-backdrop" id="editRowModal">
     <div class="modal-overlay" id="editRowOverlay"></div>
-    <div class="modal-container" style="max-width: 620px;">
+    <div class="modal-container" style="max-width: 640px;">
       <div class="modal-header">
         <h3 class="modal-title" id="modalModTitle">Edit Module</h3>
         <button class="modal-close" id="closeRowModal">&times;</button>
       </div>
       <form id="editRowForm">
         <input type="hidden" id="editModName">
-        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="form-group"><label for="rowAttended">Classes Attended</label><input type="number" id="rowAttended" class="form-control" min="0" max="10" required></div>
-          <div class="form-group"><label for="rowAttention">Focused Minutes</label><input type="number" id="rowAttention" class="form-control" min="0" max="1200" required></div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label>Assignments S1 to S6</label>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <label><input type="checkbox" id="rowS1"> S1</label>
-              <label><input type="checkbox" id="rowS2"> S2</label>
-              <label><input type="checkbox" id="rowS3"> S3</label>
-              <label><input type="checkbox" id="rowS4"> S4</label>
-              <label><input type="checkbox" id="rowS5"> S5</label>
-              <label><input type="checkbox" id="rowS6"> S6</label>
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+          <!-- Section 1: Core Application Learning Scorecard -->
+          <div>
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+              <span>Application Learning Scorecard</span>
+              <span style="font-size:10px; color:var(--text-muted); text-transform:none;">(Counts towards Application LMS Score: MCQ + Practical + Attendance)</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <div class="form-group"><label for="rowAttended">Classes Attended (of 10)</label><input type="number" id="rowAttended" class="form-control" min="0" max="10" required></div>
+              <div class="form-group"><label for="rowAttention">Focused Minutes (of 1200)</label><input type="number" id="rowAttention" class="form-control" min="0" max="1200" required></div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Assignments S1 to S6</label>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
+                  <label><input type="checkbox" id="rowS1"> S1</label>
+                  <label><input type="checkbox" id="rowS2"> S2</label>
+                  <label><input type="checkbox" id="rowS3"> S3</label>
+                  <label><input type="checkbox" id="rowS4"> S4</label>
+                  <label><input type="checkbox" id="rowS5"> S5</label>
+                  <label><input type="checkbox" id="rowS6"> S6</label>
+                </div>
+              </div>
+              <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" required></div>
+              <div class="form-group"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" required></div>
             </div>
           </div>
-          <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" required></div>
-          <div class="form-group"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" required></div>
-          <div class="form-group"><label for="rowPaper">Pen and Paper %</label><input type="number" id="rowPaper" class="form-control" min="0" max="100" required></div>
-          <div class="form-group"><label for="rowMock">Mock Interview %</label><input type="number" id="rowMock" class="form-control" min="0" max="100" required></div>
+
+          <!-- Section 2: Career Readiness & Placement Evaluations -->
+          <div style="border-top:1px solid var(--border); padding-top:12px;">
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--success); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+              <span>Career Readiness & Placement Evaluations</span>
+              <span style="font-size:10px; color:var(--text-muted); text-transform:none;">(Counts towards DV Elite & Placement Eligibility)</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <div class="form-group"><label for="rowPaper">Pen and Paper %</label><input type="number" id="rowPaper" class="form-control" min="0" max="100" required></div>
+              <div class="form-group"><label for="rowMock">Mock Interview %</label><input type="number" id="rowMock" class="form-control" min="0" max="100" required></div>
+            </div>
+          </div>
         </div>
         <div class="modal-foot">
           <button type="button" class="btn-secondary" id="cancelRowBtn">Cancel</button>
@@ -133,12 +153,14 @@
 
     let student = null;
     const studentId = new URLSearchParams(window.location.search).get("id");
-    const assessmentScore = m => Math.round((m.mcq + m.test + m.penAndPaper + m.mockInterview) / 4);
+    // Application LMS score: MCQ, Practical Test, and Attendance %
+    const assessmentScore = m => Math.round((m.mcq + m.test + m.attendancePct) / 3);
     const pctClass = value => value >= 75 ? "good" : value < 60 ? "risk" : "";
-    const scoreClass = value => value >= 70 ? "good" : value < 50 ? "risk" : "info";
+    const scoreClass = value => value >= 70 ? "good" : "risk";
 
     function badge(text, type = "completed") {
-      return `<span class="badge badge-${type}">${text}</span>`;
+      const isPass = type === "elite" || type === "placement" || type === "completed";
+      return `<span class="badge ${isPass ? "badge-completed" : "badge-risk"}">${text}</span>`;
     }
 
     function metric(label, value, note) {
@@ -167,8 +189,8 @@
       document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch} / ${student.session}`;
 
       const statusBadges = [
-        student.dvEliteEligible ? badge("DV Elite eligible", "elite") : badge("DV Elite pending", "pending"),
-        student.placementSupportEligible ? badge("Placement ready", "placement") : badge("Placement pending", "pending"),
+        student.dvEliteEligible ? badge("DV Elite eligible", "completed") : badge("DV Elite pending", "risk"),
+        student.placementSupportEligible ? badge("Placement ready", "completed") : badge("Placement pending", "risk"),
         student.attendance < 75 ? badge("Attendance risk", "risk") : badge("Attendance ok", "completed"),
         student.attention < 60 ? badge("Focus risk", "risk") : badge("Focus ok", "completed")
       ].join("");
@@ -188,8 +210,8 @@
         <div class="rule-panel">
           <div class="rule-item"><span>Attendance Result</span><strong>${student.attendanceResult}</strong></div>
           <div class="rule-item"><span>Attention Result</span><strong>${student.attentionResult}</strong></div>
-          <div class="rule-item"><span>DV Elite Rule</span><strong>SQL, Python, SAS, and ML score at least 70%</strong></div>
-          <div class="rule-item"><span>Placement Rule</span><strong>Mock interview average at least 70%</strong></div>
+          <div class="rule-item"><span>DV Elite Rule</span><strong>Application competence & Pen & Paper $\\ge$ 70%</strong></div>
+          <div class="rule-item"><span>Placement Rule</span><strong>Mock interview & Pen & Paper $\\ge$ 70%</strong></div>
         </div>
       `;
 
@@ -197,7 +219,7 @@
         metric("Attendance", `${student.attendance}%`, `${student.modules.reduce((a, m) => a + m.attended, 0)} of ${student.modules.reduce((a, m) => a + m.classes, 0)} classes attended`),
         metric("Focus Rate", `${student.attention}%`, "Class attention minutes"),
         metric("Assignments", `${student.assignmentCompletion}%`, "S1-S6 completion"),
-        metric("LMS Score", `${student.lmsScore}%`, "Assessment pillar average")
+        metric("LMS Score", `${student.lmsScore}%`, "MCQ, Practical, and Attendance average")
       ].join("");
 
       document.getElementById("moduleGrid").innerHTML = student.modules.map(m => {
@@ -209,11 +231,11 @@
                 <h3>${m.name}</h3>
                 <div class="student-meta">${m.attended}/${m.classes} classes / ${m.assignmentTotal}/${m.assignmentTarget} assignments</div>
               </div>
-              <div class="module-score">${score}%</div>
+              <div class="module-score" style="color:${score >= 70 ? 'var(--success)' : 'var(--danger)'};">${score}%</div>
             </div>
             ${progress("Attendance", m.attendancePct, pctClass(m.attendancePct))}
             ${progress("Attention", m.attentionPct, pctClass(m.attentionPct))}
-            ${progress("Assessment", score, scoreClass(score))}
+            ${progress("Learning Score (MCQ+Test+Att)", score, scoreClass(score))}
             <div class="assignment-dots">${assignmentDots(m.assignments)}</div>
           </article>
         `;
@@ -227,7 +249,8 @@
             <td>${m.attended}/${m.classes} classes<br><span class="student-meta">${m.attendancePct}% attendance</span></td>
             <td>${m.classAttention}/${m.classDuration} mins<br><span class="student-meta">${m.attentionPct}% focus</span></td>
             <td><div class="assignment-dots">${assignmentDots(m.assignments)}</div><div class="student-meta">${m.assignmentPct}% complete</div></td>
-            <td><strong>${score}%</strong><br><span class="student-meta">MCQ ${m.mcq} / Test ${m.test} / Paper ${m.penAndPaper} / Mock ${m.mockInterview}</span></td>
+            <td><strong style="color:${score >= 70 ? 'var(--success)' : 'var(--danger)'};">${score}%</strong><br><span class="student-meta">MCQ ${m.mcq}% / Test ${m.test}% / Att ${m.attendancePct}%</span></td>
+            <td><strong style="color:var(--heading);">Paper ${m.penAndPaper}%</strong><br><span class="student-meta">Mock Interview ${m.mockInterview}%</span></td>
             <td class="table-actions"><button class="btn-secondary btn-sm btn-edit-row" data-mod="${m.name}">Edit</button></td>
           </tr>
         `;

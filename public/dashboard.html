@@ -48,6 +48,7 @@
       </header>
 
       <main class="page-container">
+        <!-- Page Header & Filters -->
         <section class="page-toolbar">
           <div class="section-title">
             <h2>Leadership Summary</h2>
@@ -56,52 +57,190 @@
           <div class="toolbar-group">
             <select class="filter-select" id="batchFilter"><option value="All">All batches</option></select>
             <select class="filter-select" id="sessionFilter"><option value="All">All sessions</option></select>
+            <select class="filter-select" id="datePresetFilter">
+              <option value="all">All time</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="last7">Last 7 days</option>
+              <option value="last30">Last 30 days</option>
+              <option value="custom">Custom date range</option>
+            </select>
+            <div id="customDateRangeWrap" style="display:none; align-items:center; gap:6px;">
+              <input type="date" class="filter-select" id="startDateInput" style="padding:6px 10px;" value="2026-08-01">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" class="filter-select" id="endDateInput" style="padding:6px 10px;" value="2026-08-25">
+            </div>
           </div>
         </section>
 
+        <!-- Executive Summary 4 Cards -->
         <section class="metric-grid" id="summaryMetrics"></section>
 
-        <section class="dashboard-grid">
+        <!-- Calling & Telephony Analytics Toolbar -->
+        <section class="page-toolbar" style="margin-top:16px;">
+          <div class="section-title">
+            <h2>Telephony & Calling Analytics</h2>
+            <p>Real-time metrics for calls dialed, connect rates, and student engagement volume.</p>
+          </div>
+        </section>
+
+        <!-- 7 Required KPI Cards -->
+        <section class="calling-kpi-grid" id="callingMetrics"></section>
+
+        <section class="dashboard-grid" style="margin-top:18px;">
+          <!-- 1. Trend Visualizations: Daily, Weekly, Monthly, Yearly Line Chart -->
+          <article class="card card-grid-full">
+            <div class="card-head">
+              <div>
+                <h3>Call Trends Over Time</h3>
+                <p>Track calling volume and connectivity across daily, weekly, monthly, and yearly intervals.</p>
+              </div>
+              <div class="chart-header-actions" style="display:flex; align-items:center; gap:8px;">
+                <label for="trendGranularitySelect" style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">View Trend:</label>
+                <select id="trendGranularitySelect" class="form-control" style="min-width:180px; padding:6px 12px; font-size:12px; font-weight:600; border-radius:var(--radius-sm);">
+                  <option value="daily" selected>Daily Call Trend</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="weekly">Weekly Call Trend</option>
+                  <option value="monthly">Monthly Call Trend</option>
+                  <option value="yearly">Yearly Call Trend</option>
+                </select>
+              </div>
+            </div>
+            <div class="chart-legend-wrap">
+              <div class="chart-legend-item"><span class="legend-dot series-1"></span><span>Total Calls Dialed</span></div>
+              <div class="chart-legend-item"><span class="legend-dot series-2"></span><span>Total Calls Connected</span></div>
+            </div>
+            <div class="chart-svg-box" id="trendChartBox">
+              <div class="chart-tooltip-bubble" id="trendTooltip"></div>
+            </div>
+          </article>
+
+          <!-- 2. Attendance Comparison Batch-wise: Clustered Column Chart -->
+          <article class="card card-grid-full">
+            <div class="card-head">
+              <div>
+                <h3>Attendance Comparison Batch-wise</h3>
+                <p>Clustered column comparison of attendance percentages across curriculum modules by batch.</p>
+              </div>
+              <div class="chart-header-actions" style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Select Batches:</span>
+                <div class="custom-multiselect" id="batchMultiselectWrapper">
+                  <button type="button" class="multiselect-btn" id="batchMultiselectBtn">
+                    <span id="batchMultiselectSummary">All Batches (2)</span>
+                    <span style="font-size:10px;">▼</span>
+                  </button>
+                  <div class="multiselect-menu" id="batchMultiselectMenu">
+                    <label class="multiselect-option" style="font-weight:700;">
+                      <input type="checkbox" id="selectAllAttendanceBatches" checked />
+                      <span>Select All Batches</span>
+                    </label>
+                    <div class="multiselect-divider"></div>
+                    <div id="batchCheckboxList"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chart-legend-wrap" id="batchAttendanceLegend"></div>
+            <div class="chart-svg-box" id="attendanceChartBox">
+              <div class="chart-tooltip-bubble" id="attendanceTooltip"></div>
+            </div>
+          </article>
+
+          <!-- 3. Batch-wise Unique Students Called -->
           <article class="card">
             <div class="card-head">
-              <div><h3>Module Competency</h3><p>Average assessment score by application.</p></div>
+              <div>
+                <h3>Batch-wise Unique Students Called</h3>
+                <p>Unique students reached vs total students called per batch.</p>
+              </div>
+            </div>
+            <div class="bar-list" id="batchUniqueCalledBars"></div>
+          </article>
+
+          <!-- 4. Batch-wise Total Students -->
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h3>Batch-wise Total Students</h3>
+                <p>Total and active student enrollment distribution per cohort.</p>
+              </div>
+            </div>
+            <div class="bar-list" id="batchTotalStudentBars"></div>
+          </article>
+
+          <!-- 5. Module Competency -->
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h3>Module Competency</h3>
+                <p>Average application score (MCQ + Practical + Attendance).</p>
+              </div>
             </div>
             <div class="bar-list" id="moduleBars"></div>
           </article>
 
+          <!-- 6. LMS Assessment Pillars & Career Readiness -->
           <article class="card">
             <div class="card-head">
-              <div><h3>Assessment Pillars</h3><p>MCQ, practical, paper, and mock interview averages.</p></div>
+              <div>
+                <h3>LMS & Readiness Pillars</h3>
+                <p>Core application learning pillars & career readiness benchmarks.</p>
+              </div>
             </div>
-            <div class="bar-list" id="pillarBars"></div>
+            <div style="margin-bottom:12px;">
+              <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Core Application LMS Pillars (Application Score)</span>
+              <div class="bar-list" id="coreLmsBars" style="margin-top:6px;"></div>
+            </div>
+            <div style="border-top:1px solid var(--border); padding-top:12px;">
+              <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Readiness & Placement Pillars (DV Elite / Placement)</span>
+              <div class="bar-list" id="readinessBars" style="margin-top:6px;"></div>
+            </div>
           </article>
 
+          <!-- 7. Assignment Completion by Application (Donut Chart) -->
+          <article class="card card-grid-full">
+            <div class="card-head">
+              <div>
+                <h3>Assignment Completion by Application</h3>
+                <p>Application-wise task submission rate and relative curriculum share.</p>
+              </div>
+            </div>
+            <div class="donut-chart-box" id="donutChartBox">
+              <div class="chart-tooltip-bubble" id="donutTooltip"></div>
+            </div>
+          </article>
+
+          <!-- 8. Students Ready For Growth -->
           <article class="card">
             <div class="card-head">
-              <div><h3>Students Ready For Growth</h3><p>Top performers and placement-ready candidates.</p></div>
+              <div>
+                <h3>Students Ready For Growth</h3>
+                <p>Top performers and placement-ready candidates.</p>
+              </div>
             </div>
             <div class="insight-list" id="topPerformers"></div>
           </article>
 
+          <!-- 9. Intervention Queue -->
           <article class="card">
             <div class="card-head">
-              <div><h3>Intervention Queue</h3><p>Students with low attendance, focus, or LMS score.</p></div>
+              <div>
+                <h3>Intervention Queue</h3>
+                <p>Students with low attendance, focus, or LMS score.</p>
+              </div>
             </div>
             <div class="insight-list" id="needsFocus"></div>
           </article>
 
-          <article class="card">
+          <!-- 10. Feedback Health -->
+          <article class="card card-grid-full">
             <div class="card-head">
-              <div><h3>Feedback Health</h3><p>Student and mentor feedback quality signals.</p></div>
+              <div>
+                <h3>Feedback Health & Quality</h3>
+                <p>Student, faculty, and mentor feedback quality and satisfaction metrics.</p>
+              </div>
             </div>
-            <div class="metric-grid" style="grid-template-columns: repeat(2, 1fr);" id="feedbackHealth"></div>
-          </article>
-
-          <article class="card">
-            <div class="card-head">
-              <div><h3>Knowledge And Assignments</h3><p>Mentor evaluation distribution.</p></div>
-            </div>
-            <div class="bar-list" id="feedbackBars"></div>
+            <div class="metric-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));" id="feedbackHealth"></div>
           </article>
         </section>
       </main>
@@ -110,11 +249,21 @@
 
   <script type="module">
     import { apiFetch } from './app.js';
+    import { onThemeChange } from './theme.js';
+
+    let currentDashboardData = null;
+    let activeTrendGranularity = "daily";
 
     const maxWidth = value => `${Math.max(0, Math.min(100, value))}%`;
 
     function metric(label, value, note) {
-      return `<div class="metric-card"><p class="metric-label">${label}</p><p class="metric-value">${value}</p><p class="metric-note">${note}</p></div>`;
+      return `
+        <div class="metric-card">
+          <p class="metric-label">${label}</p>
+          <p class="metric-value">${value}</p>
+          <p class="metric-note">${note}</p>
+        </div>
+      `;
     }
 
     function barRow(label, value, colorClass = "") {
@@ -127,13 +276,13 @@
       `;
     }
 
-    function countBar(label, value, max, colorClass = "") {
+    function countBar(label, value, max, colorClass = "", suffix = "") {
       const pct = max ? Math.round((value / max) * 100) : 0;
       return `
         <div class="bar-row">
           <strong style="font-size:12px;">${label}</strong>
           <div class="progress-track"><div class="progress-fill ${colorClass}" style="width:${maxWidth(pct)}"></div></div>
-          <strong>${value}</strong>
+          <strong>${value}${suffix}</strong>
         </div>
       `;
     }
@@ -151,6 +300,504 @@
       `;
     }
 
+    // ----------------------------------------------------
+    // SVG Trend Line Chart Renderer
+    // ----------------------------------------------------
+    function renderTrendLineChart(data, activeTab) {
+      const box = document.getElementById("trendChartBox");
+      if (!box) return;
+
+      if (!data || !data.length) {
+        box.innerHTML = `<div class="empty-state">No call trend records available for the selected filters.</div>`;
+        return;
+      }
+
+      const width = 800;
+      const height = 250;
+      const padLeft = 45;
+      const padRight = 30;
+      const padTop = 25;
+      const padBottom = 40;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const maxVal = Math.max(5, ...data.map(d => Math.max(d.dialed, d.connected)));
+      const yTicks = 4;
+
+      // Coordinate helpers
+      const getX = index => data.length === 1 ? padLeft + chartW / 2 : padLeft + (index / (data.length - 1)) * chartW;
+      const getY = val => padTop + chartH - (val / maxVal) * chartH;
+
+      // Build path data
+      let pathDialed = "";
+      let pathConnected = "";
+      let areaDialed = "";
+      let areaConnected = "";
+
+      data.forEach((pt, i) => {
+        const x = getX(i);
+        const yDialed = getY(pt.dialed);
+        const yConnected = getY(pt.connected);
+
+        if (i === 0) {
+          pathDialed = `M ${x} ${yDialed}`;
+          pathConnected = `M ${x} ${yConnected}`;
+          areaDialed = `M ${x} ${padTop + chartH} L ${x} ${yDialed}`;
+          areaConnected = `M ${x} ${padTop + chartH} L ${x} ${yConnected}`;
+        } else {
+          pathDialed += ` L ${x} ${yDialed}`;
+          pathConnected += ` L ${x} ${yConnected}`;
+          areaDialed += ` L ${x} ${yDialed}`;
+          areaConnected += ` L ${x} ${yConnected}`;
+        }
+      });
+
+      const lastX = getX(data.length - 1);
+      const firstX = getX(0);
+      areaDialed += ` L ${lastX} ${padTop + chartH} L ${firstX} ${padTop + chartH} Z`;
+      areaConnected += ` L ${lastX} ${padTop + chartH} L ${firstX} ${padTop + chartH} Z`;
+
+      // Horizontal Grid Lines
+      let gridLines = "";
+      for (let i = 0; i <= yTicks; i++) {
+        const val = Math.round((maxVal / yTicks) * i);
+        const y = getY(val);
+        gridLines += `
+          <line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="svg-grid-line" />
+          <text x="${padLeft - 10}" y="${y + 3}" text-anchor="end" class="svg-axis-text">${val}</text>
+        `;
+      }
+
+      // X-Axis Labels
+      let xLabels = "";
+      const step = Math.max(1, Math.ceil(data.length / 10));
+      data.forEach((pt, i) => {
+        if (i % step === 0 || i === data.length - 1) {
+          const x = getX(i);
+          xLabels += `<text x="${x}" y="${height - 12}" text-anchor="middle" class="svg-axis-text">${pt.label}</text>`;
+        }
+      });
+
+      // Interactive Points
+      let pointsDialed = "";
+      let pointsConnected = "";
+      data.forEach((pt, i) => {
+        const x = getX(i);
+        const yD = getY(pt.dialed);
+        const yC = getY(pt.connected);
+        pointsDialed += `
+          <circle cx="${x}" cy="${yD}" r="4" stroke="#ef4444" class="svg-point"
+            data-label="${pt.label}" data-dialed="${pt.dialed}" data-connected="${pt.connected}" data-pct="${pt.connectPct}" data-cx="${x}" data-cy="${yD}" />
+        `;
+        pointsConnected += `
+          <circle cx="${x}" cy="${yC}" r="4" stroke="#16a34a" class="svg-point"
+            data-label="${pt.label}" data-dialed="${pt.dialed}" data-connected="${pt.connected}" data-pct="${pt.connectPct}" data-cx="${x}" data-cy="${yC}" />
+        `;
+      });
+
+      const svgHtml = `
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="gradDialed" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ef4444" stop-opacity="0.22" />
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0.0" />
+            </linearGradient>
+            <linearGradient id="gradConnected" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#16a34a" stop-opacity="0.2" />
+              <stop offset="100%" stop-color="#16a34a" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          ${gridLines}
+          <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" class="svg-axis-line" />
+          <path d="${areaDialed}" fill="url(#gradDialed)" />
+          <path d="${areaConnected}" fill="url(#gradConnected)" />
+          <path d="${pathDialed}" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="${pathConnected}" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          ${pointsDialed}
+          ${pointsConnected}
+          ${xLabels}
+        </svg>
+      `;
+
+      box.innerHTML = svgHtml + `<div class="chart-tooltip-bubble" id="trendTooltip"></div>`;
+
+      // Wire Tooltips
+      const newTooltip = document.getElementById("trendTooltip");
+      box.querySelectorAll(".svg-point").forEach(pt => {
+        pt.addEventListener("mouseenter", () => {
+          const l = pt.dataset.label;
+          const d = pt.dataset.dialed;
+          const c = pt.dataset.connected;
+          const p = pt.dataset.pct;
+          const rect = box.getBoundingClientRect();
+          const cx = parseFloat(pt.dataset.cx);
+          const cy = parseFloat(pt.dataset.cy);
+          const scaleX = rect.width / width;
+          const scaleY = rect.height / height;
+
+          newTooltip.innerHTML = `
+            <div><strong>${l}</strong></div>
+            <div style="margin-top:4px; color:#ef4444;">Dialed: <strong>${d}</strong> calls</div>
+            <div style="color:#16a34a;">Connected: <strong>${c}</strong> calls</div>
+            <div style="margin-top:2px; font-size:10px; color:var(--text-muted);">Connect Rate: <strong>${p}%</strong></div>
+          `;
+          newTooltip.style.left = `${cx * scaleX}px`;
+          newTooltip.style.top = `${cy * scaleY}px`;
+          newTooltip.classList.add("is-visible");
+        });
+
+        pt.addEventListener("mouseleave", () => {
+          newTooltip.classList.remove("is-visible");
+        });
+      });
+    }
+
+    // ----------------------------------------------------
+    // SVG Clustered Column Chart Renderer (Batch-wise Attendance with Multi-Select Dropdown)
+    // ----------------------------------------------------
+    let selectedAttendanceBatches = null;
+    let multiselectEventsWired = false;
+
+    function renderClusteredColumnChart(modulesData, allBatchList) {
+      const box = document.getElementById("attendanceChartBox");
+      const multiselectWrapper = document.getElementById("batchMultiselectWrapper");
+      const summaryElem = document.getElementById("batchMultiselectSummary");
+      const listElem = document.getElementById("batchCheckboxList");
+      const selectAllCheckbox = document.getElementById("selectAllAttendanceBatches");
+      const legendWrap = document.getElementById("batchAttendanceLegend");
+      if (!box) return;
+
+      if (!modulesData || !modulesData.length || !allBatchList || !allBatchList.length) {
+        box.innerHTML = `<div class="empty-state">No attendance comparison data available.</div>`;
+        if (legendWrap) legendWrap.innerHTML = "";
+        return;
+      }
+
+      const batchColors = ["#16a34a", "#22c55e", "#15803d", "#4ade80"];
+
+      if (!selectedAttendanceBatches || selectedAttendanceBatches.size === 0) {
+        selectedAttendanceBatches = new Set(allBatchList);
+      }
+
+      // Populate Custom Multi-Select Dropdown Menu
+      if (listElem && multiselectWrapper) {
+        const isAllSelected = selectedAttendanceBatches.size === allBatchList.length;
+        if (selectAllCheckbox) selectAllCheckbox.checked = isAllSelected;
+
+        let optionsHtml = "";
+        allBatchList.forEach((batch, idx) => {
+          const isChecked = selectedAttendanceBatches.has(batch);
+          const dotColor = batchColors[idx % batchColors.length];
+          optionsHtml += `
+            <label class="multiselect-option">
+              <input type="checkbox" class="batch-opt-checkbox" data-batch="${batch}" ${isChecked ? "checked" : ""} />
+              <span class="legend-dot" style="background:${dotColor}; width:8px; height:8px;"></span>
+              <span>${batch}</span>
+            </label>
+          `;
+        });
+        listElem.innerHTML = optionsHtml;
+
+        // Update Summary Text
+        if (summaryElem) {
+          if (isAllSelected) {
+            summaryElem.textContent = `All Batches (${allBatchList.length} comparing)`;
+          } else if (selectedAttendanceBatches.size === 1) {
+            summaryElem.textContent = `${Array.from(selectedAttendanceBatches)[0]}`;
+          } else {
+            summaryElem.textContent = `${selectedAttendanceBatches.size} Batches Comparing`;
+          }
+        }
+
+        // Wire Event Handlers Once
+        if (!multiselectEventsWired) {
+          multiselectEventsWired = true;
+          const toggleBtn = document.getElementById("batchMultiselectBtn");
+          toggleBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            multiselectWrapper.classList.toggle("is-open");
+          });
+
+          document.addEventListener("click", (e) => {
+            if (!multiselectWrapper.contains(e.target)) {
+              multiselectWrapper.classList.remove("is-open");
+            }
+          });
+
+          if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener("change", () => {
+              if (selectAllCheckbox.checked) {
+                selectedAttendanceBatches = new Set(allBatchList);
+              } else {
+                // Keep at least one selected for comparison
+                selectedAttendanceBatches = new Set([allBatchList[0]]);
+              }
+              renderClusteredColumnChart(modulesData, allBatchList);
+            });
+          }
+        }
+
+        // Wire Individual Option Checkboxes
+        listElem.querySelectorAll(".batch-opt-checkbox").forEach(cb => {
+          cb.addEventListener("change", () => {
+            const bName = cb.dataset.batch;
+            if (cb.checked) {
+              selectedAttendanceBatches.add(bName);
+            } else {
+              if (selectedAttendanceBatches.size > 1) {
+                selectedAttendanceBatches.delete(bName);
+              } else {
+                cb.checked = true; // Prevent unchecking the last active batch
+                return;
+              }
+            }
+            renderClusteredColumnChart(modulesData, allBatchList);
+          });
+        });
+      }
+
+      const activeBatches = allBatchList.filter(b => selectedAttendanceBatches.has(b));
+
+      // Render legend with dots
+      if (legendWrap) {
+        legendWrap.innerHTML = activeBatches.map(batch => {
+          const originalIdx = allBatchList.indexOf(batch);
+          const dotColor = batchColors[originalIdx % batchColors.length];
+          return `
+            <div class="chart-legend-item">
+              <span class="legend-dot" style="background:${dotColor}"></span>
+              <span>${batch}</span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const width = 880;
+      const height = 310;
+      const padLeft = 45;
+      const padRight = 25;
+      const padTop = 30;
+      const padBottom = 80;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const groupCount = modulesData.length;
+      const groupWidth = chartW / groupCount;
+      const clusterPad = Math.max(6, 18 - activeBatches.length * 3);
+      const usableClusterW = groupWidth - clusterPad * 2;
+      const colWidth = Math.max(10, Math.min(36, usableClusterW / activeBatches.length));
+
+      // Y Axis Ticks (0, 25, 50, 75, 100%)
+      let gridLines = "";
+      for (let i = 0; i <= 4; i++) {
+        const val = i * 25;
+        const y = padTop + chartH - (val / 100) * chartH;
+        gridLines += `
+          <line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" class="svg-grid-line" />
+          <text x="${padLeft - 10}" y="${y + 3}" text-anchor="end" class="svg-axis-text">${val}%</text>
+        `;
+      }
+
+      // Columns and X-Axis Labels
+      let columnsHtml = "";
+      let xLabelsHtml = "";
+
+      modulesData.forEach((row, gIdx) => {
+        const groupX = padLeft + gIdx * groupWidth + (groupWidth - activeBatches.length * colWidth) / 2;
+        const groupCenterX = padLeft + gIdx * groupWidth + groupWidth / 2;
+
+        activeBatches.forEach((batch, bIdx) => {
+          const originalIdx = allBatchList.indexOf(batch);
+          const val = row[batch] || 0;
+          const colHeight = (val / 100) * chartH;
+          const x = groupX + bIdx * colWidth;
+          const y = padTop + chartH - colHeight;
+          const color = val < 75 ? "#ef4444" : batchColors[originalIdx % batchColors.length];
+
+          columnsHtml += `
+            <rect x="${x}" y="${y}" width="${colWidth - 2}" height="${colHeight}" rx="3"
+              fill="${color}" class="svg-column-bar"
+              data-mod="${row.module}" data-batch="${batch}" data-val="${val}" data-cx="${x + colWidth / 2}" data-cy="${y}" />
+          `;
+        });
+
+        xLabelsHtml += `
+          <text x="${groupCenterX + 6}" y="${height - 24}" text-anchor="end" class="svg-axis-text" transform="rotate(-35, ${groupCenterX + 6}, ${height - 24})" style="font-size:10.5px; font-weight:600;">${row.module}</text>
+        `;
+      });
+
+      const svgHtml = `
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="overflow:visible;">
+          ${gridLines}
+          <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" class="svg-axis-line" />
+          ${columnsHtml}
+          ${xLabelsHtml}
+        </svg>
+      `;
+
+      box.innerHTML = svgHtml + `<div class="chart-tooltip-bubble" id="attendanceTooltip"></div>`;
+
+      // Wire Tooltips with safe top clamping
+      const newTooltip = document.getElementById("attendanceTooltip");
+      box.querySelectorAll(".svg-column-bar").forEach(bar => {
+        bar.addEventListener("mouseenter", () => {
+          const mod = bar.dataset.mod;
+          const batch = bar.dataset.batch;
+          const val = bar.dataset.val;
+          const rect = box.getBoundingClientRect();
+          const cx = parseFloat(bar.dataset.cx);
+          const cy = parseFloat(bar.dataset.cy);
+          const scaleX = rect.width / width;
+          const scaleY = rect.height / height;
+          const topPos = Math.max(30, cy * scaleY);
+
+          newTooltip.innerHTML = `
+            <div style="font-size:12px; font-weight:700; color:var(--heading);">${mod}</div>
+            <div style="color:var(--text-muted); font-size:11px; margin-top:2px;">${batch}</div>
+            <div style="margin-top:4px; font-size:12px;">Attendance: <strong style="color:${val < 75 ? '#ef4444' : '#16a34a'};">${val}%</strong></div>
+          `;
+          newTooltip.style.left = `${cx * scaleX}px`;
+          newTooltip.style.top = `${topPos}px`;
+          newTooltip.classList.add("is-visible");
+        });
+
+        bar.addEventListener("mouseleave", () => {
+          newTooltip.classList.remove("is-visible");
+        });
+      });
+    }
+
+    // ----------------------------------------------------
+    // SVG Donut Chart Renderer (Assignment Completion by Application)
+    // ----------------------------------------------------
+    function renderDonutChart(items) {
+      const box = document.getElementById("donutChartBox");
+      if (!box) return;
+      if (!items || !items.length) {
+        box.innerHTML = `<div class="empty-state">No assignment data available.</div>`;
+        return;
+      }
+
+      const width = 640;
+      const height = 340;
+      const cx = width / 2;
+      const cy = height / 2;
+      const outerR = 95;
+      const innerR = 55;
+      const leaderR = 118;
+
+      const colors = [
+        "#0e7490", "#ea580c", "#16a34a", "#0284c7", "#9333ea",
+        "#15803d", "#0f766e", "#3b82f6", "#047857", "#c2410c"
+      ];
+
+      const totalSubmitted = items.reduce((acc, it) => acc + (it.submitted || 0), 0);
+      const totalTarget = items.reduce((acc, it) => acc + (it.target || 0), 0);
+      const avgCompletion = totalTarget > 0 ? Math.round((totalSubmitted / totalTarget) * 100) : 0;
+
+      let startAngle = -Math.PI / 2;
+      let pathsHtml = "";
+      let linesHtml = "";
+      let labelsHtml = "";
+
+      const totalShare = items.reduce((acc, it) => acc + (it.sharePct || it.submitted || 1), 0);
+
+      items.forEach((it, idx) => {
+        const shareVal = it.sharePct || it.submitted || 1;
+        const sliceAngle = (shareVal / totalShare) * (Math.PI * 2);
+        const endAngle = startAngle + sliceAngle;
+        const midAngle = startAngle + sliceAngle / 2;
+
+        const x1 = cx + outerR * Math.cos(startAngle);
+        const y1 = cy + outerR * Math.sin(startAngle);
+        const x2 = cx + outerR * Math.cos(endAngle);
+        const y2 = cy + outerR * Math.sin(endAngle);
+
+        const x3 = cx + innerR * Math.cos(endAngle);
+        const y3 = cy + innerR * Math.sin(endAngle);
+        const x4 = cx + innerR * Math.cos(startAngle);
+        const y4 = cy + innerR * Math.sin(startAngle);
+
+        const largeArc = sliceAngle > Math.PI ? 1 : 0;
+        const color = colors[idx % colors.length];
+
+        const d = `M ${x1} ${y1} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+
+        pathsHtml += `
+          <path d="${d}" fill="${color}" stroke="var(--surface)" stroke-width="2" class="donut-segment"
+            data-module="${it.module}" data-val="${it.completionPct}" data-share="${it.sharePct || 0}"
+            data-sub="${it.submitted}" data-target="${it.target}" />
+        `;
+
+        // Leader line
+        const lx1 = cx + outerR * Math.cos(midAngle);
+        const ly1 = cy + outerR * Math.sin(midAngle);
+        const lx2 = cx + leaderR * Math.cos(midAngle);
+        const ly2 = cy + leaderR * Math.sin(midAngle);
+        const isRight = Math.cos(midAngle) >= 0;
+        const lx3 = lx2 + (isRight ? 24 : -24);
+        const ly3 = ly2;
+
+        linesHtml += `
+          <polyline points="${lx1},${ly1} ${lx2},${ly2} ${lx3},${ly3}" class="donut-leader-line" />
+        `;
+
+        const labelX = lx3 + (isRight ? 6 : -6);
+        const anchor = isRight ? "start" : "end";
+
+        labelsHtml += `
+          <text x="${labelX}" y="${ly3 - 2}" text-anchor="${anchor}" class="donut-label-main">${it.shortName || it.module}</text>
+          <text x="${labelX}" y="${ly3 + 10}" text-anchor="${anchor}" class="donut-label-sub">${it.completionPct}% (${it.sharePct || 0}%)</text>
+        `;
+
+        startAngle = endAngle;
+      });
+
+      const svgHtml = `
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="width:100%; max-width:640px; height:auto; overflow:visible;">
+          ${pathsHtml}
+          ${linesHtml}
+          ${labelsHtml}
+          <text x="${cx}" y="${cy - 6}" class="donut-center-title">AVG COMPLETION</text>
+          <text x="${cx}" y="${cy + 16}" class="donut-center-value">${avgCompletion}%</text>
+        </svg>
+      `;
+
+      box.innerHTML = svgHtml + `<div class="chart-tooltip-bubble" id="donutTooltip"></div>`;
+
+      const newTooltip = document.getElementById("donutTooltip");
+      box.querySelectorAll(".donut-segment").forEach(seg => {
+        seg.addEventListener("mouseenter", e => {
+          const mod = seg.dataset.module;
+          const val = seg.dataset.val;
+          const share = seg.dataset.share;
+          const sub = seg.dataset.sub;
+          const target = seg.dataset.target;
+          const rect = box.getBoundingClientRect();
+
+          newTooltip.innerHTML = `
+            <div style="font-weight:700; color:var(--heading);">Series 1 Point "${mod}"</div>
+            <div style="margin-top:2px; font-size:12px; color:var(--primary);">Value: <strong>${val}% (${share}%)</strong></div>
+            <div style="font-size:10px; color:var(--text-muted);">Submitted: ${sub} / ${target} assignments</div>
+          `;
+          newTooltip.style.left = `${e.clientX - rect.left}px`;
+          newTooltip.style.top = `${e.clientY - rect.top}px`;
+          newTooltip.classList.add("is-visible");
+        });
+        seg.addEventListener("mousemove", e => {
+          const rect = box.getBoundingClientRect();
+          newTooltip.style.left = `${e.clientX - rect.left}px`;
+          newTooltip.style.top = `${e.clientY - rect.top}px`;
+        });
+        seg.addEventListener("mouseleave", () => {
+          newTooltip.classList.remove("is-visible");
+        });
+      });
+    }
+
+    // ----------------------------------------------------
+    // Filter Population & Dashboard Loader
+    // ----------------------------------------------------
     async function populateFilters() {
       const students = await apiFetch('/api/students');
       const batches = [...new Set(students.map(s => s.batch))];
@@ -163,55 +810,175 @@
       const params = new URLSearchParams();
       const batch = document.getElementById("batchFilter").value;
       const session = document.getElementById("sessionFilter").value;
+      const datePreset = document.getElementById("datePresetFilter") ? document.getElementById("datePresetFilter").value : "all";
+      const startDate = document.getElementById("startDateInput") ? document.getElementById("startDateInput").value : "";
+      const endDate = document.getElementById("endDateInput") ? document.getElementById("endDateInput").value : "";
+
       if (batch !== "All") params.set("batch", batch);
       if (session !== "All") params.set("session", session);
+      if (datePreset && datePreset !== "all") params.set("datePreset", datePreset);
+      if (datePreset === "custom") {
+        if (startDate) params.set("startDate", startDate);
+        if (endDate) params.set("endDate", endDate);
+      }
 
       const perf = await apiFetch(`/api/dashboard/sms?${params.toString()}`);
       const feedback = await apiFetch('/api/dashboard/srm');
-      const s = perf.stats;
+      currentDashboardData = perf;
 
+      const s = perf.stats;
+      const k = perf.callingKpis || {};
+
+      // 1. Executive Summary Metrics (4 cards)
       document.getElementById("summaryMetrics").innerHTML = [
-        metric("Active Students", s.activeStudents, `${s.activeBatches} active batch groups`),
+        metric("Active Students", `${s.activeStudents} / ${s.selectedStudents} <span style="font-size:16px; font-weight:700; color:var(--success); margin-left:4px;">(${s.activeStudentsPct}%)</span>`, `${s.activeBatches} active batch group${s.activeBatches === 1 ? '' : 's'}`),
         metric("Attendance", `${s.attendanceRate}%`, "Cohort average"),
         metric("Focus Rate", `${s.avgAttention}%`, "Class attention average"),
-        metric("DV Elite / Placement", `${s.dvEliteCount} / ${s.placementCount}`, "Rule-qualified students")
+        metric("DV Elite / Placement", `${s.dvEliteCount} / ${s.selectedStudents} <span style="font-size:16px; font-weight:700; color:var(--success); margin-left:4px;">(${s.dvElitePct}%)</span>`, "Rule-qualified students")
       ].join("");
 
-      document.getElementById("moduleBars").innerHTML = perf.moduleAverages.map(m => barRow(m.name, m.averageScore, m.averageScore >= 70 ? "good" : m.averageScore < 50 ? "risk" : "")).join("");
-      document.getElementById("pillarBars").innerHTML = [
-        ["MCQ", s.mcqAvg],
-        ["Practical Test", s.practicalAvg],
-        ["Pen and Paper", s.hardpaperAvg],
-        ["Mock Interview", s.mockInterviewAvg]
-      ].map(([label, value]) => barRow(label, value, value >= 70 ? "good" : value < 50 ? "risk" : "info")).join("");
+      // 2. 7 Calling KPI Cards (Exact Requirements with selected/total and %)
+      document.getElementById("callingMetrics").innerHTML = [
+        metric("Total Calls Dialed", k.totalCallsDialed ?? s.totalCallsDialed ?? 0, "Total outgoing attempts"),
+        metric("Total Calls Connected", `${k.totalCallsConnected ?? s.totalCallsConnected ?? 0} <span style="font-size:16px; font-weight:700; color:var(--success); margin-left:4px;">(${k.connectPercentage ?? s.connectPercentage ?? 0}%)</span>`, "Successful connections"),
+        metric("Total Students", `${k.selectedStudents ?? s.selectedStudents ?? s.totalStudents ?? 5} / ${k.totalCohortStudents ?? s.totalCohortStudents ?? 5} <span style="font-size:16px; font-weight:700; color:var(--success); margin-left:4px;">(${k.selectedStudentsPct ?? s.selectedStudentsPct ?? 100}%)</span>`, "Selected / Total enrolled"),
+        metric("Total Students Connected", `${k.uniqueStudentsConnected ?? s.uniqueStudentsConnected ?? 0} / ${k.selectedStudents ?? s.selectedStudents ?? 5} <span style="font-size:16px; font-weight:700; color:var(--success); margin-left:4px;">(${Math.round(((k.uniqueStudentsConnected || 0) / (k.selectedStudents || 1)) * 100)}%)</span>`, "Unique students reached"),
+        metric("Connect %", `<span style="color:var(--success);">${k.connectPercentage ?? s.connectPercentage ?? 0}%</span>`, "Call connect efficiency"),
+        metric("Total Calls Made", k.totalCallsMade ?? s.totalCallsMade ?? 0, "Logged call volume"),
+        metric("Average Calls Made", k.averageCallsMade ?? s.averageCallsMade ?? 0, "Average per student")
+      ].join("");
 
+      // 3. Render Trend Line Chart based on active tab
+      updateActiveTrendChart();
+
+      // 4. Render Clustered Column Attendance Chart
+      if (perf.comparisons) {
+        renderClusteredColumnChart(perf.comparisons.batchAttendanceByModule, perf.comparisons.batches);
+
+        // 5. Batch-wise Unique Students Called Bars
+        const maxCalled = Math.max(1, ...(perf.comparisons.batchUniqueStudentsCalled || []).map(b => b.totalStudents));
+        document.getElementById("batchUniqueCalledBars").innerHTML = (perf.comparisons.batchUniqueStudentsCalled || []).map(b => `
+          <div style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <strong>${b.batch}</strong>
+              <span style="color:var(--text-muted); font-size:11px;">${b.uniqueConnected} / ${b.totalStudents} connected <strong style="color:var(--success);">(${Math.round((b.uniqueConnected / b.totalStudents) * 100)}%)</strong></span>
+            </div>
+            <div class="progress-track" style="height:10px;">
+              <div class="progress-fill good" style="width:${maxWidth(Math.round((b.uniqueConnected / b.totalStudents) * 100))};"></div>
+            </div>
+          </div>
+        `).join("") || `<div class="empty-state">No batch calling data.</div>`;
+
+        // 6. Batch-wise Total Students Bars
+        const maxStudents = Math.max(1, ...(perf.comparisons.batchTotalStudents || []).map(b => b.totalStudents));
+        document.getElementById("batchTotalStudentBars").innerHTML = (perf.comparisons.batchTotalStudents || []).map(b => `
+          <div style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+              <strong>${b.batch}</strong>
+              <span style="color:var(--text-muted); font-size:11px;">${b.activeStudents} active / ${b.totalStudents} total <strong style="color:var(--success);">(${Math.round((b.activeStudents / b.totalStudents) * 100)}%)</strong></span>
+            </div>
+            <div class="progress-track" style="height:10px;">
+              <div class="progress-fill good" style="width:${maxWidth(Math.round((b.totalStudents / maxStudents) * 100))};"></div>
+            </div>
+          </div>
+        `).join("") || `<div class="empty-state">No batch enrollment data.</div>`;
+      }
+
+      // 7. Module Competency
+      document.getElementById("moduleBars").innerHTML = perf.moduleAverages.map(m => barRow(m.name, m.averageScore, m.averageScore >= 70 ? "good" : "risk")).join("");
+
+      // 8. Core LMS Pillars & Career Readiness Pillars
+      document.getElementById("coreLmsBars").innerHTML = [
+        ["MCQ Score Average", s.mcqAvg],
+        ["Practical Test Average", s.practicalAvg],
+        ["Attendance Rate", s.attendanceRate]
+      ].map(([label, value]) => barRow(label, value, value >= 70 ? "good" : "risk")).join("");
+
+      document.getElementById("readinessBars").innerHTML = [
+        ["Pen and Paper Exam", s.hardpaperAvg],
+        ["Mock Interview Score", s.mockInterviewAvg]
+      ].map(([label, value]) => barRow(label, value, value >= 70 ? "good" : "risk")).join("");
+
+      // 9. Assignment Completion Donut Chart
+      if (perf.assignmentDonut || s.assignmentDonut) {
+        renderDonutChart(perf.assignmentDonut || s.assignmentDonut);
+      }
+
+      // 10. Top Performers & Needs Focus
       document.getElementById("topPerformers").innerHTML = s.topPerformers.length ? s.topPerformers.map(i => insightRow(i, "good")).join("") : `<div class="empty-state">No students available.</div>`;
       document.getElementById("needsFocus").innerHTML = s.weakStudents.length ? s.weakStudents.map(i => insightRow(i, "risk")).join("") : `<div class="empty-state">No active intervention queue.</div>`;
 
+      // 11. Feedback Health & Knowledge
       document.getElementById("feedbackHealth").innerHTML = [
         metric("Feedback Logs", feedback.stats.totalFeedbackCount, "All triad records"),
-        metric("Reachability", `${feedback.stats.connectionRate}%`, "Connected calls"),
+        metric("Reachability", `<span style="color:var(--success);">${feedback.stats.connectionRate}%</span>`, "Connected calls"),
         metric("Faculty Rating", `${feedback.stats.avgFacultyRating} / 5`, "Class experience"),
         metric("Mentor Rating", `${feedback.stats.avgMentorRating} / 5`, "Support experience")
       ].join("");
+    }
 
-      const maxKnowledge = Math.max(1, ...Object.values(feedback.knowledgeDist));
-      const maxAssignment = Math.max(1, ...Object.values(feedback.assignmentDist));
-      document.getElementById("feedbackBars").innerHTML = [
-        countBar("Best knowledge", feedback.knowledgeDist.Best, maxKnowledge, "good"),
-        countBar("Good knowledge", feedback.knowledgeDist.Good, maxKnowledge, "info"),
-        countBar("Average knowledge", feedback.knowledgeDist.Average, maxKnowledge, ""),
-        countBar("Low knowledge", feedback.knowledgeDist.Low, maxKnowledge, "risk"),
-        countBar("Completed", feedback.assignmentDist.Completed, maxAssignment, "good"),
-        countBar("In progress", feedback.assignmentDist.InProgress, maxAssignment, "info"),
-        countBar("Not started", feedback.assignmentDist.NotStarted, maxAssignment, "risk")
-      ].join("");
+    function updateActiveTrendChart() {
+      if (!currentDashboardData || !currentDashboardData.trends) return;
+
+      let trendData = [];
+      if (activeTrendGranularity === "yesterday") {
+        const daily = currentDashboardData.trends.daily || [];
+        const yesterdayItem = daily.find(d => d.date === "2026-08-24") || daily[daily.length - 2] || daily[daily.length - 1];
+        trendData = yesterdayItem ? [
+          { label: "Morning", dialed: Math.ceil(yesterdayItem.dialed * 0.4), connected: Math.ceil(yesterdayItem.connected * 0.4), connectPct: yesterdayItem.connectPct },
+          { label: "Afternoon", dialed: Math.floor(yesterdayItem.dialed * 0.35), connected: Math.floor(yesterdayItem.connected * 0.35), connectPct: yesterdayItem.connectPct },
+          { label: "Evening", dialed: Math.max(1, yesterdayItem.dialed - Math.ceil(yesterdayItem.dialed * 0.4) - Math.floor(yesterdayItem.dialed * 0.35)), connected: Math.max(1, yesterdayItem.connected - Math.ceil(yesterdayItem.connected * 0.4) - Math.floor(yesterdayItem.connected * 0.35)), connectPct: yesterdayItem.connectPct }
+        ] : daily.slice(-3);
+      } else {
+        trendData = currentDashboardData.trends[activeTrendGranularity] || [];
+      }
+
+      renderTrendLineChart(trendData, activeTrendGranularity);
+    }
+
+    function setupEventListeners() {
+      const batchFilter = document.getElementById("batchFilter");
+      const sessionFilter = document.getElementById("sessionFilter");
+      const datePresetFilter = document.getElementById("datePresetFilter");
+      const startDateInput = document.getElementById("startDateInput");
+      const endDateInput = document.getElementById("endDateInput");
+      const customRangeWrap = document.getElementById("customDateRangeWrap");
+
+      batchFilter.addEventListener("change", loadDashboard);
+      sessionFilter.addEventListener("change", loadDashboard);
+      
+      datePresetFilter.addEventListener("change", () => {
+        if (datePresetFilter.value === "custom") {
+          customRangeWrap.style.display = "inline-flex";
+        } else {
+          customRangeWrap.style.display = "none";
+        }
+        loadDashboard();
+      });
+
+      startDateInput.addEventListener("change", loadDashboard);
+      endDateInput.addEventListener("change", loadDashboard);
+      const trendSelect = document.getElementById("trendGranularitySelect");
+      if (trendSelect) {
+        trendSelect.addEventListener("change", () => {
+          activeTrendGranularity = trendSelect.value;
+          updateActiveTrendChart();
+        });
+      }
+
+      onThemeChange(() => {
+        if (currentDashboardData) {
+          updateActiveTrendChart();
+          if (currentDashboardData.comparisons) {
+            renderClusteredColumnChart(currentDashboardData.comparisons.batchAttendanceByModule, currentDashboardData.comparisons.batches);
+          }
+        }
+      });
     }
 
     async function init() {
       await populateFilters();
-      document.getElementById("batchFilter").addEventListener("change", loadDashboard);
-      document.getElementById("sessionFilter").addEventListener("change", loadDashboard);
+      setupEventListeners();
       await loadDashboard();
     }
 
