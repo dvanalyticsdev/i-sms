@@ -278,9 +278,10 @@
     }
 
     function renderFacultyRow(item) {
+      const studentLink = item.studentId ? `student-dashboard.html?id=${encodeURIComponent(item.studentId)}` : '#';
       return `
         <tr>
-          <td><strong>${item.studentName}</strong></td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
           <td><code>${item.studentId}</code></td>
           <td>${item.course}</td>
           <td>${item.batch}</td>
@@ -302,9 +303,10 @@
     }
 
     function renderMentorRow(item) {
+      const studentLink = item.studentId ? `student-dashboard.html?id=${encodeURIComponent(item.studentId)}` : '#';
       return `
         <tr>
-          <td><strong>${item.studentName}</strong></td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
           <td><code>${item.studentId}</code></td>
           <td>${item.course}</td>
           <td>${item.batch}</td>
@@ -329,9 +331,10 @@
       const knowledgeClass = isGood ? "badge-completed" : "badge-risk";
       const assignStatus = up(item.assignmentStatus);
       const isAssignDone = assignStatus === "COMPLETED";
+      const studentLink = item.studentId ? `student-dashboard.html?id=${encodeURIComponent(item.studentId)}` : '#';
       return `
         <tr>
-          <td><strong>${item.studentName}</strong></td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
           <td><code>${item.studentId}</code></td>
           <td>${item.course}</td>
           <td>${item.batch}</td>

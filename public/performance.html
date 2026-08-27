@@ -152,7 +152,9 @@
         return `
           <tr>
             <td>
-              <strong>${student.name}</strong>
+              <a href="student-dashboard.html?id=${encodeURIComponent(student.id)}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)">
+                <strong>${student.name}</strong>
+              </a>
               <div class="student-meta">${student.email || "No email recorded"}</div>
             </td>
             <td><code>${student.id}</code></td>
