@@ -2260,6 +2260,10 @@ html[data-theme="dark"] .assignment-dot.pending {
   gap: 18px;
 }
 
+.card-grid-full {
+  grid-column: 1 / -1;
+}
+
 .insight-list {
   display: flex;
   flex-direction: column;
@@ -2662,7 +2666,8 @@ html[data-theme="dark"] .assignment-dot.pending {
   .calling-kpi-grid,
   .feedback-board,
   .dashboard-grid,
-  .profile-banner {
+  .profile-banner,
+  .top-faculty-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2670,3 +2675,310 @@ html[data-theme="dark"] .assignment-dot.pending {
     grid-template-columns: 1fr;
   }
 }
+
+/* Faculty Feedback & Top 3 Display */
+.top-faculty-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.faculty-podium-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.faculty-podium-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.faculty-podium-card.rank-1 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.09) 0%, var(--surface) 100%);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.faculty-podium-card.rank-2 {
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.09) 0%, var(--surface) 100%);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+.faculty-podium-card.rank-3 {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, var(--surface) 100%);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+.faculty-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.faculty-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.faculty-rank-badge.rank-1 {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.faculty-rank-badge.rank-2 {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.faculty-rank-badge.rank-3 {
+  background: rgba(217, 119, 6, 0.2);
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+}
+
+.faculty-name-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading);
+  margin: 0;
+}
+
+.faculty-rating-block {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.faculty-rating-val {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: #f59e0b;
+}
+
+.faculty-rating-stars {
+  font-size: 14px;
+  color: #f59e0b;
+  letter-spacing: 2px;
+}
+
+.faculty-positive-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.faculty-meter-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.faculty-meter-label strong {
+  color: var(--success);
+}
+
+.faculty-substats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.faculty-substat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.faculty-substat-item span {
+  color: var(--text-muted);
+}
+
+.faculty-substat-item strong {
+  color: var(--heading);
+  font-weight: 600;
+}
+
+/* Faculty Feedback Redesign Layout */
+.faculty-donut-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 4px;
+}
+
+@media (max-width: 1080px) {
+  .faculty-donut-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.faculty-donut-pane,
+.faculty-cards-pane {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+}
+
+.faculty-pane-head {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.faculty-pane-head h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--heading);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.faculty-pane-head p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.faculty-donut-box {
+  width: 100%;
+  flex: 1;
+  min-height: 330px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.faculty-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.faculty-top-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all var(--ease);
+  position: relative;
+}
+
+.faculty-top-item:hover {
+  background: var(--row-hover);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.faculty-top-item.rank-1 {
+  border-left: 4px solid #f59e0b;
+}
+
+.faculty-top-item.rank-2 {
+  border-left: 4px solid #0284c7;
+}
+
+.faculty-top-item.rank-3 {
+  border-left: 4px solid #10b981;
+}
+
+.faculty-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.faculty-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--heading);
+  font-size: 13.5px;
+}
+
+.faculty-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.faculty-item-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.faculty-rating-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.faculty-item-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.faculty-item-subtags {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-top: 5px;
+  border-top: 1px dashed var(--border);
+}
+
+.faculty-item-subtags strong {
+  color: var(--heading);
+  font-weight: 600;
+}
+
+
+
