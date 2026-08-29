@@ -20,12 +20,64 @@
         </div>
       </div>
       <nav class="sidebar-nav">
-        <a href="performance.html" class="sidebar-link">Student Performance Management</a>
-        <a href="feedback.html" class="sidebar-link">Student Review Management</a>
-        <a href="dashboard.html" class="sidebar-link is-active">Analytics Dashboard</a>
+        <a href="student-performance-dashboard.html" class="sidebar-link" data-tooltip="Performance Dashboard" aria-label="Performance Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Performance Dashboard</span>
+        </a>
+        <a href="student-review-dashboard.html" class="sidebar-link" data-tooltip="Review Dashboard" aria-label="Review Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Review Dashboard</span>
+        </a>
+        <a href="performance.html" class="sidebar-link" data-tooltip="Performance Management" aria-label="Performance Management">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Performance Management</span>
+        </a>
+        <a href="feedback.html" class="sidebar-link" data-tooltip="Review Management" aria-label="Review Management">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Review Management</span>
+        </a>
+        <a href="dashboard.html" class="sidebar-link is-active" data-tooltip="Analytics Dashboard" aria-label="Analytics Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Analytics Dashboard</span>
+        </a>
       </nav>
       <div class="sidebar-bottom-links">
-        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" data-tooltip="Log out" aria-label="Log out" style="border:none; cursor:pointer;">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </div>
+        </button>
       </div>
     </aside>
 
@@ -594,10 +646,11 @@
         `;
       }
 
-      const width = 880;
+      const groupCount = activeBatchesData.length;
+      const width = 960;
       const height = 310;
       const padLeft = 45;
-      const padRight = 25;
+      const padRight = 30;
       const padTop = 35;
       const padBottom = 55;
       const chartW = width - padLeft - padRight;
@@ -619,15 +672,15 @@
         `;
       }
 
-      // Clustered Columns
-      const groupCount = activeBatchesData.length;
+      // Clustered Columns Calculation
       const groupWidth = chartW / groupCount;
-      const barWidth = Math.max(22, Math.min(52, (groupWidth - 80) / 2));
-      const barGap = 8;
+      const barWidth = Math.max(16, Math.min(26, (groupWidth * 0.38 - 6) / 2));
+      const barGap = 6;
       const clusterWidth = barWidth * 2 + barGap;
 
       let columnsHtml = "";
       let xLabelsHtml = "";
+      const fontSize = groupCount > 7 ? 10 : 11.5;
 
       activeBatchesData.forEach((d, gIdx) => {
         const groupCenterX = padLeft + gIdx * groupWidth + groupWidth / 2;
@@ -646,33 +699,33 @@
 
         // Bar 1: Total Students (Sky/Blue #0284c7)
         columnsHtml += `
-          <rect x="${x1}" y="${y1}" width="${barWidth}" height="${h1}" rx="4"
+          <rect x="${x1}" y="${y1}" width="${barWidth}" height="${h1}" rx="3"
             fill="#0284c7" class="svg-column-bar"
             data-type="Total Students" data-batch="${d.batch}" data-tot="${totalVal}" data-att="${attVal}" data-rate="${d.attendanceRate || 0}"
             data-cx="${x1 + barWidth / 2}" data-cy="${y1}" />
           <text x="${x1 + barWidth / 2}" y="${y1 - 6}" text-anchor="middle"
-            style="font-size:12px; font-weight:700; fill:var(--heading);">${totalVal}</text>
+            style="font-size:11.5px; font-weight:700; fill:var(--heading);">${totalVal}</text>
         `;
 
         // Bar 2: Attendance Count (Emerald Green #16a34a)
         columnsHtml += `
-          <rect x="${x2}" y="${y2}" width="${barWidth}" height="${h2}" rx="4"
+          <rect x="${x2}" y="${y2}" width="${barWidth}" height="${h2}" rx="3"
             fill="#16a34a" class="svg-column-bar"
             data-type="Attendance Count" data-batch="${d.batch}" data-tot="${totalVal}" data-att="${attVal}" data-rate="${d.attendanceRate || 0}"
             data-cx="${x2 + barWidth / 2}" data-cy="${y2}" />
           <text x="${x2 + barWidth / 2}" y="${y2 - 6}" text-anchor="middle"
-            style="font-size:12px; font-weight:700; fill:var(--heading);">${attVal}</text>
+            style="font-size:11.5px; font-weight:700; fill:var(--heading);">${attVal}</text>
         `;
 
-        // X-Axis Labels
+        // Straight Horizontal X-Axis Labels
         xLabelsHtml += `
-          <text x="${groupCenterX}" y="${padTop + chartH + 20}" text-anchor="middle" class="svg-axis-text" style="font-size:12px; font-weight:700; fill:var(--heading);">${d.batch}</text>
-          <text x="${groupCenterX}" y="${padTop + chartH + 36}" text-anchor="middle" style="font-size:11px; font-weight:600; fill:var(--text-muted);">${d.attendanceRate}% Attendance</text>
+          <text x="${groupCenterX}" y="${padTop + chartH + 20}" text-anchor="middle" class="svg-axis-text" style="font-size:${fontSize}px; font-weight:700; fill:var(--heading);">${d.batch}</text>
+          <text x="${groupCenterX}" y="${padTop + chartH + 36}" text-anchor="middle" style="font-size:10px; font-weight:600; fill:var(--text-muted);">${d.attendanceRate}% Att.</text>
         `;
       });
 
       const svgHtml = `
-        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="overflow:visible; width:100%; height:auto;">
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:310px; display:block; overflow:visible;">
           ${gridLines}
           <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" class="svg-axis-line" />
           ${columnsHtml}

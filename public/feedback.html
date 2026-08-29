@@ -20,12 +20,64 @@
         </div>
       </div>
       <nav class="sidebar-nav">
-        <a href="performance.html" class="sidebar-link">Student Performance Management</a>
-        <a href="feedback.html" class="sidebar-link is-active">Student Review Management</a>
-        <a href="dashboard.html" class="sidebar-link">Analytics Dashboard</a>
+        <a href="student-performance-dashboard.html" class="sidebar-link" data-tooltip="Performance Dashboard" aria-label="Performance Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Performance Dashboard</span>
+        </a>
+        <a href="student-review-dashboard.html" class="sidebar-link" data-tooltip="Review Dashboard" aria-label="Review Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Review Dashboard</span>
+        </a>
+        <a href="performance.html" class="sidebar-link" data-tooltip="Performance Management" aria-label="Performance Management">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Performance Management</span>
+        </a>
+        <a href="feedback.html" class="sidebar-link is-active" data-tooltip="Review Management" aria-label="Review Management">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Review Management</span>
+        </a>
+        <a href="dashboard.html" class="sidebar-link" data-tooltip="Analytics Dashboard" aria-label="Analytics Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Analytics Dashboard</span>
+        </a>
       </nav>
       <div class="sidebar-bottom-links">
-        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="width:100%; border:none; text-align:left; cursor:pointer;">Log out</button>
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" data-tooltip="Log out" aria-label="Log out" style="border:none; cursor:pointer;">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </div>
+        </button>
       </div>
     </aside>
 
@@ -88,6 +140,7 @@
               <tbody id="feedbackBody"></tbody>
             </table>
           </div>
+          <div class="sr-pagination" id="feedbackPaginationBar" style="padding: 12px 18px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;"></div>
         </section>
       </main>
     </div>
@@ -105,14 +158,13 @@
           <div class="form-group"><label>Application</label><select id="facApp" class="form-control" required></select></div>
           <div class="form-group"><label>Session</label><input id="facSession" class="form-control" value="SESSION-1" required></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Faculty Name</label><select id="facFaculty" class="form-control" required></select></div>
-          <div class="form-group"><label>Faculty Rating</label><input id="facRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
-          <div class="form-group"><label>Assignment Rating</label><input id="facAssignmentRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Overall Feedback</label><input id="facRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Class Material</label><input id="facMaterial" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Video Uploaded</label><select id="facVideoUploaded" class="form-control"><option value="On Time">On Time</option><option value="Delay">Delay</option></select></div>
-          <div class="form-group"><label>Class Timing</label><input id="facTiming" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
-          <div class="form-group"><label>Material</label><input id="facMaterial" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
+          <div class="form-group"><label>Assignment</label><input id="facTiming" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Class Speed</label><input id="facSpeed" type="number" min="0" max="5" step="0.1" class="form-control" value="4"></div>
           <div class="form-group"><label>Satisfaction</label><input id="facSatisfaction" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
-          <div class="form-group" style="grid-column:1/-1;"><label>Comments</label><textarea id="facComments" class="form-control" rows="2"></textarea></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Review Summary</label><textarea id="facComments" class="form-control" rows="2"></textarea></div>
         </div>
         <div class="modal-foot"><button type="button" class="btn-secondary" data-close="facultyModal">Cancel</button><button class="btn-primary" type="submit">Save</button></div>
       </form>
@@ -189,25 +241,27 @@
     let evals = [];
     let staff = [];
     let activeTab = "faculty";
+    let currentPage = 1;
+    const pageSize = 15;
 
     const tabConfig = {
       faculty: {
         title: "Faculty Feedback",
         description: "Student rates class delivery, pace, material, and satisfaction.",
         modal: "facultyModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Faculty Name", "Faculty Rating", "Assignment Rating", "Video Uploaded", "Timing", "Material", "Speed", "Satisfaction", "Comments"]
+        headers: ["#", "Student ID", "Student Name", "Batch", "Course", "Application", "Faculty", "Class Material", "Video Uploaded", "Assignment", "Class Speed", "Overall Feedback", "Review Summary"]
       },
       mentor: {
         title: "Mentor Feedback",
         description: "Student rates mentoring, doubt support, behaviour, and attention.",
         modal: "mentorModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Session", "Mentor Name", "Mentor Rating", "Doubt Support", "Behaviour", "Attention", "Satisfaction", "Comments"]
+        headers: ["#", "Student ID", "Student Name", "Batch", "Course", "Application", "Mentor", "Doubt Support", "Behaviour", "Attention", "Overall Feedback", "Comments"]
       },
       evaluation: {
         title: "Student Evaluation",
         description: "Mentor records assignment status, knowledge level, and call note.",
         modal: "evalModal",
-        headers: ["Student", "LMS ID", "Course", "Batch", "Call Date", "Connection", "Application", "Mentor Name", "Assignment Status", "Knowledge", "Overall Feedback"]
+        headers: ["#", "Student ID", "Student Name", "Batch", "Course", "Application", "Mentor", "Assignment Status", "Knowledge", "Overall Feedback"]
       },
       people: {
         title: "Faculty & Mentors",
@@ -228,20 +282,39 @@
       const searchInput = el("searchInput");
       const query = (searchInput ? searchInput.value.trim().toLowerCase() : "");
 
-      const matchesStudent = (student === "All" || item.studentId === student);
+      const matchesStudent = (student === "All" || item.studentId === student || item.batch === student);
       const matchesApp = (application === "All" || up(item.application) === up(application));
       const matchesQuery = !query ||
         String(item.studentName || "").toLowerCase().includes(query) ||
         String(item.studentId || "").toLowerCase().includes(query) ||
-        String(item.batch || "").toLowerCase().includes(query);
+        String(item.batch || "").toLowerCase().includes(query) ||
+        String(item.facultyName || item.faculty || "").toLowerCase().includes(query) ||
+        String(item.comments || item.reviewSummary || "").toLowerCase().includes(query);
 
       return matchesStudent && matchesApp && matchesQuery;
     };
 
+    function renderStars(rating) {
+      const num = Math.min(5, Math.max(0, Math.round(Number(rating) || 5)));
+      let stars = "";
+      for (let i = 1; i <= 5; i++) {
+        stars += `<span style="color:${i <= num ? '#f59e0b' : '#cbd5e1'}; font-size:13px; margin-right:1px;">★</span>`;
+      }
+      return `<div style="display:inline-flex; align-items:center; letter-spacing:1px;" title="${rating}">${stars}</div>`;
+    }
+
+    function renderScorePill(val) {
+      const num = Number(val) || 0;
+      let bg = '#16a34a';
+      if (num < 3.5) bg = '#dc2626';
+      else if (num < 4.5) bg = '#f59e0b';
+      return `<span style="display:inline-block; padding:2px 8px; border-radius:12px; font-size:11.5px; font-weight:700; background:${bg}18; color:${bg}; border:1px solid ${bg}40;">${num.toFixed(1)}</span>`;
+    }
+
     function renderMetrics() {
       const all = [...faculty, ...mentor, ...evals].filter(matchesFilters);
       const connected = all.filter(i => up(i.connectionStatus) === "YES").length;
-      const avgRating = arr => arr.length ? (arr.reduce((a, b) => a + Number(b.facultyRating || b.mentorRating || 0), 0) / arr.length).toFixed(1) : "0.0";
+      const avgRating = arr => arr.length ? (arr.reduce((a, b) => a + Number(b.overallFeedback || b.facultyRating || b.mentorRating || 0), 0) / arr.length).toFixed(1) : "0.0";
       if (activeTab === "people") {
         el("feedbackMetrics").innerHTML = [
           ["Faculty", staff.filter(member => member.type === "Faculty").length, "Available in faculty review forms"],
@@ -253,9 +326,9 @@
       }
 
       el("feedbackMetrics").innerHTML = [
-        ["Total Logs", all.length, "Across the selected filters"],
+        ["Total Reviews", all.length, "Across the selected filters"],
         ["Reachability", `${all.length ? Math.round((connected / all.length) * 100) : 0}%`, "Connected calls"],
-        ["Faculty Rating", `${avgRating(faculty.filter(matchesFilters))} / 5`, "Average class experience"],
+        ["Average Rating", `${avgRating(faculty.filter(matchesFilters))} / 5`, "Average class experience"],
         ["Mentor Rating", `${avgRating(mentor.filter(matchesFilters))} / 5`, "Average support experience"]
       ].map(m => `<div class="metric-card"><p class="metric-label">${m[0]}</p><p class="metric-value">${m[1]}</p><p class="metric-note">${m[2]}</p></div>`).join("");
     }
@@ -267,80 +340,82 @@
       return evals.filter(matchesFilters);
     }
 
-    function connectionBadge(value) {
-      const isYes = up(value) === "YES";
-      return `<span class="badge ${isYes ? "badge-completed" : "badge-risk"}">${up(value)}</span>`;
+    function renderVideoBadge(val) {
+      const str = String(val || "").toLowerCase();
+      const isDelay = str.includes("delay") || (typeof val === 'number' && val < 4.0);
+      if (isDelay) {
+        return `<span class="badge badge-risk" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5;">Delay</span>`;
+      }
+      return `<span class="badge badge-completed" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#dcfce7; color:#16a34a; border:1px solid #86efac;">On Time</span>`;
     }
 
-    function videoBadge(value) {
-      const isDelay = String(value || "").toLowerCase().includes("delay");
-      return `<span class="badge ${isDelay ? "badge-risk" : "badge-completed"}">${isDelay ? "DELAY" : "ON TIME"}</span>`;
-    }
-
-    function renderFacultyRow(item) {
+    function renderFacultyRow(item, idx) {
       const studentLink = item.studentId ? `student-dashboard.html?id=${encodeURIComponent(item.studentId)}` : '#';
+      const rowNum = (currentPage - 1) * pageSize + (idx + 1);
+      const overall = Number(item.overallFeedback || item.facultyRating || item.overallSatisfaction || 5.0);
+      const mat = Number(item.classMaterial || item.material || 5.0);
+      const vid = item.videoUploaded || item.video;
+      const asgn = Number(item.assignment !== undefined ? item.assignment : (item.assignmentRating !== undefined ? item.assignmentRating : (item.classTiming || item.deliveryOnTime || 5.0)));
+      const spd = Number(item.classSpeed || 4.5);
+      const summary = item.reviewSummary || item.comments || "--";
+
       return `
         <tr>
-          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td style="color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;">${rowNum}</td>
           <td><code>${item.studentId}</code></td>
-          <td>${item.course}</td>
-          <td>${item.batch}</td>
-          <td>${item.callDate}</td>
-          <td>${connectionBadge(item.connectionStatus)}</td>
-          <td>${item.application}</td>
-          <td>${item.session}</td>
-          <td><strong>${item.facultyName || "Not assigned"}</strong></td>
-          <td><strong>${item.facultyRating} / 5</strong></td>
-          <td><strong>${item.assignmentRating !== undefined ? item.assignmentRating : 5} / 5</strong></td>
-          <td>${videoBadge(item.videoUploaded)}</td>
-          <td>${item.classTiming}</td>
-          <td>${item.material}</td>
-          <td>${item.classSpeed}</td>
-          <td><strong>${item.overallSatisfaction}</strong></td>
-          <td class="feedback-comment-cell">${item.comments || "--"}</td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td><span class="badge badge-neutral">${item.batch}</span></td>
+          <td style="font-size:12px; color:var(--text-muted);">${item.course || "Data Analytics with AI"}</td>
+          <td><span class="badge badge-neutral">${item.application}</span></td>
+          <td><strong>${item.faculty || item.facultyName || "Rohit Sir"}</strong></td>
+          <td style="font-weight:700; text-align:center;">${mat.toFixed(1)}</td>
+          <td style="text-align:center;">${renderVideoBadge(vid)}</td>
+          <td style="font-weight:700; text-align:center;">${asgn.toFixed(1)}</td>
+          <td style="font-weight:700; text-align:center;">${spd.toFixed(1)}</td>
+          <td>${renderScorePill(overall)}</td>
+          <td class="feedback-comment-cell">${summary}</td>
         </tr>
       `;
     }
 
-    function renderMentorRow(item) {
+    function renderMentorRow(item, idx) {
       const studentLink = item.studentId ? `student-dashboard.html?id=${encodeURIComponent(item.studentId)}` : '#';
+      const rowNum = (currentPage - 1) * pageSize + (idx + 1);
+      const overall = Number(item.overallSatisfaction || item.mentorRating || 5.0);
       return `
         <tr>
-          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td style="color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;">${rowNum}</td>
           <td><code>${item.studentId}</code></td>
-          <td>${item.course}</td>
-          <td>${item.batch}</td>
-          <td>${item.callDate}</td>
-          <td>${connectionBadge(item.connectionStatus)}</td>
-          <td>${item.application}</td>
-          <td>${item.session}</td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td><span class="badge badge-neutral">${item.batch}</span></td>
+          <td style="font-size:12px; color:var(--text-muted);">${item.course}</td>
+          <td><span class="badge badge-neutral">${item.application}</span></td>
           <td><strong>${item.mentorName || "Not assigned"}</strong></td>
-          <td><strong>${item.mentorRating} / 5</strong></td>
-          <td>${item.doubtClearing}</td>
-          <td>${item.behaviour}</td>
-          <td>${item.attention}</td>
-          <td><strong>${item.overallSatisfaction}</strong></td>
+          <td style="font-weight:700; text-align:center;">${Number(item.doubtClearing || 5.0).toFixed(1)}</td>
+          <td style="font-weight:700; text-align:center;">${Number(item.behaviour || 5.0).toFixed(1)}</td>
+          <td style="font-weight:700; text-align:center;">${Number(item.attention || 5.0).toFixed(1)}</td>
+          <td>${renderScorePill(overall)}</td>
           <td class="feedback-comment-cell">${item.comments || "--"}</td>
         </tr>
       `;
     }
 
-    function renderEvaluationRow(item) {
+    function renderEvaluationRow(item, idx) {
       const k = up(item.applicationKnowledge);
       const isGood = k === "BEST" || k === "GOOD";
       const knowledgeClass = isGood ? "badge-completed" : "badge-risk";
       const assignStatus = up(item.assignmentStatus);
       const isAssignDone = assignStatus === "COMPLETED";
       const studentLink = item.studentId ? `student-dashboard.html?id=${encodeURIComponent(item.studentId)}` : '#';
+      const rowNum = (currentPage - 1) * pageSize + (idx + 1);
       return `
         <tr>
-          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td style="color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;">${rowNum}</td>
           <td><code>${item.studentId}</code></td>
-          <td>${item.course}</td>
-          <td>${item.batch}</td>
-          <td>${item.callDate}</td>
-          <td>${connectionBadge(item.connectionStatus)}</td>
-          <td>${item.application}</td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td><span class="badge badge-neutral">${item.batch}</span></td>
+          <td style="font-size:12px; color:var(--text-muted);">${item.course}</td>
+          <td><span class="badge badge-neutral">${item.application}</span></td>
           <td><strong>${item.mentorName || "Not assigned"}</strong></td>
           <td><span class="badge ${isAssignDone ? "badge-completed" : "badge-risk"}">${assignStatus}</span></td>
           <td><span class="badge ${knowledgeClass}">${k}</span></td>
@@ -362,19 +437,71 @@
       `;
     }
 
+    function renderPagination(totalItems, totalPages) {
+      const bar = el("feedbackPaginationBar");
+      if (!bar) return;
+      if (totalItems <= pageSize) {
+        bar.innerHTML = `<div class="sr-pag-info" style="font-size:12px; color:var(--text-muted);">Showing <strong>1–${totalItems}</strong> of <strong>${totalItems}</strong> records</div>`;
+        return;
+      }
+
+      const start = (currentPage - 1) * pageSize + 1;
+      const end = Math.min(currentPage * pageSize, totalItems);
+
+      let btns = "";
+      btns += `<button class="sr-page-btn ${currentPage === 1 ? 'is-disabled' : ''}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>« Prev</button>`;
+
+      for (let p = 1; p <= totalPages; p++) {
+        if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+          btns += `<button class="sr-page-btn ${p === currentPage ? 'is-active' : ''}" data-page="${p}">${p}</button>`;
+        } else if (p === currentPage - 2 || p === currentPage + 2) {
+          btns += `<span class="sr-page-dots">...</span>`;
+        }
+      }
+
+      btns += `<button class="sr-page-btn ${currentPage === totalPages ? 'is-disabled' : ''}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>Next »</button>`;
+
+      bar.innerHTML = `
+        <div class="sr-pag-info" style="font-size:12px; color:var(--text-muted);">
+          Showing <strong>${start}–${end}</strong> of <strong>${totalItems}</strong> records (Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong>)
+        </div>
+        <div class="sr-pag-controls" style="display:flex; align-items:center; gap:4px;">
+          ${btns}
+        </div>
+      `;
+
+      bar.querySelectorAll(".sr-page-btn:not(:disabled)").forEach(b => {
+        b.addEventListener("click", () => {
+          currentPage = parseInt(b.dataset.page, 10);
+          renderActiveTab();
+        });
+      });
+    }
+
     function renderActiveTab() {
       const config = tabConfig[activeTab];
-      const rows = activeRows();
+      const allRows = activeRows();
+      const totalItems = allRows.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * pageSize;
+      const pageRows = allRows.slice(startIdx, startIdx + pageSize);
+
       el("activeTitle").textContent = config.title;
       el("activeDescription").textContent = config.description;
       el("activeAddBtn").textContent = activeTab === "people" ? "Add Faculty / Mentor" : `Add ${config.title}`;
       el("feedbackHead").innerHTML = config.headers.map(header => `<th>${header}</th>`).join("");
-      el("feedbackBody").innerHTML = rows.length ? rows.map(item => {
-        if (activeTab === "faculty") return renderFacultyRow(item);
-        if (activeTab === "mentor") return renderMentorRow(item);
+
+      el("feedbackBody").innerHTML = pageRows.length ? pageRows.map((item, idx) => {
+        if (activeTab === "faculty") return renderFacultyRow(item, idx);
+        if (activeTab === "mentor") return renderMentorRow(item, idx);
         if (activeTab === "people") return renderStaffRow(item);
-        return renderEvaluationRow(item);
+        return renderEvaluationRow(item, idx);
       }).join("") : `<tr><td colspan="${config.headers.length}"><div class="empty-state">No ${config.title.toLowerCase()} records match the current filters.</div></td></tr>`;
+
+      renderPagination(totalItems, totalPages);
 
       document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
         btn.classList.toggle("is-active", btn.dataset.feedbackTab === activeTab);
@@ -428,13 +555,23 @@
       document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
         btn.addEventListener("click", () => {
           activeTab = btn.dataset.feedbackTab;
+          currentPage = 1;
           renderActiveTab();
         });
       });
       el("activeAddBtn").addEventListener("click", () => openModal(tabConfig[activeTab].modal));
-      if (el("searchInput")) el("searchInput").addEventListener("input", renderActiveTab);
-      el("studentFilter").addEventListener("change", renderActiveTab);
-      el("applicationFilter").addEventListener("change", renderActiveTab);
+      if (el("searchInput")) el("searchInput").addEventListener("input", () => {
+        currentPage = 1;
+        renderActiveTab();
+      });
+      el("studentFilter").addEventListener("change", () => {
+        currentPage = 1;
+        renderActiveTab();
+      });
+      el("applicationFilter").addEventListener("change", () => {
+        currentPage = 1;
+        renderActiveTab();
+      });
       await loadFeedback();
     }
 

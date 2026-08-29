@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | Student Performance Dashboard</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="layout-root">
+    <!-- Navigation Sidebar with 5 Panels -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap"><span class="sms-logo-text">i-SMS</span></div>
+          <div class="sms-dv-badge"><span class="sms-dv-by">by</span><img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="student-performance-dashboard.html" class="sidebar-link is-active" data-tooltip="Performance Dashboard" aria-label="Performance Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Performance Dashboard</span>
+        </a>
+        <a href="student-review-dashboard.html" class="sidebar-link" data-tooltip="Review Dashboard" aria-label="Review Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Review Dashboard</span>
+        </a>
+        <a href="performance.html" class="sidebar-link" data-tooltip="Performance Management" aria-label="Performance Management">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Performance Management</span>
+        </a>
+        <a href="feedback.html" class="sidebar-link" data-tooltip="Review Management" aria-label="Review Management">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Review Management</span>
+        </a>
+        <a href="dashboard.html" class="sidebar-link" data-tooltip="Analytics Dashboard" aria-label="Analytics Dashboard">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+            </svg>
+          </div>
+          <span class="sidebar-link-text">Analytics Dashboard</span>
+        </a>
+      </nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" data-tooltip="Log out" aria-label="Log out" style="border:none; cursor:pointer;">
+          <div class="sidebar-icon-wrap">
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </div>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <!-- Topbar matching Reference 1 style -->
+      <header class="topbar sp-header">
+        <div class="sp-header-left">
+          <div class="sp-header-title-wrap">
+            <svg class="sp-header-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 9L12 4.33 20.55 9 12 13.67 3.45 9zM5 12.33v4.67L12 21l7-4V12.33l-7 4-7-4z"/>
+            </svg>
+            <h1 class="sp-dashboard-title">STUDENT PERFORMANCE DASHBOARD</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions sp-header-actions">
+          <div class="sp-search-box-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="sp-search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="spStudentSearchInput" class="sp-search-input" placeholder="Search Student ID or Name..." autocomplete="off">
+            <div id="spSearchResultsDropdown" class="sp-search-dropdown" style="display:none;"></div>
+          </div>
+
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg>
+              </span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg>
+              </span>
+            </span>
+            <span class="theme-toggle__label" data-theme-label>Light</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Dashboard Grid Content -->
+      <main class="page-container sp-dashboard-layout">
+        <!-- TOP ROW: Student Profile + 6 KPI Cards -->
+        <section class="sp-top-grid">
+          <!-- STUDENT PROFILE CARD -->
+          <div class="card sp-profile-card">
+            <div class="sp-card-banner-header">STUDENT PROFILE</div>
+            <div class="sp-profile-body">
+              <div class="sp-avatar-circle">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <div class="sp-profile-details">
+                <div class="sp-profile-item">
+                  <span class="sp-profile-lbl">Student Name</span>
+                  <strong class="sp-profile-val sp-name-val" id="profileName">Aarav Sharma</strong>
+                </div>
+                <div class="sp-profile-item">
+                  <span class="sp-profile-lbl">Student ID</span>
+                  <span class="sp-profile-val" id="profileId">STU20250123</span>
+                </div>
+                <div class="sp-profile-item">
+                  <span class="sp-profile-lbl">Batch</span>
+                  <span class="sp-profile-val" id="profileBatch">BDAI-25A</span>
+                </div>
+                <div class="sp-profile-item">
+                  <span class="sp-profile-lbl">Course</span>
+                  <span class="sp-profile-val sp-course-val" id="profileCourse">Data Analytics with AI</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 TOP KPI CARDS -->
+          <div class="sp-kpis-grid">
+            <!-- 1. ATTENDANCE -->
+            <div class="sp-kpi-card sp-kpi-attendance">
+              <div class="sp-kpi-head">
+                <span class="sp-kpi-title">ATTENDANCE</span>
+              </div>
+              <div class="sp-kpi-body">
+                <div class="sp-kpi-icon-wrap icon-green">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="m9 16 2 2 4-4"></path></svg>
+                </div>
+                <div class="sp-kpi-text-wrap">
+                  <div class="sp-kpi-value text-green" id="kpiAttendanceVal">92%</div>
+                  <div class="sp-kpi-subtext" id="kpiAttendanceSub">(107 / 116 Days)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. ASSIGNMENTS -->
+            <div class="sp-kpi-card sp-kpi-assignment">
+              <div class="sp-kpi-head">
+                <span class="sp-kpi-title">ASSIGNMENTS</span>
+              </div>
+              <div class="sp-kpi-body">
+                <div class="sp-kpi-icon-wrap icon-blue">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </div>
+                <div class="sp-kpi-text-wrap">
+                  <div class="sp-kpi-value text-blue" id="kpiAssignmentVal">88%</div>
+                  <div class="sp-kpi-subtext">(Avg. Completion)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. TEST SCORE -->
+            <div class="sp-kpi-card sp-kpi-test">
+              <div class="sp-kpi-head">
+                <span class="sp-kpi-title">TEST SCORE</span>
+              </div>
+              <div class="sp-kpi-body">
+                <div class="sp-kpi-icon-wrap icon-purple">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="m9 14 2 2 4-4"></path></svg>
+                </div>
+                <div class="sp-kpi-text-wrap">
+                  <div class="sp-kpi-value text-purple" id="kpiTestVal">85%</div>
+                  <div class="sp-kpi-subtext">(Average Score)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. OVERALL SCORE -->
+            <div class="sp-kpi-card sp-kpi-overall">
+              <div class="sp-kpi-head">
+                <span class="sp-kpi-title">OVERALL SCORE</span>
+              </div>
+              <div class="sp-kpi-body">
+                <div class="sp-kpi-icon-wrap icon-gold">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                </div>
+                <div class="sp-kpi-text-wrap">
+                  <div class="sp-kpi-value text-gold" id="kpiOverallVal">88%</div>
+                  <div class="sp-kpi-subtext">(Weighted Score)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. ELITE GROUP -->
+            <div class="sp-kpi-card sp-kpi-elite">
+              <div class="sp-kpi-head">
+                <span class="sp-kpi-title">ELITE GROUP</span>
+              </div>
+              <div class="sp-kpi-body">
+                <div class="sp-kpi-icon-wrap icon-darkgreen">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <div class="sp-kpi-text-wrap">
+                  <div class="sp-kpi-status-badge badge-elite-selected" id="kpiEliteVal">SELECTED</div>
+                  <div class="sp-kpi-subtext" id="kpiEliteSub">(Eligible)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. PLACEMENT SUPPORT -->
+            <div class="sp-kpi-card sp-kpi-placement">
+              <div class="sp-kpi-head">
+                <span class="sp-kpi-title">PLACEMENT SUPPORT</span>
+              </div>
+              <div class="sp-kpi-body">
+                <div class="sp-kpi-icon-wrap icon-teal">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                </div>
+                <div class="sp-kpi-text-wrap">
+                  <div class="sp-kpi-status-badge badge-placement-yes" id="kpiPlacementVal">YES</div>
+                  <div class="sp-kpi-subtext" id="kpiPlacementSub">(Eligible)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MIDDLE SECTION: Summary + Table + Donut & Status -->
+        <section class="sp-mid-grid">
+          <!-- LEFT SUBCOLUMN: Performance Summary -->
+          <div class="sp-mid-left">
+            <div class="card sp-summary-card">
+              <div class="sp-card-banner-header">PERFORMANCE SUMMARY</div>
+              <div class="sp-summary-list">
+                <div class="sp-summary-row">
+                  <div class="sp-summary-label-wrap">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span>Total Days Attended</span>
+                  </div>
+                  <strong class="sp-summary-value" id="sumDaysVal">107 / 116</strong>
+                </div>
+
+                <div class="sp-summary-row">
+                  <div class="sp-summary-label-wrap">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Total Training Hours</span>
+                  </div>
+                  <strong class="sp-summary-value" id="sumHoursVal">214 / 240</strong>
+                </div>
+
+                <div class="sp-summary-row">
+                  <div class="sp-summary-label-wrap">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span>Assignments Submitted</span>
+                  </div>
+                  <strong class="sp-summary-value" id="sumAssignVal">88%</strong>
+                </div>
+
+                <div class="sp-summary-row">
+                  <div class="sp-summary-label-wrap">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                    <span>Average Test Score</span>
+                  </div>
+                  <strong class="sp-summary-value" id="sumTestVal">85%</strong>
+                </div>
+
+                <div class="sp-summary-row">
+                  <div class="sp-summary-label-wrap">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Overall Score</span>
+                  </div>
+                  <strong class="sp-summary-value text-blue" id="sumOverallVal">88%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CENTER SUBCOLUMN: Application-Wise Performance Table -->
+          <div class="sp-mid-center">
+            <div class="card sp-table-card">
+              <div class="sp-table-header-bar">
+                <h3>APPLICATION-WISE PERFORMANCE</h3>
+              </div>
+              <div class="table-responsive sp-table-responsive">
+                <table class="sp-table">
+                  <thead>
+                    <tr>
+                      <th style="width:40px;">#</th>
+                      <th>Application</th>
+                      <th>Attendance Days<br><small style="font-weight:normal; opacity:0.8;">(Attended / Total)</small></th>
+                      <th>Class Hours<br><small style="font-weight:normal; opacity:0.8;">(Attended / Total)</small></th>
+                      <th>Attendance %</th>
+                      <th>Assignment<br>Completion %</th>
+                      <th>Test Score %</th>
+                      <th>Performance<br>(Level)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="spTableBody">
+                    <!-- Dynamic Module Rows -->
+                  </tbody>
+                  <tfoot>
+                    <tr class="sp-table-overall-row" id="spTableFooter">
+                      <td colspan="4" style="text-align:left; font-weight:800; padding-left:16px;">OVERALL</td>
+                      <td id="footAttPct">92%</td>
+                      <td id="footAssignPct">88%</td>
+                      <td id="footTestPct">85%</td>
+                      <td><span class="sp-level-badge badge-verygood" id="footLevel">Very Good</span></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT SUBCOLUMN: Overall Performance Donut & Eligibility Status -->
+          <div class="sp-mid-right">
+            <!-- Overall Performance Gauge / Donut Card -->
+            <div class="card sp-donut-card">
+              <div class="sp-donut-head">OVERALL PERFORMANCE</div>
+              <div class="sp-donut-body">
+                <div class="sp-donut-svg-wrap">
+                  <svg viewBox="0 0 160 160" width="130" height="130" class="sp-donut-svg">
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="var(--border)" stroke-width="18"/>
+                    <!-- Segment 1: Attendance 30% -->
+                    <circle id="donutSeg1" cx="80" cy="80" r="60" fill="none" stroke="#10b981" stroke-width="18" stroke-dasharray="105 377" stroke-dashoffset="94" stroke-linecap="round"/>
+                    <!-- Segment 2: Assignment 30% -->
+                    <circle id="donutSeg2" cx="80" cy="80" r="60" fill="none" stroke="#2563eb" stroke-width="18" stroke-dasharray="100 377" stroke-dashoffset="366" stroke-linecap="round"/>
+                    <!-- Segment 3: Test 40% -->
+                    <circle id="donutSeg3" cx="80" cy="80" r="60" fill="none" stroke="#8b5cf6" stroke-width="18" stroke-dasharray="130 377" stroke-dashoffset="240" stroke-linecap="round"/>
+                  </svg>
+                  <div class="sp-donut-center">
+                    <div class="sp-donut-number" id="donutScoreDisplay">88%</div>
+                    <div class="sp-donut-label">Overall Score</div>
+                  </div>
+                </div>
+
+                <div class="sp-donut-legend">
+                  <div class="sp-legend-item">
+                    <span class="sp-legend-dot bg-green"></span>
+                    <span class="sp-legend-text">Attendance (30%)</span>
+                    <strong class="sp-legend-val" id="donutAttVal">92%</strong>
+                  </div>
+                  <div class="sp-legend-item">
+                    <span class="sp-legend-dot bg-blue"></span>
+                    <span class="sp-legend-text">Assignments (30%)</span>
+                    <strong class="sp-legend-val" id="donutAssignVal">88%</strong>
+                  </div>
+                  <div class="sp-legend-item">
+                    <span class="sp-legend-dot bg-purple"></span>
+                    <span class="sp-legend-text">Test Score (40%)</span>
+                    <strong class="sp-legend-val" id="donutTestVal">85%</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Eligibility & Status Card -->
+            <div class="card sp-status-card">
+              <div class="sp-donut-head">ELIGIBILITY & STATUS</div>
+              <div class="sp-status-body">
+                <div class="sp-status-row">
+                  <div class="sp-status-label-wrap">
+                    <div class="sp-status-icon-circle icon-darkgreen">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                    </div>
+                    <span>Elite Group</span>
+                  </div>
+                  <span class="sp-status-tag tag-elite" id="statusEliteTag">SELECTED</span>
+                </div>
+
+                <div class="sp-status-row">
+                  <div class="sp-status-label-wrap">
+                    <div class="sp-status-icon-circle icon-teal">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                    </div>
+                    <span>Placement Support</span>
+                  </div>
+                  <span class="sp-status-tag tag-placement" id="statusPlacementTag">YES</span>
+                </div>
+
+                <div class="sp-status-row">
+                  <div class="sp-status-label-wrap">
+                    <div class="sp-status-icon-circle icon-purple">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle></svg>
+                    </div>
+                    <span>Placement Readiness</span>
+                  </div>
+                  <span class="sp-status-tag tag-readiness" id="statusReadinessTag">86%</span>
+                </div>
+
+                <div class="sp-status-row">
+                  <div class="sp-status-label-wrap">
+                    <div class="sp-status-icon-circle icon-gold">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                    </div>
+                    <span>Current Status</span>
+                  </div>
+                  <span class="sp-status-tag tag-ontrack" id="statusCurrentTag">On Track</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BOTTOM CHARTS SECTION (4 Visualizations) -->
+        <section class="sp-charts-grid">
+          <!-- 1. ATTENDANCE % BY APPLICATION -->
+          <div class="card sp-chart-card">
+            <div class="sp-chart-title">ATTENDANCE % BY APPLICATION</div>
+            <div class="sp-chart-svg-container" id="barChartAttendance">
+              <!-- SVG Bar Chart -->
+            </div>
+          </div>
+
+          <!-- 2. ASSIGNMENT % BY APPLICATION -->
+          <div class="card sp-chart-card">
+            <div class="sp-chart-title">ASSIGNMENT % BY APPLICATION</div>
+            <div class="sp-chart-svg-container" id="barChartAssignment">
+              <!-- SVG Bar Chart -->
+            </div>
+          </div>
+
+          <!-- 3. TEST SCORE % BY APPLICATION -->
+          <div class="card sp-chart-card">
+            <div class="sp-chart-title">TEST SCORE % BY APPLICATION</div>
+            <div class="sp-chart-svg-container" id="barChartTest">
+              <!-- SVG Bar Chart -->
+            </div>
+          </div>
+
+          <!-- 4. STUDENT PERFORMANCE TREND -->
+          <div class="card sp-chart-card">
+            <div class="sp-chart-title">STUDENT PERFORMANCE TREND (OVERALL SCORE %)</div>
+            <div class="sp-chart-svg-container" id="lineChartTrend">
+              <!-- SVG Line Chart -->
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Custom Tooltip Container -->
+  <div id="spChartTooltip" class="sp-chart-tooltip"></div>
+
+  <script type="module">
+    import { apiFetch } from './app.js';
+
+    let currentStudent = null;
+    let studentsList = [];
+    let batchesList = [];
+
+    // Helper level badge class
+    function getLevelBadge(level) {
+      const l = String(level || "").toLowerCase();
+      if (l.includes("excellent")) return `<span class="sp-level-badge badge-excellent">Excellent</span>`;
+      if (l.includes("very good") || l.includes("verygood")) return `<span class="sp-level-badge badge-verygood">Very Good</span>`;
+      if (l.includes("good")) return `<span class="sp-level-badge badge-good">Good</span>`;
+      return `<span class="sp-level-badge badge-needsfocus">Needs Focus</span>`;
+    }
+
+    // Load data from server
+    async function loadPerformanceDashboard(studentId, batch) {
+      try {
+        const query = new URLSearchParams();
+        if (studentId) query.set('studentId', studentId);
+        if (batch && batch !== 'All') query.set('batch', batch);
+
+        const data = await apiFetch(`/api/dashboard/performance-view?${query.toString()}`);
+        currentStudent = data.student;
+        studentsList = data.studentsList || [];
+        batchesList = data.batches || [];
+
+        renderStudentProfile(data.student);
+        renderKpis(data.student);
+        renderPerformanceSummary(data.student);
+        renderTable(data.student.modules);
+        renderDonut(data.student);
+        renderStatus(data.student);
+        renderCharts(data.student);
+        renderBatchSummary(data.batchSummary);
+        setupStudentSearch(data.studentsList);
+      } catch (err) {
+        console.error("Failed to load student performance data", err);
+      }
+    }
+
+    function setupStudentSearch(students) {
+      const searchInput = document.getElementById("spStudentSearchInput");
+      const dropdown = document.getElementById("spSearchResultsDropdown");
+      if (!searchInput || !dropdown) return;
+
+      const renderMatches = (q) => {
+        if (!q) {
+          dropdown.style.display = "none";
+          return;
+        }
+        const matches = (students || []).filter(s =>
+          (s.name && s.name.toLowerCase().includes(q.toLowerCase())) ||
+          (s.id && s.id.toLowerCase().includes(q.toLowerCase())) ||
+          (s.studentId && s.studentId.toLowerCase().includes(q.toLowerCase())) ||
+          (s.batch && s.batch.toLowerCase().includes(q.toLowerCase()))
+        );
+
+        if (!matches.length) {
+          dropdown.innerHTML = `<div class="sp-search-no-res">No students found matching "${q}"</div>`;
+          dropdown.style.display = "block";
+          return;
+        }
+
+        dropdown.innerHTML = matches.slice(0, 8).map(s => `
+          <div class="sp-search-item" data-id="${s.id}">
+            <div class="sp-search-item-main">
+              <span class="sp-search-item-name">${s.name}</span>
+              <span class="sp-search-item-id">${s.id}</span>
+            </div>
+            <span class="sp-search-item-batch">${s.batch}</span>
+          </div>
+        `).join("");
+        dropdown.style.display = "block";
+
+        dropdown.querySelectorAll(".sp-search-item").forEach(item => {
+          item.addEventListener("click", () => {
+            const sid = item.getAttribute("data-id");
+            dropdown.style.display = "none";
+            searchInput.value = "";
+            loadPerformanceDashboard(sid, 'All');
+          });
+        });
+      };
+
+      searchInput.addEventListener("input", (e) => {
+        renderMatches(e.target.value.trim());
+      });
+
+      searchInput.addEventListener("focus", (e) => {
+        if (e.target.value.trim()) renderMatches(e.target.value.trim());
+      });
+
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const firstItem = dropdown.querySelector(".sp-search-item");
+          if (firstItem) {
+            const sid = firstItem.getAttribute("data-id");
+            dropdown.style.display = "none";
+            searchInput.value = "";
+            loadPerformanceDashboard(sid, 'All');
+          }
+        }
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = "none";
+        }
+      });
+    }
+
+    function renderStudentProfile(student) {
+      document.getElementById("profileName").textContent = student.name;
+      document.getElementById("profileId").textContent = student.studentId || student.id;
+      document.getElementById("profileBatch").textContent = student.batch;
+      document.getElementById("profileCourse").textContent = student.course;
+    }
+
+    function renderKpis(student) {
+      document.getElementById("kpiAttendanceVal").textContent = `${student.attendancePct}%`;
+      document.getElementById("kpiAttendanceSub").textContent = `(${student.attendedDays || 107} / ${student.totalDays || 116} Days)`;
+      document.getElementById("kpiAssignmentVal").textContent = `${student.assignmentCompletion}%`;
+      document.getElementById("kpiTestVal").textContent = `${student.testScoreAvg}%`;
+      document.getElementById("kpiOverallVal").textContent = `${student.overallScore}%`;
+
+      const eliteBadge = document.getElementById("kpiEliteVal");
+      eliteBadge.textContent = student.eliteGroup || "SELECTED";
+      eliteBadge.className = `sp-kpi-status-badge ${student.eliteGroup === 'SELECTED' ? 'badge-elite-selected' : 'badge-elite-notselected'}`;
+      document.getElementById("kpiEliteSub").textContent = student.eliteGroup === 'SELECTED' ? '(Eligible)' : '(Not Eligible)';
+
+      const placementBadge = document.getElementById("kpiPlacementVal");
+      placementBadge.textContent = student.placementSupport || "YES";
+      placementBadge.className = `sp-kpi-status-badge ${student.placementSupport === 'YES' ? 'badge-placement-yes' : 'badge-placement-no'}`;
+      document.getElementById("kpiPlacementSub").textContent = student.placementSupport === 'YES' ? '(Eligible)' : '(Not Eligible)';
+    }
+
+    function renderPerformanceSummary(student) {
+      document.getElementById("sumDaysVal").textContent = `${student.attendedDays || 107} / ${student.totalDays || 116}`;
+      document.getElementById("sumHoursVal").textContent = `${student.attendedHours || (student.attendedDays * 2)} / ${student.totalHours || (student.totalDays * 2)}`;
+      document.getElementById("sumAssignVal").textContent = `${student.assignmentCompletion}%`;
+      document.getElementById("sumTestVal").textContent = `${student.testScoreAvg}%`;
+      document.getElementById("sumOverallVal").textContent = `${student.overallScore}%`;
+    }
+
+    function renderTable(modules) {
+      const tbody = document.getElementById("spTableBody");
+      tbody.innerHTML = (modules || []).map((m, idx) => `
+        <tr>
+          <td style="font-weight:700; color:var(--text-muted);">${idx + 1}</td>
+          <td style="font-weight:700; text-align:left; color:var(--text);">${m.name}</td>
+          <td>${m.attendanceDisplay || (m.attendedDays + ' / ' + m.totalDays)}</td>
+          <td>${m.hoursDisplay || (m.attendedHours + ' / ' + m.totalHours)}</td>
+          <td style="font-weight:700;">${m.attendancePct}%</td>
+          <td style="font-weight:700;">${m.assignmentPct}%</td>
+          <td style="font-weight:700;">${m.testScorePct}%</td>
+          <td>${getLevelBadge(m.performanceLevel)}</td>
+        </tr>
+      `).join("");
+
+      // Overall Row
+      document.getElementById("footAttPct").textContent = `${currentStudent.attendancePct}%`;
+      document.getElementById("footAssignPct").textContent = `${currentStudent.assignmentCompletion}%`;
+      document.getElementById("footTestPct").textContent = `${currentStudent.testScoreAvg}%`;
+      document.getElementById("footLevel").textContent = currentStudent.overallLevel || "Very Good";
+      document.getElementById("footLevel").className = `sp-level-badge ${currentStudent.overallLevel === 'Excellent' ? 'badge-excellent' : 'badge-verygood'}`;
+    }
+
+    function renderDonut(student) {
+      document.getElementById("donutScoreDisplay").textContent = `${student.overallScore}%`;
+      document.getElementById("donutAttVal").textContent = `${student.attendancePct}%`;
+      document.getElementById("donutAssignVal").textContent = `${student.assignmentCompletion}%`;
+      document.getElementById("donutTestVal").textContent = `${student.testScoreAvg}%`;
+    }
+
+    function renderStatus(student) {
+      const eliteTag = document.getElementById("statusEliteTag");
+      eliteTag.textContent = student.eliteGroup;
+      eliteTag.className = `sp-status-tag ${student.eliteGroup === 'SELECTED' ? 'tag-elite' : 'tag-notselected'}`;
+
+      const placementTag = document.getElementById("statusPlacementTag");
+      placementTag.textContent = student.placementSupport;
+      placementTag.className = `sp-status-tag ${student.placementSupport === 'YES' ? 'tag-placement' : 'tag-notselected'}`;
+
+      document.getElementById("statusReadinessTag").textContent = `${student.placementReadiness || 86}%`;
+      document.getElementById("statusCurrentTag").textContent = student.currentStatus || "On Track";
+    }
+
+    // Interactive SVG Charts
+    function renderCharts(student) {
+      const modules = student.modules || [];
+      const labels = modules.map(m => m.name);
+
+      // 1. Attendance Bar Chart
+      renderVerticalBarChart("barChartAttendance", modules.map(m => ({ label: m.name, val: m.attendancePct })), "#10b981");
+
+      // 2. Assignment Bar Chart
+      renderVerticalBarChart("barChartAssignment", modules.map(m => ({ label: m.name, val: m.assignmentPct })), "#2563eb");
+
+      // 3. Test Score Bar Chart
+      renderVerticalBarChart("barChartTest", modules.map(m => ({ label: m.name, val: m.testScorePct })), "#8b5cf6");
+
+      // 4. Performance Trend Line Chart
+      renderTrendLineChart("lineChartTrend", student.performanceTrend || []);
+    }
+
+    function renderVerticalBarChart(containerId, items, barColor) {
+      const container = document.getElementById(containerId);
+      if (!container || !items.length) return;
+
+      const width = 280;
+      const height = 140;
+      const padLeft = 32;
+      const padRight = 10;
+      const padTop = 18;
+      const padBottom = 28;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const barW = Math.max(12, Math.floor(chartW / items.length) - 6);
+      const step = chartW / items.length;
+
+      let barsSvg = "";
+      let labelsSvg = "";
+      let yAxisSvg = `
+        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1"/>
+        <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1"/>
+        <text x="${padLeft - 6}" y="${padTop + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">100%</text>
+        <text x="${padLeft - 6}" y="${padTop + chartH * 0.25 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">75%</text>
+        <text x="${padLeft - 6}" y="${padTop + chartH * 0.5 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">50%</text>
+        <text x="${padLeft - 6}" y="${padTop + chartH * 0.75 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">25%</text>
+        <text x="${padLeft - 6}" y="${height - padBottom + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">0%</text>
+      `;
+
+      items.forEach((item, idx) => {
+        const x = padLeft + idx * step + (step - barW) / 2;
+        const bH = (item.val / 100) * chartH;
+        const y = height - padBottom - bH;
+        const labelShort = item.label.length > 7 ? item.label.slice(0, 6) + '..' : item.label;
+
+        barsSvg += `
+          <g class="sp-bar-group" data-title="${item.label}: ${item.val}%">
+            <rect x="${x}" y="${y}" width="${barW}" height="${bH}" rx="2" fill="${barColor}" class="sp-chart-bar"/>
+            <text x="${x + barW / 2}" y="${y - 4}" font-size="7.5" font-weight="700" fill="var(--text)" text-anchor="middle">${item.val}%</text>
+          </g>
+        `;
+        labelsSvg += `
+          <text x="${x + barW / 2}" y="${height - padBottom + 12}" font-size="7" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${labelShort}</text>
+        `;
+      });
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="sp-svg-chart" style="width:100%; height:100%;">
+          ${yAxisSvg}
+          ${barsSvg}
+          ${labelsSvg}
+        </svg>
+      `;
+
+      bindChartTooltips(container);
+    }
+
+    function renderTrendLineChart(containerId, points) {
+      const container = document.getElementById(containerId);
+      if (!container || !points.length) return;
+
+      const width = 280;
+      const height = 140;
+      const padLeft = 32;
+      const padRight = 16;
+      const padTop = 18;
+      const padBottom = 28;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const step = points.length > 1 ? chartW / (points.length - 1) : chartW;
+
+      let yAxisSvg = `
+        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1"/>
+        <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1"/>
+        <text x="${padLeft - 6}" y="${padTop + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">100%</text>
+        <text x="${padLeft - 6}" y="${padTop + chartH * 0.25 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">75%</text>
+        <text x="${padLeft - 6}" y="${padTop + chartH * 0.5 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">50%</text>
+        <text x="${padLeft - 6}" y="${padTop + chartH * 0.75 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">25%</text>
+        <text x="${padLeft - 6}" y="${height - padBottom + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">0%</text>
+      `;
+
+      let pathD = "";
+      let dotsSvg = "";
+      let labelsSvg = "";
+
+      points.forEach((pt, idx) => {
+        const x = padLeft + idx * step;
+        const y = height - padBottom - (pt.score / 100) * chartH;
+
+        if (idx === 0) pathD += `M ${x} ${y}`;
+        else pathD += ` L ${x} ${y}`;
+
+        dotsSvg += `
+          <g class="sp-bar-group" data-title="${pt.month}: ${pt.score}%">
+            <circle cx="${x}" cy="${y}" r="3.5" fill="#2563eb" stroke="#ffffff" stroke-width="1.5" class="sp-trend-dot"/>
+            <text x="${x}" y="${y - 6}" font-size="8" font-weight="700" fill="var(--text)" text-anchor="middle">${pt.score}%</text>
+          </g>
+        `;
+
+        labelsSvg += `
+          <text x="${x}" y="${height - padBottom + 13}" font-size="7.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${pt.month}</text>
+        `;
+      });
+
+      container.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="sp-svg-chart" style="width:100%; height:100%;">
+          ${yAxisSvg}
+          <path d="${pathD}" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+          ${dotsSvg}
+          ${labelsSvg}
+        </svg>
+      `;
+
+      bindChartTooltips(container);
+    }
+
+    function bindChartTooltips(container) {
+      const tooltip = document.getElementById("spChartTooltip");
+      const groups = container.querySelectorAll(".sp-bar-group");
+      groups.forEach(g => {
+        g.addEventListener("mouseenter", (e) => {
+          tooltip.textContent = g.getAttribute("data-title");
+          tooltip.style.display = "block";
+          tooltip.style.left = `${e.pageX + 10}px`;
+          tooltip.style.top = `${e.pageY - 25}px`;
+        });
+        g.addEventListener("mousemove", (e) => {
+          tooltip.style.left = `${e.pageX + 10}px`;
+          tooltip.style.top = `${e.pageY - 25}px`;
+        });
+        g.addEventListener("mouseleave", () => {
+          tooltip.style.display = "none";
+        });
+      });
+    }
+
+    function renderBatchSummary(summary) {
+      if (!summary || !document.getElementById("batchTotalStudents")) return;
+      document.getElementById("batchTotalStudents").textContent = summary.totalStudents;
+      document.getElementById("batchEliteSelected").textContent = `${summary.eliteSelected.count} (${summary.eliteSelected.pct}%)`;
+      document.getElementById("batchEliteNotSelected").textContent = `${summary.eliteNotSelected.count} (${summary.eliteNotSelected.pct}%)`;
+      document.getElementById("batchPlacementEligible").textContent = `${summary.placementEligible.count} (${summary.placementEligible.pct}%)`;
+      document.getElementById("batchPlacementNotEligible").textContent = `${summary.placementNotEligible.count} (${summary.placementNotEligible.pct}%)`;
+    }
+
+    // Check URL params for student ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialStudentId = urlParams.get('id') || urlParams.get('studentId') || 'STU20250123';
+
+    loadPerformanceDashboard(initialStudentId, 'All');
+  </script>
+</body>
+</html>

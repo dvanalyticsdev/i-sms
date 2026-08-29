@@ -21,11 +21,31 @@ export async function apiFetch(endpoint, options = {}) {
   }
 }
 
-const SIDEBAR_ICONS = {
-  "performance.html": `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`,
-  "feedback.html": `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
-  "dashboard.html": `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
-  "logout": `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
+const SIDEBAR_CONFIG = {
+  "student-performance-dashboard.html": {
+    name: "Performance Dashboard",
+    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`
+  },
+  "student-review-dashboard.html": {
+    name: "Review Dashboard",
+    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`
+  },
+  "performance.html": {
+    name: "Performance Management",
+    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
+  },
+  "feedback.html": {
+    name: "Review Management",
+    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`
+  },
+  "dashboard.html": {
+    name: "Analytics Dashboard",
+    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>`
+  },
+  "logout": {
+    name: "Log out",
+    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
+  }
 };
 
 function initSidebar() {
@@ -38,24 +58,29 @@ function initSidebar() {
   }
 
   document.querySelectorAll(".sidebar-nav .sidebar-link").forEach(link => {
-    if (!link.querySelector(".sidebar-link-text")) {
-      const href = link.getAttribute("href") || "";
-      const text = link.textContent.trim();
-      const iconHtml = SIDEBAR_ICONS[href] || SIDEBAR_ICONS["performance.html"];
-      link.setAttribute("title", text);
-      link.innerHTML = `${iconHtml}<span class="sidebar-link-text">${text}</span>`;
-    }
+    const href = link.getAttribute("href") || "";
+    const cfg = SIDEBAR_CONFIG[href] || SIDEBAR_CONFIG["performance.html"];
+    link.setAttribute("data-tooltip", cfg.name);
+    link.setAttribute("aria-label", cfg.name);
+    link.innerHTML = `
+      <div class="sidebar-icon-wrap">${cfg.icon}</div>
+      <span class="sidebar-link-text">${cfg.name}</span>
+    `;
   });
 
   const logoutBtn = document.querySelector("[data-logout]");
-  if (logoutBtn && !logoutBtn.querySelector(".sidebar-link-text")) {
-    const text = logoutBtn.textContent.trim();
-    logoutBtn.setAttribute("title", text);
-    logoutBtn.innerHTML = `${SIDEBAR_ICONS["logout"]}<span class="sidebar-link-text">${text}</span>`;
+  if (logoutBtn) {
+    const cfg = SIDEBAR_CONFIG["logout"];
+    logoutBtn.setAttribute("data-tooltip", cfg.name);
+    logoutBtn.setAttribute("aria-label", cfg.name);
+    logoutBtn.innerHTML = `
+      <div class="sidebar-icon-wrap">${cfg.icon}</div>
+      <span class="sidebar-link-text">${cfg.name}</span>
+    `;
   }
 
   sidebarBrand.style.cursor = "pointer";
-  sidebarBrand.setAttribute("title", "Toggle side panel");
+  sidebarBrand.setAttribute("title", "Click to expand / collapse sidebar");
   sidebarBrand.addEventListener("click", (e) => {
     e.preventDefault();
     const isCollapsed = layoutRoot.classList.toggle("sidebar-collapsed");
