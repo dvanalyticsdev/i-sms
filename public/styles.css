@@ -652,6 +652,201 @@ html[data-theme="dark"] .sms-dv-badge {
   border-radius: 50%;
   display: flex;
   align-items: center;
+}
+
+.layout-root.sidebar-collapsed .sidebar-nav {
+  padding: 16px 8px;
+  align-items: center;
+  gap: 10px;
+}
+
+.layout-root.sidebar-collapsed .sidebar-link {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 12px;
+  border-left: 1px solid transparent;
+  transform: none;
+}
+
+.layout-root.sidebar-collapsed .sidebar-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.layout-root.sidebar-collapsed .sidebar-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.layout-root.sidebar-collapsed .sidebar-link-text {
+  display: none !important;
+}
+
+.layout-root.sidebar-collapsed .sidebar-link:hover {
+  background: var(--surface-muted);
+  transform: translateY(-2px) scale(1.08);
+  border-color: var(--border);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.layout-root.sidebar-collapsed .sidebar-link.is-active {
+  background: var(--primary-soft);
+  border-color: rgba(224, 83, 34, 0.35);
+  box-shadow: 0 0 16px rgba(224, 83, 34, 0.22);
+  animation: activeSectionPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes activeSectionPulse {
+  0% { box-shadow: 0 0 0 0 rgba(224, 83, 34, 0.3), 0 2px 8px rgba(224, 83, 34, 0.15); }
+  50% { box-shadow: 0 0 0 6px rgba(224, 83, 34, 0), 0 4px 16px rgba(224, 83, 34, 0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(224, 83, 34, 0), 0 2px 8px rgba(224, 83, 34, 0.15); }
+}
+
+/* Floating Tooltips (Only active in Collapsed mode) */
+.layout-root.sidebar-collapsed .sidebar-link[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}
+
+.layout-root.sidebar-collapsed .sidebar-link[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  border: 4px solid transparent;
+  border-right-color: #0f172a;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+}
+
+.layout-root.sidebar-collapsed .sidebar-link:hover[data-tooltip]::after,
+.layout-root.sidebar-collapsed .sidebar-link:hover[data-tooltip]::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+.layout-root.sidebar-collapsed .sidebar-bottom-links {
+  padding: 12px 8px;
+  justify-content: center;
+}
+
+.layout-root.sidebar-collapsed .sidebar .sidebar-bottom-links .sidebar-link {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.layout-root.sidebar-collapsed .sidebar [data-logout]:hover {
+  background: var(--danger-soft);
+  color: #c93a35;
+  border-color: rgba(223, 81, 76, 0.25);
+}
+
+/* Right Content Panel */
+.main-content {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-muted);
+}
+
+/* Top Header */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  min-height: 72px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.topbar-title h1 {
+  font-size: 18px;
+  margin-bottom: 2px;
+  color: var(--heading);
+}
+
+.topbar-title p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+/* Notification Bell Button */
+.bell-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--ease);
+}
+
+.bell-btn:hover {
+  background: var(--row-hover);
+  border-color: var(--border-strong);
+  color: var(--heading);
+}
+
+.bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
   box-shadow: 0 2px 6px rgba(224, 83, 34, 0.4);
   line-height: 1;
@@ -661,29 +856,35 @@ html[data-theme="dark"] .sms-dv-badge {
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 50% !important;
   cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
+  color: var(--text-muted);
   transition: all var(--ease);
 }
 
-.theme-toggle:hover {
-  background: var(--row-hover);
-  border-color: var(--border-strong);
+.theme-toggle:hover,
+.theme-toggle:focus,
+.theme-toggle:active {
+  background: var(--row-hover) !important;
+  color: var(--text) !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .theme-toggle__stack {
   display: flex;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   position: relative;
 }
 
@@ -697,11 +898,11 @@ html[data-theme="dark"] .sms-dv-badge {
 }
 
 .theme-toggle__icon svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.5;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }

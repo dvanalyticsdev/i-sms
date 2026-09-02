@@ -95,6 +95,10 @@
         </div>
 
         <div class="topbar-actions sp-header-actions">
+          <button type="button" class="btn-primary btn-sm" id="btnDownloadReport" style="display:flex; align-items:center; gap:6px; background:#0284c7; border-color:#0284c7; font-weight:600; padding:6px 14px; border-radius:6px; cursor:pointer; color:#ffffff;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download Report</span>
+          </button>
           <div class="sp-search-box-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" class="sp-search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="spStudentSearchInput" class="sp-search-input" placeholder="Search Student ID or Name..." autocomplete="off">
@@ -110,7 +114,6 @@
                 <svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg>
               </span>
             </span>
-            <span class="theme-toggle__label" data-theme-label>Light</span>
           </button>
         </div>
       </header>
@@ -607,8 +610,14 @@
     }
 
     function renderPerformanceSummary(student) {
-      document.getElementById("sumDaysVal").textContent = `${student.attendedDays || 107} / ${student.totalDays || 116}`;
-      document.getElementById("sumHoursVal").textContent = `${student.attendedHours || (student.attendedDays * 2)} / ${student.totalHours || (student.totalDays * 2)}`;
+      const daysAtt = student.attendedDays || 97;
+      const daysTot = student.totalDays || 104;
+      const daysPct = Math.round((daysAtt / daysTot) * 100);
+      const hrsAtt = student.attendedHours || (daysAtt * 2);
+      const hrsTot = student.totalHours || (daysTot * 2);
+      const hrsPct = Math.round((hrsAtt / hrsTot) * 100);
+      document.getElementById("sumDaysVal").innerHTML = `${daysAtt} / ${daysTot} <span style="font-size:12px; font-weight:700; color:var(--success); margin-left:4px;">(${daysPct}%)</span>`;
+      document.getElementById("sumHoursVal").innerHTML = `${hrsAtt} / ${hrsTot} <span style="font-size:12px; font-weight:700; color:var(--success); margin-left:4px;">(${hrsPct}%)</span>`;
       document.getElementById("sumAssignVal").textContent = `${student.assignmentCompletion}%`;
       document.getElementById("sumTestVal").textContent = `${student.testScoreAvg}%`;
       document.getElementById("sumOverallVal").textContent = `${student.overallScore}%`;
@@ -616,18 +625,21 @@
 
     function renderTable(modules) {
       const tbody = document.getElementById("spTableBody");
-      tbody.innerHTML = (modules || []).map((m, idx) => `
+      tbody.innerHTML = (modules || []).map((m, idx) => {
+        const attPct = m.attendancePct !== undefined ? m.attendancePct : Math.round(((m.attendedDays || 0) / (m.totalDays || 1)) * 100);
+        const hrsPct = m.hoursPct !== undefined ? m.hoursPct : Math.round(((m.attendedHours || (m.attendedDays * 2)) / (m.totalHours || (m.totalDays * 2) || 1)) * 100);
+        return `
         <tr>
           <td style="font-weight:700; color:var(--text-muted);">${idx + 1}</td>
           <td style="font-weight:700; text-align:left; color:var(--text);">${m.name}</td>
-          <td>${m.attendanceDisplay || (m.attendedDays + ' / ' + m.totalDays)}</td>
-          <td>${m.hoursDisplay || (m.attendedHours + ' / ' + m.totalHours)}</td>
+          <td>${m.attendedDays || 0}/${m.totalDays || 0} <span style="font-size:11px; font-weight:700; color:var(--success); margin-left:3px;">(${attPct}%)</span></td>
+          <td>${m.attendedHours || (m.attendedDays * 2)}/${m.totalHours || (m.totalDays * 2)} <span style="font-size:11px; font-weight:700; color:var(--success); margin-left:3px;">(${hrsPct}%)</span></td>
           <td style="font-weight:700;">${m.attendancePct}%</td>
           <td style="font-weight:700;">${m.assignmentPct}%</td>
           <td style="font-weight:700;">${m.testScorePct}%</td>
           <td>${getLevelBadge(m.performanceLevel)}</td>
-        </tr>
-      `).join("");
+        </tr>`;
+      }).join("");
 
       // Overall Row
       document.getElementById("footAttPct").textContent = `${currentStudent.attendancePct}%`;
@@ -823,6 +835,22 @@
     // Check URL params for student ID
     const urlParams = new URLSearchParams(window.location.search);
     const initialStudentId = urlParams.get('id') || urlParams.get('studentId') || 'STU20250123';
+
+    // Download Report Button Action
+    const downloadBtn = document.getElementById("btnDownloadReport");
+    if (downloadBtn) {
+      downloadBtn.addEventListener("click", () => {
+        const sid = (currentStudent && (currentStudent.studentId || currentStudent.id)) || initialStudentId || 'STU20250123';
+        const downloadUrl = `/api/students/${encodeURIComponent(sid)}/report.pdf`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.target = '_blank';
+        link.download = `I-SMS_${sid}_Performance_Report.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
 
     loadPerformanceDashboard(initialStudentId, 'All');
   </script>
