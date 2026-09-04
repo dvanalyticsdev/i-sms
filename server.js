@@ -1735,17 +1735,17 @@ function refreshStudents() {
 // 1. Auth Endpoint
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
-  if (username === 'admin' && password === 'admin') {
+  if (username === 'dvadmin' && password === 'DVA-SMS-2026!xQ7#R9vL') {
     res.json({
       message: "Login successful",
       user: {
-        username: 'admin',
+        username: 'dvadmin',
         role: 'Administrator',
         name: 'Admin Officer'
       }
     });
   } else {
-    res.status(401).json({ error: "Invalid credentials. Hint: admin / admin" });
+    res.status(401).json({ error: "Invalid credentials." });
   }
 });
 
