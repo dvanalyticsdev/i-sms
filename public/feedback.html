@@ -3,12 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>i-SMS | Student Review Management</title>
+  <title>i-SMS | Review Management</title>
   <script src="theme-bootstrap.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .student-name-link {
+      color: var(--heading);
+      text-decoration: none;
+      transition: color var(--ease);
+    }
+    .student-name-link:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+    .feedback-tab-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .feedback-comment-cell {
+      max-width: 220px;
+      white-space: normal;
+      word-wrap: break-word;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+    .table-pag-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+    .table-pag-btn {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .table-pag-btn.is-active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .table-pag-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
   <div class="layout-root">
@@ -42,7 +95,7 @@
             <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M23 21v-2a4 4 0 0 3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
           </div>
@@ -55,17 +108,6 @@
             </svg>
           </div>
           <span class="sidebar-link-text">Review Management</span>
-        </a>
-        <a href="dashboard.html" class="sidebar-link" data-tooltip="Analytics Dashboard" aria-label="Analytics Dashboard">
-          <div class="sidebar-icon-wrap">
-            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
-              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
-              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
-              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
-            </svg>
-          </div>
-          <span class="sidebar-link-text">Analytics Dashboard</span>
         </a>
       </nav>
       <div class="sidebar-bottom-links">
@@ -83,68 +125,55 @@
 
     <div class="main-content">
       <header class="topbar">
-        <div class="topbar-title">
-          <h1>Student Review Management</h1>
-          <p>Manage the 360-degree triad: student-to-faculty, student-to-mentor, and mentor-to-student evaluation.</p>
+        <div>
+          <h1 style="font-size:18px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">REVIEW MANAGEMENT</h1>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:2px;" id="tabDesc">Manage class reviews, mentor feedback, evaluations, and staff directory.</p>
         </div>
         <div class="topbar-actions">
+          <button class="btn-primary" id="activeAddBtn">+ Add Feedback</button>
           <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
             <span class="theme-toggle__stack" aria-hidden="true">
               <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg></span>
               <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg></span>
             </span>
           </button>
-          <div class="topbar-profile"></div>
         </div>
       </header>
 
       <main class="page-container">
-        <section class="page-toolbar">
-          <div class="section-title">
-            <h2>Feedback Triad</h2>
-            <p>Fast entry forms and recent records, not spreadsheet rows.</p>
+        <div class="card" style="padding:12px 16px 0; margin-bottom:16px;">
+          <div class="tablist feedback-tablist" style="margin:0;">
+            <button class="tab is-active" data-feedback-tab="faculty">Faculty Feedback</button>
+            <button class="tab" data-feedback-tab="mentor">Mentor Feedback</button>
+            <button class="tab" data-feedback-tab="evaluation">Student Evaluation</button>
+            <button class="tab" data-feedback-tab="facultyStaff">Faculty</button>
+            <button class="tab" data-feedback-tab="mentorStaff">Mentor</button>
+            <button class="tab" data-feedback-tab="coordinatorStaff">Student Coordinator</button>
           </div>
-          <div class="toolbar-group">
-            <input type="search" class="filter-input" id="searchInput" placeholder="Search name, LMS ID, batch">
-            <select class="filter-select" id="studentFilter"><option value="All">All students</option></select>
-            <select class="filter-select" id="applicationFilter"><option value="All">All applications</option></select>
-          </div>
-        </section>
+        </div>
 
-        <section class="metric-grid" id="feedbackMetrics"></section>
-
-        <section class="card feedback-tabs-card">
-          <div class="page-toolbar" style="margin-bottom:14px;">
-            <div class="tablist feedback-tablist" style="margin:0;">
-              <button class="tab is-active" data-feedback-tab="faculty">Faculty Feedback</button>
-              <button class="tab" data-feedback-tab="mentor">Mentor Feedback</button>
-              <button class="tab" data-feedback-tab="evaluation">Student Evaluation</button>
-              <button class="tab" data-feedback-tab="people">Faculty & Mentors</button>
+        <div class="card" style="margin-top:16px;">
+          <div class="toolbar" style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+              <select id="studentFilter" class="form-control" style="width:180px;"><option value="All">All students</option></select>
+              <select id="applicationFilter" class="form-control" style="width:180px;"><option value="All">All applications</option></select>
+              <input type="search" id="searchInput" class="form-control" style="width:200px;" placeholder="Search reviews...">
             </div>
-            <button class="btn-primary btn-sm" id="activeAddBtn">Add Record</button>
+            <div style="font-size:12px; color:var(--text-muted);" id="rowCountInfo"></div>
           </div>
-
-          <div class="card-head">
-            <div>
-              <h3 id="activeTitle">Faculty Feedback</h3>
-              <p id="activeDescription">Student rates class delivery, pace, material, and satisfaction.</p>
-            </div>
-          </div>
-
-          <div class="table-responsive" style="border:0;">
-            <table class="compact-table feedback-list-table">
-              <thead>
-                <tr id="feedbackHead"></tr>
-              </thead>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead id="feedbackHead"></thead>
               <tbody id="feedbackBody"></tbody>
             </table>
           </div>
-          <div class="sr-pagination" id="feedbackPaginationBar" style="padding: 12px 18px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;"></div>
-        </section>
+          <div class="table-pag-bar" id="feedbackPagBar"></div>
+        </div>
       </main>
     </div>
   </div>
 
+  <!-- Faculty Feedback Modal -->
   <div class="modal-backdrop" id="facultyModal">
     <div class="modal-overlay" data-close="facultyModal"></div>
     <div class="modal-container">
@@ -152,10 +181,12 @@
       <form id="facultyForm">
         <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group"><label>Student</label><select id="facStudent" class="form-control" required></select></div>
-          <div class="form-group"><label>Call Date</label><input id="facDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Call Date</label><input id="facCallDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Session Date</label><input id="facDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="facStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
           <div class="form-group"><label>Application</label><select id="facApp" class="form-control" required></select></div>
           <div class="form-group"><label>Session</label><input id="facSession" class="form-control" value="SESSION-1" required></div>
+          <div class="form-group"><label>Call By (Student Coordinator)</label><select id="facCallBy" class="form-control" required></select></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Faculty Name</label><select id="facFaculty" class="form-control" required></select></div>
           <div class="form-group"><label>Overall Feedback</label><input id="facRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Class Material</label><input id="facMaterial" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
@@ -170,6 +201,7 @@
     </div>
   </div>
 
+  <!-- Mentor Feedback Modal -->
   <div class="modal-backdrop" id="mentorModal">
     <div class="modal-overlay" data-close="mentorModal"></div>
     <div class="modal-container">
@@ -177,11 +209,13 @@
       <form id="mentorForm">
         <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group"><label>Student</label><select id="menStudent" class="form-control" required></select></div>
-          <div class="form-group"><label>Call Date</label><input id="menDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Call Date</label><input id="menCallDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Session Date</label><input id="menDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="menStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
           <div class="form-group"><label>Application</label><select id="menApp" class="form-control" required></select></div>
           <div class="form-group"><label>Session</label><input id="menSession" class="form-control" value="SESSION-1" required></div>
-          <div class="form-group" style="grid-column:1/-1;"><label>Call By</label><select id="menMentor" class="form-control" required></select></div>
+          <div class="form-group"><label>Call By (Student Coordinator)</label><select id="menCallBy" class="form-control" required></select></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Mentor Name</label><select id="menMentor" class="form-control" required></select></div>
           <div class="form-group"><label>Mentor Rating</label><input id="menRating" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Doubt Support</label><input id="menDoubt" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
           <div class="form-group"><label>Behaviour</label><input id="menBehaviour" type="number" min="0" max="5" step="0.1" class="form-control" value="5"></div>
@@ -194,6 +228,7 @@
     </div>
   </div>
 
+  <!-- Student Evaluation Modal -->
   <div class="modal-backdrop" id="evalModal">
     <div class="modal-overlay" data-close="evalModal"></div>
     <div class="modal-container">
@@ -201,9 +236,12 @@
       <form id="evalForm">
         <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group"><label>Student</label><select id="evalStudent" class="form-control" required></select></div>
-          <div class="form-group"><label>Call Date</label><input id="evalDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Call Date</label><input id="evalCallDate" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Session Date</label><input id="evalDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="evalStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
           <div class="form-group"><label>Application</label><select id="evalApp" class="form-control" required></select></div>
+          <div class="form-group"><label>Session</label><input id="evalSession" class="form-control" value="SESSION-1" required></div>
+          <div class="form-group"><label>Call By (Student Coordinator)</label><select id="evalCallBy" class="form-control" required></select></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Mentor Name</label><select id="evalMentor" class="form-control" required></select></div>
           <div class="form-group"><label>Assignment Status</label><select id="evalAssignment" class="form-control"><option>COMPLETED</option><option>IN PROGRESS</option><option>NOT STARTED</option></select></div>
           <div class="form-group"><label>Knowledge</label><select id="evalKnowledge" class="form-control"><option>BEST</option><option selected>GOOD</option><option>AVERAGE</option><option>LOW</option></select></div>
@@ -214,18 +252,20 @@
     </div>
   </div>
 
+  <!-- Staff Modal -->
   <div class="modal-backdrop" id="staffModal">
     <div class="modal-overlay" data-close="staffModal"></div>
     <div class="modal-container">
-      <div class="modal-header"><h3 class="modal-title">Add Faculty / Mentor</h3><button class="modal-close" data-close="staffModal">&times;</button></div>
+      <div class="modal-header"><h3 class="modal-title" id="staffModalTitle">Add Staff Member</h3><button class="modal-close" data-close="staffModal">&times;</button></div>
       <form id="staffForm">
         <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Type</label><select id="staffType" class="form-control" required><option>Faculty</option><option>Mentor</option></select></div>
+          <div class="form-group"><label>Type</label><select id="staffType" class="form-control" required><option value="Faculty">Faculty</option><option value="Mentor">Mentor</option><option value="Student Coordinator">Student Coordinator</option></select></div>
           <div class="form-group"><label>Name</label><input id="staffName" class="form-control" required placeholder="Enter name"></div>
           <div class="form-group"><label>Email</label><input id="staffEmail" type="email" class="form-control" placeholder="name@example.com"></div>
-          <div class="form-group"><label>Phone</label><input id="staffPhone" class="form-control" placeholder="+91 ..."></div>
+          <div class="form-group"><label>Phone</label><input id="staffPhone" class="form-control" placeholder="+91 XXXXX XXXXX"></div>
+          <div class="form-group" style="grid-column:1/-1;"><label>Status</label><select id="staffStatus" class="form-control"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
         </div>
-        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="staffModal">Cancel</button><button class="btn-primary" type="submit">Save Person</button></div>
+        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="staffModal">Cancel</button><button class="btn-primary" type="submit">Save Staff</button></div>
       </form>
     </div>
   </div>
@@ -233,38 +273,50 @@
   <script type="module">
     import { apiFetch } from './app.js';
 
-    let students = [];
-    let modules = [];
+    let activeTab = "faculty";
     let faculty = [];
     let mentor = [];
     let evals = [];
     let staff = [];
-    let activeTab = "faculty";
+    let students = [];
+    let modules = [];
     let currentPage = 1;
-    const pageSize = 15;
+    const pageSize = 10;
 
     const tabConfig = {
       faculty: {
         title: "Faculty Feedback",
         description: "Student rates class delivery, pace, material, and satisfaction.",
         modal: "facultyModal",
-        headers: ["#", "Student ID", "Student Name", "Batch", "Course", "Application", "Faculty", "Class Material", "Video Uploaded", "Assignment", "Class Speed", "Overall Feedback", "Review Summary"]
+        headers: ["#", "Call Date", "Session Date", "Student ID", "Student Name", "Batch", "Course", "Application", "Session", "Call By", "Faculty", "Class Material", "Video Uploaded", "Assignment", "Class Speed", "Overall Feedback", "Review Summary"]
       },
       mentor: {
         title: "Mentor Feedback",
         description: "Student rates mentoring, doubt support, behaviour, and attention.",
         modal: "mentorModal",
-        headers: ["#", "Student ID", "Student Name", "Batch", "Course", "Application", "Mentor", "Doubt Support", "Behaviour", "Attention", "Overall Feedback", "Comments"]
+        headers: ["#", "Call Date", "Session Date", "Student ID", "Student Name", "Batch", "Course", "Application", "Session", "Call By", "Mentor", "Doubt Support", "Behaviour", "Attention", "Overall Feedback", "Comments"]
       },
       evaluation: {
         title: "Student Evaluation",
         description: "Mentor records assignment status, knowledge level, and call note.",
         modal: "evalModal",
-        headers: ["#", "Student ID", "Student Name", "Batch", "Course", "Application", "Mentor", "Assignment Status", "Knowledge", "Overall Feedback"]
+        headers: ["#", "Call Date", "Session Date", "Student ID", "Student Name", "Batch", "Course", "Application", "Session", "Call By", "Mentor", "Assignment Status", "Knowledge", "Overall Feedback"]
       },
-      people: {
-        title: "Faculty & Mentors",
-        description: "Maintain faculty and mentor names used inside feedback forms.",
+      facultyStaff: {
+        title: "Faculty",
+        description: "Maintain faculty members list used inside feedback forms.",
+        modal: "staffModal",
+        headers: ["Name", "Type", "Email", "Phone", "Status", ""]
+      },
+      mentorStaff: {
+        title: "Mentor",
+        description: "Maintain mentor members list used inside feedback forms.",
+        modal: "staffModal",
+        headers: ["Name", "Type", "Email", "Phone", "Status", ""]
+      },
+      coordinatorStaff: {
+        title: "Student Coordinator",
+        description: "Maintain student coordinators directory.",
         modal: "staffModal",
         headers: ["Name", "Type", "Email", "Phone", "Status", ""]
       }
@@ -275,6 +327,7 @@
     const closeModal = id => el(id).classList.remove("is-open");
     const openModal = id => el(id).classList.add("is-open");
     const up = value => String(value || "").toUpperCase();
+
     const matchesFilters = item => {
       const student = el("studentFilter").value;
       const application = el("applicationFilter").value;
@@ -287,20 +340,11 @@
         String(item.studentName || "").toLowerCase().includes(query) ||
         String(item.studentId || "").toLowerCase().includes(query) ||
         String(item.batch || "").toLowerCase().includes(query) ||
-        String(item.facultyName || item.faculty || "").toLowerCase().includes(query) ||
+        String(item.facultyName || item.faculty || item.calledBy || "").toLowerCase().includes(query) ||
         String(item.comments || item.reviewSummary || "").toLowerCase().includes(query);
 
       return matchesStudent && matchesApp && matchesQuery;
     };
-
-    function renderStars(rating) {
-      const num = Math.min(5, Math.max(0, Math.round(Number(rating) || 5)));
-      let stars = "";
-      for (let i = 1; i <= 5; i++) {
-        stars += `<span style="color:${i <= num ? '#f59e0b' : '#cbd5e1'}; font-size:13px; margin-right:1px;">★</span>`;
-      }
-      return `<div style="display:inline-flex; align-items:center; letter-spacing:1px;" title="${rating}">${stars}</div>`;
-    }
 
     function renderScorePill(val) {
       const num = Number(val) || 0;
@@ -311,15 +355,17 @@
     }
 
     function renderMetrics() {
+      const container = el("feedbackMetrics");
+      if (!container) return;
       const all = [...faculty, ...mentor, ...evals].filter(matchesFilters);
       const connected = all.filter(i => up(i.connectionStatus) === "YES").length;
       const avgRating = arr => arr.length ? (arr.reduce((a, b) => a + Number(b.overallFeedback || b.facultyRating || b.mentorRating || 0), 0) / arr.length).toFixed(1) : "0.0";
-      if (activeTab === "people") {
+      if (["facultyStaff", "mentorStaff", "coordinatorStaff"].includes(activeTab)) {
         el("feedbackMetrics").innerHTML = [
-          ["Faculty", staff.filter(member => member.type === "Faculty").length, "Available in faculty review forms"],
-          ["Mentors", staff.filter(member => member.type === "Mentor").length, "Available in mentor review forms"],
-          ["Active People", staff.filter(member => member.status === "Active").length, "Current staff directory"],
-          ["Total People", staff.length, "Faculty and mentors combined"]
+          ["Faculty", staff.filter(member => member.type === "Faculty").length, "Active faculty members"],
+          ["Mentors", staff.filter(member => member.type === "Mentor").length, "Active mentor members"],
+          ["Coordinators", staff.filter(member => member.type === "Student Coordinator").length, "Active student coordinators"],
+          ["Total Directory", staff.length, "Combined staff count"]
         ].map(m => `<div class="metric-card"><p class="metric-label">${m[0]}</p><p class="metric-value">${m[1]}</p><p class="metric-note">${m[2]}</p></div>`).join("");
         return;
       }
@@ -335,8 +381,11 @@
     function activeRows() {
       if (activeTab === "faculty") return faculty.filter(matchesFilters);
       if (activeTab === "mentor") return mentor.filter(matchesFilters);
-      if (activeTab === "people") return staff;
-      return evals.filter(matchesFilters);
+      if (activeTab === "evaluation") return evals.filter(matchesFilters);
+      if (activeTab === "facultyStaff") return staff.filter(member => member.type === "Faculty");
+      if (activeTab === "mentorStaff") return staff.filter(member => member.type === "Mentor");
+      if (activeTab === "coordinatorStaff") return staff.filter(member => member.type === "Student Coordinator");
+      return [];
     }
 
     function renderVideoBadge(val) {
@@ -354,19 +403,23 @@
       const overall = Number(item.overallFeedback || item.facultyRating || item.overallSatisfaction || 5.0);
       const mat = Number(item.classMaterial || item.material || 5.0);
       const vid = item.videoUploaded || item.video;
-      const asgn = Number(item.assignment !== undefined ? item.assignment : (item.assignmentRating !== undefined ? item.assignmentRating : (item.classTiming || item.deliveryOnTime || 5.0)));
+      const asgn = Number(item.assignment !== undefined ? item.assignment : (item.assignmentRating !== undefined ? item.assignmentRating : 5.0));
       const spd = Number(item.classSpeed || 4.5);
       const summary = item.reviewSummary || item.comments || "--";
 
       return `
         <tr>
           <td style="color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;">${rowNum}</td>
+          <td style="font-size:12px; white-space:nowrap;">${item.callDate || "--"}</td>
+          <td style="font-size:12px; white-space:nowrap;">${item.sessionDate || item.date || "--"}</td>
           <td><code>${item.studentId}</code></td>
-          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard"><strong>${item.studentName}</strong></a></td>
           <td><span class="badge badge-neutral">${item.batch}</span></td>
           <td style="font-size:12px; color:var(--text-muted);">${item.course || "Data Analytics with AI"}</td>
           <td><span class="badge badge-neutral">${item.application}</span></td>
-          <td><strong>${item.faculty || item.facultyName || "Rohit Sir"}</strong></td>
+          <td><span class="badge badge-neutral">${item.session || "SESSION-1"}</span></td>
+          <td><strong style="color:var(--primary); font-size:12px;">${item.calledBy || item.callBy || "Sunita Deshmukh"}</strong></td>
+          <td><strong>${item.faculty || item.facultyName || "Dr. Amit Verma"}</strong></td>
           <td style="font-weight:700; text-align:center;">${mat.toFixed(1)}</td>
           <td style="text-align:center;">${renderVideoBadge(vid)}</td>
           <td style="font-weight:700; text-align:center;">${asgn.toFixed(1)}</td>
@@ -384,11 +437,15 @@
       return `
         <tr>
           <td style="color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;">${rowNum}</td>
+          <td style="font-size:12px; white-space:nowrap;">${item.callDate || "--"}</td>
+          <td style="font-size:12px; white-space:nowrap;">${item.sessionDate || item.date || "--"}</td>
           <td><code>${item.studentId}</code></td>
-          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard"><strong>${item.studentName}</strong></a></td>
           <td><span class="badge badge-neutral">${item.batch}</span></td>
           <td style="font-size:12px; color:var(--text-muted);">${item.course}</td>
           <td><span class="badge badge-neutral">${item.application}</span></td>
+          <td><span class="badge badge-neutral">${item.session || "SESSION-1"}</span></td>
+          <td><strong style="color:var(--primary); font-size:12px;">${item.calledBy || item.callBy || "Sunita Deshmukh"}</strong></td>
           <td><strong>${item.mentorName || "Not assigned"}</strong></td>
           <td style="font-weight:700; text-align:center;">${Number(item.doubtClearing || 5.0).toFixed(1)}</td>
           <td style="font-weight:700; text-align:center;">${Number(item.behaviour || 5.0).toFixed(1)}</td>
@@ -410,11 +467,15 @@
       return `
         <tr>
           <td style="color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;">${rowNum}</td>
+          <td style="font-size:12px; white-space:nowrap;">${item.callDate || "--"}</td>
+          <td style="font-size:12px; white-space:nowrap;">${item.sessionDate || item.date || "--"}</td>
           <td><code>${item.studentId}</code></td>
-          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)"><strong>${item.studentName}</strong></a></td>
+          <td><a href="${studentLink}" class="student-name-link" title="Click to view student scorecard"><strong>${item.studentName}</strong></a></td>
           <td><span class="badge badge-neutral">${item.batch}</span></td>
           <td style="font-size:12px; color:var(--text-muted);">${item.course}</td>
           <td><span class="badge badge-neutral">${item.application}</span></td>
+          <td><span class="badge badge-neutral">${item.session || "SESSION-1"}</span></td>
+          <td><strong style="color:var(--primary); font-size:12px;">${item.calledBy || item.callBy || "Sunita Deshmukh"}</strong></td>
           <td><strong>${item.mentorName || "Not assigned"}</strong></td>
           <td><span class="badge ${isAssignDone ? "badge-completed" : "badge-risk"}">${assignStatus}</span></td>
           <td><span class="badge ${knowledgeClass}">${k}</span></td>
@@ -430,46 +491,76 @@
           <td><span class="badge ${item.type === "Faculty" ? "badge-completed" : "badge-neutral"}">${item.type}</span></td>
           <td>${item.email || "--"}</td>
           <td>${item.phone || "--"}</td>
-          <td><span class="badge badge-active">${item.status || "Active"}</span></td>
-          <td class="table-actions"><button class="btn-danger btn-sm" data-remove-staff="${item.id}" data-staff-name="${item.name}">Remove</button></td>
+          <td><span class="badge ${item.status === "Active" ? "badge-completed" : "badge-risk"}">${item.status}</span></td>
+          <td style="text-align:right;">
+            <button class="btn-ghost" style="color:var(--danger); padding:4px 8px; font-size:12px;" onclick="removeStaff('${item.id}', '${item.name}')">Remove</button>
+          </td>
         </tr>
       `;
     }
 
-    function renderPagination(totalItems, totalPages) {
-      const bar = el("feedbackPaginationBar");
-      if (!bar) return;
-      if (totalItems <= pageSize) {
-        bar.innerHTML = `<div class="sr-pag-info" style="font-size:12px; color:var(--text-muted);">Showing <strong>1–${totalItems}</strong> of <strong>${totalItems}</strong> records</div>`;
+    function renderActiveTab() {
+      const config = tabConfig[activeTab];
+      el("tabDesc").textContent = config.description;
+      el("activeAddBtn").textContent = ["facultyStaff", "mentorStaff", "coordinatorStaff"].includes(activeTab) ? `+ Add ${config.title}` : `+ Add ${config.title}`;
+      document.querySelectorAll("[data-feedback-tab]").forEach(btn => btn.classList.toggle("is-active", btn.dataset.feedbackTab === activeTab));
+
+      el("feedbackHead").innerHTML = `<tr>${config.headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+      renderMetrics();
+
+      const rows = activeRows();
+      if (!rows.length) {
+        el("feedbackBody").innerHTML = `<tr><td colspan="${config.headers.length}" style="text-align:center; padding:2rem; color:var(--text-muted);">No records found.</td></tr>`;
+        el("feedbackPagBar").innerHTML = "";
+        el("rowCountInfo").textContent = "Showing 0 records";
         return;
       }
 
-      const start = (currentPage - 1) * pageSize + 1;
-      const end = Math.min(currentPage * pageSize, totalItems);
+      const totalPages = Math.ceil(rows.length / pageSize);
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
 
-      let btns = "";
-      btns += `<button class="sr-page-btn ${currentPage === 1 ? 'is-disabled' : ''}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>« Prev</button>`;
+      const start = (currentPage - 1) * pageSize;
+      const end = Math.min(start + pageSize, rows.length);
+      const pageSlice = rows.slice(start, end);
 
-      for (let p = 1; p <= totalPages; p++) {
-        if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
-          btns += `<button class="sr-page-btn ${p === currentPage ? 'is-active' : ''}" data-page="${p}">${p}</button>`;
-        } else if (p === currentPage - 2 || p === currentPage + 2) {
-          btns += `<span class="sr-page-dots">...</span>`;
-        }
+      el("rowCountInfo").textContent = `Showing ${start + 1}–${end} of ${rows.length} records (Page ${currentPage} of ${totalPages})`;
+
+      if (activeTab === "faculty") {
+        el("feedbackBody").innerHTML = pageSlice.map((item, idx) => renderFacultyRow(item, idx)).join("");
+      } else if (activeTab === "mentor") {
+        el("feedbackBody").innerHTML = pageSlice.map((item, idx) => renderMentorRow(item, idx)).join("");
+      } else if (activeTab === "evaluation") {
+        el("feedbackBody").innerHTML = pageSlice.map((item, idx) => renderEvaluationRow(item, idx)).join("");
+      } else {
+        el("feedbackBody").innerHTML = pageSlice.map(item => renderStaffRow(item)).join("");
       }
 
-      btns += `<button class="sr-page-btn ${currentPage === totalPages ? 'is-disabled' : ''}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>Next »</button>`;
+      renderPaginationControls(rows.length, totalPages);
+    }
+
+    function renderPaginationControls(totalCount, totalPages) {
+      const bar = el("feedbackPagBar");
+      if (!bar) return;
+
+      let btns = `<button class="table-pag-btn" ${currentPage === 1 ? 'disabled' : ''} id="pagPrevBtn">« Prev</button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+          btns += `<button class="table-pag-btn ${p === currentPage ? 'is-active' : ''}" data-page="${p}">${p}</button>`;
+        } else if (p === currentPage - 2 || p === currentPage + 2) {
+          btns += `<span style="padding:0 4px; font-size:12px; color:var(--text-muted);">...</span>`;
+        }
+      }
+      btns += `<button class="table-pag-btn" ${currentPage === totalPages ? 'disabled' : ''} id="pagNextBtn">Next »</button>`;
 
       bar.innerHTML = `
-        <div class="sr-pag-info" style="font-size:12px; color:var(--text-muted);">
-          Showing <strong>${start}–${end}</strong> of <strong>${totalItems}</strong> records (Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong>)
-        </div>
-        <div class="sr-pag-controls" style="display:flex; align-items:center; gap:4px;">
-          ${btns}
-        </div>
+        <div style="font-size:12px; color:var(--text-muted);">Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong></div>
+        <div style="display:flex; gap:4px;">${btns}</div>
       `;
 
-      bar.querySelectorAll(".sr-page-btn:not(:disabled)").forEach(b => {
+      if (el("pagPrevBtn")) el("pagPrevBtn").addEventListener("click", () => { currentPage--; renderActiveTab(); });
+      if (el("pagNextBtn")) el("pagNextBtn").addEventListener("click", () => { currentPage++; renderActiveTab(); });
+      bar.querySelectorAll("[data-page]").forEach(b => {
         b.addEventListener("click", () => {
           currentPage = parseInt(b.dataset.page, 10);
           renderActiveTab();
@@ -477,59 +568,32 @@
       });
     }
 
-    function renderActiveTab() {
-      const config = tabConfig[activeTab];
-      const allRows = activeRows();
-      const totalItems = allRows.length;
-      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-      if (currentPage > totalPages) currentPage = totalPages;
-      if (currentPage < 1) currentPage = 1;
-
-      const startIdx = (currentPage - 1) * pageSize;
-      const pageRows = allRows.slice(startIdx, startIdx + pageSize);
-
-      el("activeTitle").textContent = config.title;
-      el("activeDescription").textContent = config.description;
-      el("activeAddBtn").textContent = activeTab === "people" ? "Add Faculty / Mentor" : `Add ${config.title}`;
-      el("feedbackHead").innerHTML = config.headers.map(header => `<th>${header}</th>`).join("");
-
-      el("feedbackBody").innerHTML = pageRows.length ? pageRows.map((item, idx) => {
-        if (activeTab === "faculty") return renderFacultyRow(item, idx);
-        if (activeTab === "mentor") return renderMentorRow(item, idx);
-        if (activeTab === "people") return renderStaffRow(item);
-        return renderEvaluationRow(item, idx);
-      }).join("") : `<tr><td colspan="${config.headers.length}"><div class="empty-state">No ${config.title.toLowerCase()} records match the current filters.</div></td></tr>`;
-
-      renderPagination(totalItems, totalPages);
-
-      document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
-        btn.classList.toggle("is-active", btn.dataset.feedbackTab === activeTab);
-      });
-      document.querySelectorAll("[data-remove-staff]").forEach(btn => {
-        btn.addEventListener("click", () => removeStaff(btn.dataset.removeStaff, btn.dataset.staffName));
-      });
-      renderMetrics();
-    }
-
     function populateStaffDropdowns() {
-      const facultyOptions = staff.filter(member => member.type === "Faculty").map(member => `<option value="${member.name}">${member.name}</option>`).join("");
-      const mentorOptions = staff.filter(member => member.type === "Mentor").map(member => `<option value="${member.name}">${member.name}</option>`).join("");
-      el("facFaculty").innerHTML = facultyOptions || `<option value="Not assigned">Not assigned</option>`;
-      el("menMentor").innerHTML = mentorOptions || `<option value="Not assigned">Not assigned</option>`;
-      el("evalMentor").innerHTML = mentorOptions || `<option value="Not assigned">Not assigned</option>`;
+      const faculties = staff.filter(m => m.type === "Faculty").map(m => `<option value="${m.name}">${m.name}</option>`).join("");
+      const mentors = staff.filter(m => m.type === "Mentor").map(m => `<option value="${m.name}">${m.name}</option>`).join("");
+      const coordinators = staff.filter(m => m.type === "Student Coordinator").map(m => `<option value="${m.name}">${m.name}</option>`).join("");
+
+      if (el("facFaculty")) el("facFaculty").innerHTML = faculties || `<option value="Dr. Amit Verma">Dr. Amit Verma</option>`;
+      if (el("menMentor")) el("menMentor").innerHTML = mentors || `<option value="Rohan Das">Rohan Das</option>`;
+      if (el("evalMentor")) el("evalMentor").innerHTML = mentors || `<option value="Rohan Das">Rohan Das</option>`;
+
+      if (el("facCallBy")) el("facCallBy").innerHTML = coordinators || `<option value="Sunita Deshmukh">Sunita Deshmukh</option>`;
+      if (el("menCallBy")) el("menCallBy").innerHTML = coordinators || `<option value="Sunita Deshmukh">Sunita Deshmukh</option>`;
+      if (el("evalCallBy")) el("evalCallBy").innerHTML = coordinators || `<option value="Sunita Deshmukh">Sunita Deshmukh</option>`;
     }
 
     async function loadStaff() {
       staff = await apiFetch('/api/staff');
       populateStaffDropdowns();
-      if (activeTab === "people") renderActiveTab();
+      if (["facultyStaff", "mentorStaff", "coordinatorStaff"].includes(activeTab)) renderActiveTab();
     }
 
     async function removeStaff(id, name) {
-      if (!confirm(`Remove ${name} from Faculty & Mentors? Existing feedback records will keep the saved name.`)) return;
+      if (!confirm(`Remove ${name} from directory? Existing feedback records will keep the saved name.`)) return;
       await apiFetch(`/api/staff/${encodeURIComponent(id)}`, { method: "DELETE" });
       await loadStaff();
     }
+    window.removeStaff = removeStaff;
 
     async function loadFeedback() {
       faculty = await apiFetch('/api/feedback?type=Faculty');
@@ -549,7 +613,9 @@
       populateStaffDropdowns();
       el("studentFilter").innerHTML = `<option value="All">All students</option>${studentOptions}`;
       el("applicationFilter").innerHTML = `<option value="All">All applications</option>${moduleOptions}`;
-      ["facDate", "menDate", "evalDate"].forEach(id => el(id).value = today());
+      ["facCallDate", "facDate", "menCallDate", "menDate", "evalCallDate", "evalDate"].forEach(id => {
+        if (el(id)) el(id).value = today();
+      });
       document.querySelectorAll("[data-close]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.close)));
       document.querySelectorAll("[data-feedback-tab]").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -558,7 +624,21 @@
           renderActiveTab();
         });
       });
-      el("activeAddBtn").addEventListener("click", () => openModal(tabConfig[activeTab].modal));
+      el("activeAddBtn").addEventListener("click", () => {
+        if (activeTab === "facultyStaff") {
+          el("staffType").value = "Faculty";
+          el("staffModalTitle").textContent = "Add Faculty";
+        } else if (activeTab === "mentorStaff") {
+          el("staffType").value = "Mentor";
+          el("staffModalTitle").textContent = "Add Mentor";
+        } else if (activeTab === "coordinatorStaff") {
+          el("staffType").value = "Student Coordinator";
+          el("staffModalTitle").textContent = "Add Student Coordinator";
+        } else {
+          el("staffModalTitle").textContent = "Add Staff Member";
+        }
+        openModal(tabConfig[activeTab].modal);
+      });
       if (el("searchInput")) el("searchInput").addEventListener("input", () => {
         currentPage = 1;
         renderActiveTab();
@@ -577,13 +657,21 @@
     el("facultyForm").addEventListener("submit", async e => {
       e.preventDefault();
       await apiFetch('/api/feedback/faculty', { method: "POST", body: JSON.stringify({
-        studentId: el("facStudent").value, callDate: el("facDate").value, connectionStatus: el("facStatus").value, application: el("facApp").value, session: el("facSession").value,
+        studentId: el("facStudent").value,
+        callDate: el("facCallDate").value,
+        sessionDate: el("facDate").value,
+        connectionStatus: el("facStatus").value,
+        application: el("facApp").value,
+        session: el("facSession").value,
+        calledBy: el("facCallBy").value,
         facultyName: el("facFaculty").value,
         facultyRating: el("facRating").value,
-        assignmentRating: el("facAssignmentRating").value,
+        material: el("facMaterial").value,
         videoUploaded: el("facVideoUploaded").value,
-        classTiming: el("facTiming").value, material: el("facMaterial").value, classSpeed: el("facSpeed").value,
-        overallSatisfaction: el("facSatisfaction").value, comments: el("facComments").value
+        assignmentRating: el("facTiming").value,
+        classSpeed: el("facSpeed").value,
+        overallSatisfaction: el("facSatisfaction").value,
+        comments: el("facComments").value
       }) });
       closeModal("facultyModal");
       await loadFeedback();
@@ -592,10 +680,20 @@
     el("mentorForm").addEventListener("submit", async e => {
       e.preventDefault();
       await apiFetch('/api/feedback/mentor', { method: "POST", body: JSON.stringify({
-        studentId: el("menStudent").value, callDate: el("menDate").value, connectionStatus: el("menStatus").value, application: el("menApp").value, session: el("menSession").value,
+        studentId: el("menStudent").value,
+        callDate: el("menCallDate").value,
+        sessionDate: el("menDate").value,
+        connectionStatus: el("menStatus").value,
+        application: el("menApp").value,
+        session: el("menSession").value,
+        calledBy: el("menCallBy").value,
         mentorName: el("menMentor").value,
-        mentorRating: el("menRating").value, doubtClearing: el("menDoubt").value, behaviour: el("menBehaviour").value, attention: el("menAttention").value,
-        overallSatisfaction: el("menSatisfaction").value, comments: el("menComments").value
+        mentorRating: el("menRating").value,
+        doubtClearing: el("menDoubt").value,
+        behaviour: el("menBehaviour").value,
+        attention: el("menAttention").value,
+        overallSatisfaction: el("menSatisfaction").value,
+        comments: el("menComments").value
       }) });
       closeModal("mentorModal");
       await loadFeedback();
@@ -604,9 +702,17 @@
     el("evalForm").addEventListener("submit", async e => {
       e.preventDefault();
       await apiFetch('/api/feedback/mentor-evaluation', { method: "POST", body: JSON.stringify({
-        studentId: el("evalStudent").value, callDate: el("evalDate").value, connectionStatus: el("evalStatus").value, application: el("evalApp").value,
+        studentId: el("evalStudent").value,
+        callDate: el("evalCallDate").value,
+        sessionDate: el("evalDate").value,
+        connectionStatus: el("evalStatus").value,
+        application: el("evalApp").value,
+        session: el("evalSession").value,
+        calledBy: el("evalCallBy").value,
         mentorName: el("evalMentor").value,
-        assignmentStatus: el("evalAssignment").value, applicationKnowledge: el("evalKnowledge").value, overallFeedback: el("evalComments").value
+        assignmentStatus: el("evalAssignment").value,
+        applicationKnowledge: el("evalKnowledge").value,
+        overallFeedback: el("evalComments").value
       }) });
       closeModal("evalModal");
       await loadFeedback();
@@ -618,9 +724,9 @@
         type: el("staffType").value,
         name: el("staffName").value,
         email: el("staffEmail").value,
-        phone: el("staffPhone").value
+        phone: el("staffPhone").value,
+        status: el("staffStatus").value
       }) });
-      el("staffForm").reset();
       closeModal("staffModal");
       await loadStaff();
     });

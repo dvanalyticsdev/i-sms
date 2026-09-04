@@ -24,15 +24,15 @@ const CURRICULUM_MODULES = [
 
 // Helper to compute module stats
 function computeModuleMetrics(m) {
-  const classes = m.classes || 10;
-  const attended = Math.min(classes, Math.max(0, m.attended || 0));
+  const classes = Math.max(1, parseInt(m.classes, 10) || 10);
+  const attended = Math.min(classes, Math.max(0, parseInt(m.attended, 10) || 0));
   const attendancePct = classes > 0 ? Math.round((attended / classes) * 100) : 0;
   
-  const classHours = m.classHours || classes * 2;
-  const hoursAttended = m.hoursAttended !== undefined ? m.hoursAttended : attended * 2;
+  const classHours = classes * 2;
+  const hoursAttended = attended * 2;
   
-  const classDuration = m.classDuration || classes * 120; // 120 mins per class default (1200 mins)
-  const classAttention = Math.min(classDuration, Math.max(0, m.classAttention || 0));
+  const classDuration = classes * 120; // 120 mins per class
+  const classAttention = Math.min(classDuration, Math.max(0, parseInt(m.classAttention, 10) || 0));
   const attentionPct = classDuration > 0 ? Math.round((classAttention / classDuration) * 100) : 0;
   
   const assignments = m.assignments || { s1: false, s2: false, s3: false, s4: false, s5: false, s6: false };
@@ -1645,7 +1645,9 @@ let staffMembers = [
   { id: "FAC004", type: "Faculty", name: "Dr. Rajesh Gupta", email: "rajesh.gupta@dvanalytics.in", phone: "+91 98765 20104", status: "Active" },
   { id: "MEN001", type: "Mentor", name: "Rohan Das", email: "rohan.das@dvanalytics.in", phone: "+91 98765 30101", status: "Active" },
   { id: "MEN002", type: "Mentor", name: "Priya Nair", email: "priya.nair@dvanalytics.in", phone: "+91 98765 30102", status: "Active" },
-  { id: "MEN003", type: "Mentor", name: "Vikram Singhania", email: "vikram.s@dvanalytics.in", phone: "+91 98765 30103", status: "Active" }
+  { id: "MEN003", type: "Mentor", name: "Vikram Singhania", email: "vikram.s@dvanalytics.in", phone: "+91 98765 30103", status: "Active" },
+  { id: "SCO001", type: "Student Coordinator", name: "Sunita Deshmukh", email: "sunita.d@dvanalytics.in", phone: "+91 98765 40101", status: "Active" },
+  { id: "SCO002", type: "Student Coordinator", name: "Rahul Malhotra", email: "rahul.m@dvanalytics.in", phone: "+91 98765 40102", status: "Active" }
 ];
 
 // Feedback Triad Collections based on Sheet 2 (STUDENT FEEDBACK)
@@ -2019,14 +2021,16 @@ app.post('/api/staff', (req, res) => {
   const data = req.body;
   const type = String(data.type || "").trim();
   const name = String(data.name || "").trim();
-  if (!["Faculty", "Mentor"].includes(type)) {
-    return res.status(400).json({ error: "Staff type must be Faculty or Mentor" });
+  if (!["Faculty", "Mentor", "Student Coordinator"].includes(type)) {
+    return res.status(400).json({ error: "Staff type must be Faculty, Mentor, or Student Coordinator" });
   }
   if (!name) {
     return res.status(400).json({ error: "Staff name is required" });
   }
 
-  const prefix = type === "Faculty" ? "FAC" : "MEN";
+  let prefix = "FAC";
+  if (type === "Mentor") prefix = "MEN";
+  else if (type === "Student Coordinator") prefix = "SCO";
   const nextNumber = staffMembers.filter(member => member.type === type).length + 1;
   const entry = {
     id: prefix + String(nextNumber).padStart(3, "0"),
@@ -2063,10 +2067,12 @@ app.post('/api/feedback/faculty', (req, res) => {
     course: student.course,
     batch: student.batch,
     callDate: data.callDate || new Date().toISOString().split('T')[0],
+    sessionDate: data.sessionDate || data.session_date || data.callDate || new Date().toISOString().split('T')[0],
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Faculty Feedback",
     application: data.application || "EXCEL AI",
     session: data.session || student.session || "SESSION-1",
+    calledBy: data.calledBy || data.callBy || "Sunita Deshmukh",
     facultyName: data.facultyName || student.faculty || "Not assigned",
     facultyRating: Math.max(0, Math.min(5, parseFloat(data.facultyRating) || 5)),
     assignmentRating: Math.max(0, Math.min(5, parseFloat(data.assignmentRating) || 5)),
@@ -2116,10 +2122,12 @@ app.post('/api/feedback/mentor', (req, res) => {
     course: student.course,
     batch: student.batch,
     callDate: data.callDate || new Date().toISOString().split('T')[0],
+    sessionDate: data.sessionDate || data.session_date || data.callDate || new Date().toISOString().split('T')[0],
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Mentor Feedback",
     application: data.application || "EXCEL AI",
     session: data.session || student.session || "SESSION-1",
+    calledBy: data.calledBy || data.callBy || "Sunita Deshmukh",
     mentorName: data.mentorName || student.counselor || "Not assigned",
     mentorRating: Math.max(0, Math.min(5, parseFloat(data.mentorRating) || 5)),
     doubtClearing: Math.max(0, Math.min(5, parseFloat(data.doubtClearing) || 5)),
@@ -2147,9 +2155,12 @@ app.post('/api/feedback/mentor-evaluation', (req, res) => {
     course: student.course,
     batch: student.batch,
     callDate: data.callDate || new Date().toISOString().split('T')[0],
+    sessionDate: data.sessionDate || data.session_date || data.callDate || new Date().toISOString().split('T')[0],
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Mentor Evaluation",
     application: data.application || "EXCEL AI",
+    session: data.session || student.session || "SESSION-1",
+    calledBy: data.calledBy || data.callBy || "Sunita Deshmukh",
     mentorName: data.mentorName || student.counselor || "Not assigned",
     assignmentStatus: data.assignmentStatus || "Completed", // Completed / In Progress / Not Started
     applicationKnowledge: data.applicationKnowledge || "Good", // Low / Average / Good / Best

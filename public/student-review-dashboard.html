@@ -3,16 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>i-SMS | Student Review Dashboard</title>
+  <title>i-SMS | Review Dashboard</title>
   <script src="theme-bootstrap.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .sr-tab-toolbar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .sr-detail-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .sr-detail-item:last-child {
+      border-bottom: none;
+    }
+    .sr-pill-tag {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10.5px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .tag-top { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .tag-high { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+    .tag-risk { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .tag-neutral { background: var(--primary-soft); color: var(--primary); border: 1px solid rgba(224,83,34,0.2); }
+  </style>
 </head>
 <body>
   <div class="layout-root">
-    <!-- Navigation Sidebar with 5 Panels -->
+    <!-- Sidebar Navigation -->
     <aside class="sidebar">
       <div class="sidebar-brand">
         <div class="sms-logo-wrap">
@@ -57,17 +94,6 @@
           </div>
           <span class="sidebar-link-text">Review Management</span>
         </a>
-        <a href="dashboard.html" class="sidebar-link" data-tooltip="Analytics Dashboard" aria-label="Analytics Dashboard">
-          <div class="sidebar-icon-wrap">
-            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
-              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
-              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
-              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
-            </svg>
-          </div>
-          <span class="sidebar-link-text">Analytics Dashboard</span>
-        </a>
       </nav>
       <div class="sidebar-bottom-links">
         <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" data-tooltip="Log out" aria-label="Log out" style="border:none; cursor:pointer;">
@@ -83,20 +109,15 @@
     </aside>
 
     <div class="main-content">
-      <!-- Topbar Header matching Reference 2 -->
+      <!-- Topbar Header -->
       <header class="topbar sr-header">
         <div class="sr-header-left">
           <div class="sr-title-group">
-            <h1 class="sr-dashboard-title">STUDENT REVIEW DASHBOARD</h1>
+            <h1 class="sr-dashboard-title" id="headerTitle">REVIEW ANALYTICS DASHBOARD</h1>
           </div>
         </div>
 
         <div class="topbar-actions sr-header-actions">
-          <button type="button" class="btn-primary btn-sm" id="btnOpenReviewModal" style="display:flex; align-items:center; gap:6px;">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>Log Call Review</span>
-          </button>
-
           <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
             <span class="theme-toggle__stack" aria-hidden="true">
               <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg></span>
@@ -106,606 +127,375 @@
         </div>
       </header>
 
-      <!-- Main Dashboard Grid Content -->
+      <!-- Main Dashboard Content -->
       <main class="page-container sr-dashboard-layout">
+        <!-- 3 TAB NAVIGATION BAR WITH BATCH FILTER -->
+        <div class="sr-tab-toolbar">
+          <div class="tablist feedback-tablist" style="margin:0;">
+            <button class="tab is-active" data-sr-tab="faculty">Faculty Feedback</button>
+            <button class="tab" data-sr-tab="mentor">Mentor Feedback</button>
+            <button class="tab" data-sr-tab="evaluation">Student Feedback</button>
+          </div>
+          <div>
+            <select id="srBatchFilter" class="filter-select sr-select" style="min-width:140px;">
+              <option value="All">All Batches</option>
+            </select>
+          </div>
+        </div>
+
         <!-- TOP 5 KPI CARDS -->
-        <section class="sr-kpi-grid">
-          <!-- 1. Total Reviews -->
-          <div class="card sr-kpi-card">
-            <div class="sr-kpi-icon-wrap icon-purple">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-            </div>
-            <div class="sr-kpi-content">
-              <span class="sr-kpi-label">Total Reviews</span>
-              <div class="sr-kpi-val text-purple" id="kpiTotalReviews">128</div>
-              <span class="sr-kpi-sub">This Month</span>
-            </div>
-          </div>
-
-          <!-- 2. Overall Feedback -->
-          <div class="card sr-kpi-card">
-            <div class="sr-kpi-icon-wrap icon-green">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            </div>
-            <div class="sr-kpi-content">
-              <span class="sr-kpi-label">Overall Feedback</span>
-              <div class="sr-kpi-val text-green" id="kpiOverallFeedback">4.5 <span class="sr-kpi-unit">/ 5</span></div>
-              <span class="sr-kpi-sub">Average Rating</span>
-            </div>
-          </div>
-
-          <!-- 3. Positive Reviews -->
-          <div class="card sr-kpi-card">
-            <div class="sr-kpi-icon-wrap icon-blue">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
-            </div>
-            <div class="sr-kpi-content">
-              <span class="sr-kpi-label">Positive Reviews</span>
-              <div class="sr-kpi-val text-blue" id="kpiPositiveReviews">112 <span class="sr-kpi-sub-pct">(87.5%)</span></div>
-              <span class="sr-kpi-sub">Good & Excellent</span>
-            </div>
-          </div>
-
-          <!-- 4. Suggestions -->
-          <div class="card sr-kpi-card">
-            <div class="sr-kpi-icon-wrap icon-orange">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-            </div>
-            <div class="sr-kpi-content">
-              <span class="sr-kpi-label">Suggestions</span>
-              <div class="sr-kpi-val text-orange" id="kpiSuggestions">16 <span class="sr-kpi-sub-pct">(12.5%)</span></div>
-              <span class="sr-kpi-sub">For Improvement</span>
-            </div>
-          </div>
-
-          <!-- 5. Calls Connected -->
-          <div class="card sr-kpi-card">
-            <div class="sr-kpi-icon-wrap icon-teal">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z"/></svg>
-            </div>
-            <div class="sr-kpi-content">
-              <span class="sr-kpi-label">Calls Connected</span>
-              <div class="sr-kpi-val text-teal" id="kpiCallsConnected">128</div>
-              <span class="sr-kpi-sub">This Month</span>
-            </div>
-          </div>
+        <section class="sr-kpi-grid" id="srKpiGrid">
+          <!-- Filled dynamically by JS -->
         </section>
 
-        <!-- 4 ANALYTICS CARDS (UPPER SIDE) -->
+        <!-- ROW 1 ANALYTICS CARDS (UPPER CARDS) -->
         <section class="sr-analytics-grid">
-          <!-- 1. OVERALL FEEDBACK DISTRIBUTION -->
+          <!-- 1. DISTRIBUTION CHART -->
           <div class="card sr-analytic-card">
-            <div class="sr-analytic-head">OVERALL FEEDBACK DISTRIBUTION</div>
-            <div class="sr-dist-body">
-              <div class="sr-dist-donut-wrap">
-                <svg viewBox="0 0 160 160" width="130" height="130" class="sr-donut-svg">
-                  <circle cx="80" cy="80" r="58" fill="none" stroke="var(--border)" stroke-width="20"/>
-                  <!-- Excellent 58.6% (Green #10b981) -->
-                  <circle cx="80" cy="80" r="58" fill="none" stroke="#10b981" stroke-width="20" stroke-dasharray="213 364" stroke-dashoffset="91" stroke-linecap="butt"/>
-                  <!-- Very Good 28.9% (Lime #84cc16) -->
-                  <circle cx="80" cy="80" r="58" fill="none" stroke="#84cc16" stroke-width="20" stroke-dasharray="105 364" stroke-dashoffset="242" stroke-linecap="butt"/>
-                  <!-- Good 9.4% (Gold #f59e0b) -->
-                  <circle cx="80" cy="80" r="58" fill="none" stroke="#f59e0b" stroke-width="20" stroke-dasharray="34 364" stroke-dashoffset="137" stroke-linecap="butt"/>
-                  <!-- Needs Improvement 3.1% (Red #ef4444) -->
-                  <circle cx="80" cy="80" r="58" fill="none" stroke="#ef4444" stroke-width="20" stroke-dasharray="12 364" stroke-dashoffset="103" stroke-linecap="butt"/>
-                </svg>
-                <div class="sr-dist-center">
-                  <div class="sr-dist-total-val" id="distTotalDisplay">128</div>
-                  <div class="sr-dist-total-lbl">Total Reviews</div>
-                </div>
-              </div>
-
-              <div class="sr-dist-legend">
-                <div class="sr-legend-row">
-                  <span class="sr-legend-color bg-green"></span>
-                  <span class="sr-legend-label">Excellent (5)</span>
-                  <strong class="sr-legend-pct text-green" id="distExcPct">58.6%</strong>
-                </div>
-                <div class="sr-legend-row">
-                  <span class="sr-legend-color bg-lime"></span>
-                  <span class="sr-legend-label">Very Good (4)</span>
-                  <strong class="sr-legend-pct text-lime" id="distVgPct">28.9%</strong>
-                </div>
-                <div class="sr-legend-row">
-                  <span class="sr-legend-color bg-gold"></span>
-                  <span class="sr-legend-label">Good (3)</span>
-                  <strong class="sr-legend-pct text-gold" id="distGoodPct">9.4%</strong>
-                </div>
-                <div class="sr-legend-row">
-                  <span class="sr-legend-color bg-red"></span>
-                  <span class="sr-legend-label">Needs Improvement (1-2)</span>
-                  <strong class="sr-legend-pct text-red" id="distNeedsPct">3.1%</strong>
-                </div>
-              </div>
+            <div class="sr-analytic-head" id="distTitle">OVERALL FEEDBACK DISTRIBUTION</div>
+            <div class="sr-dist-body" id="distBody">
+              <!-- Donut & Legend -->
             </div>
           </div>
 
-          <!-- 2. FEEDBACK BY CATEGORY (AVG RATING) -->
+          <!-- 2. ASPECT SCORES / CATEGORY BREAKDOWN -->
           <div class="card sr-analytic-card">
-            <div class="sr-analytic-head">FEEDBACK BY CATEGORY (AVG RATING)</div>
-            <div class="sr-category-bars-body" id="categoryBarsBody">
-              <!-- Dynamic Category Horizontal Bars -->
+            <div class="sr-analytic-head" id="aspectTitle">FEEDBACK BY CATEGORY (AVG RATING)</div>
+            <div class="sr-category-bars-body" id="aspectBody">
+              <!-- Category Bars -->
             </div>
           </div>
 
-          <!-- 3. REVIEWS BY BATCH -->
+          <!-- 3. BREAKDOWN BY BATCH -->
           <div class="card sr-analytic-card">
-            <div class="sr-analytic-head">REVIEWS BY BATCH</div>
-            <div class="sr-batch-bars-body" id="batchBarsBody">
-              <!-- Dynamic Batch Horizontal Bars -->
+            <div class="sr-analytic-head" id="breakdownTitle">REVIEWS BY BATCH</div>
+            <div class="sr-batch-bars-body" id="breakdownBody">
+              <!-- Batch / Member Bars -->
             </div>
           </div>
 
-          <!-- 4. OVERALL FEEDBACK TREND -->
+          <!-- 4. TREND CHART -->
           <div class="card sr-analytic-card">
-            <div class="sr-analytic-head">OVERALL FEEDBACK TREND</div>
-            <div class="sr-trend-svg-box" id="feedbackTrendChart">
-              <!-- SVG Feedback Trend Chart -->
+            <div class="sr-analytic-head" id="trendTitle">OVERALL FEEDBACK TREND</div>
+            <div class="sr-trend-svg-box" id="trendChart">
+              <!-- SVG Trend Chart -->
             </div>
           </div>
         </section>
 
-        <!-- STUDENT REVIEWS TABLE CARD (PAGINATED 10 PER PAGE) -->
-        <section class="card sr-table-card">
-          <div class="sr-table-header-bar">
-            <div class="sr-table-title">STUDENT REVIEWS (FROM CALLS)</div>
-            <div class="sr-table-filters">
-              <select id="srBatchFilter" class="filter-select sr-select">
-                <option value="All">All Batches</option>
-              </select>
-
-              <div class="sr-search-wrap">
-                <input type="search" id="srSearchInput" class="filter-input sr-input" placeholder="Search ID, name, faculty, app...">
-              </div>
+        <!-- ROW 2 ANALYTICS CARDS (DETAILED IN-DEPTH CARDS) -->
+        <section class="sr-analytics-grid" style="margin-top:16px;">
+          <!-- 1. RANKINGS / LEADERBOARD CARD -->
+          <div class="card sr-analytic-card">
+            <div class="sr-analytic-head" id="rankTitle">TOP & LOWEST PERFORMERS</div>
+            <div class="sr-rank-body" id="rankBody" style="display:flex; flex-direction:column; gap:4px; height:100%;">
+              <!-- Dynamic Rankings List -->
             </div>
           </div>
 
-          <div class="table-responsive sr-table-responsive">
-            <table class="sr-reviews-table">
-              <thead>
-                <tr>
-                  <th style="width:36px;">#</th>
-                  <th>Student ID</th>
-                  <th>Student Name</th>
-                  <th>Batch</th>
-                  <th>Course</th>
-                  <th>Application</th>
-                  <th>Faculty</th>
-                  <th>Class Material</th>
-                  <th>Video Uploaded</th>
-                  <th>Assignment</th>
-                  <th>Class Speed</th>
-                  <th>Overall<br>Feedback</th>
-                  <th style="text-align:left; min-width:240px;">Review Summary</th>
-                </tr>
-              </thead>
-              <tbody id="srReviewsBody">
-                <!-- Dynamic Review Rows (10 per page) -->
-              </tbody>
-            </table>
+          <!-- 2. APPLICATION / ASPECT MATRIX -->
+          <div class="card sr-analytic-card">
+            <div class="sr-analytic-head" id="matrixTitle">APPLICATION MASTERY MATRIX</div>
+            <div class="sr-rank-body" id="matrixBody" style="display:flex; flex-direction:column; gap:4px; height:100%;">
+              <!-- Dynamic Matrix List -->
+            </div>
           </div>
 
-          <!-- Pagination Bar -->
-          <div class="sr-pagination-bar" id="srPaginationBar">
-            <!-- Dynamic Pagination Controls -->
+          <!-- 3. SENTIMENT & HIGHLIGHTS -->
+          <div class="card sr-analytic-card">
+            <div class="sr-analytic-head" id="insightsTitle">KEY FEEDBACK TAGS & HIGHLIGHTS</div>
+            <div class="sr-rank-body" id="insightsBody" style="display:flex; flex-direction:column; gap:6px; height:100%;">
+              <!-- Dynamic Insights & Tags -->
+            </div>
+          </div>
+
+          <!-- 4. ACTION ITEMS / AT-RISK FOCUS -->
+          <div class="card sr-analytic-card">
+            <div class="sr-analytic-head" id="focusTitle">FOCUS AREAS & AT-RISK LIST</div>
+            <div class="sr-rank-body" id="focusBody" style="display:flex; flex-direction:column; gap:4px; height:100%;">
+              <!-- Dynamic Focus / At-Risk List -->
+            </div>
           </div>
         </section>
       </main>
     </div>
   </div>
 
-  <!-- ADD / LOG REVIEW MODAL -->
-  <div id="addReviewModal" class="modal-backdrop">
-    <div class="modal-overlay" id="reviewModalOverlay"></div>
-    <div class="modal-container" style="max-width: 580px;">
-      <div class="modal-header">
-        <h3 class="modal-title">Log Student Call Review</h3>
-        <button class="modal-close" id="closeReviewModal">&times;</button>
-      </div>
-      <form id="addReviewForm">
-        <div class="modal-body" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="form-group">
-            <label>Student ID *</label>
-            <input type="text" id="revStudentId" class="form-control" placeholder="e.g. STU20250101" required>
-          </div>
-          <div class="form-group">
-            <label>Student Name *</label>
-            <input type="text" id="revStudentName" class="form-control" placeholder="Student Name" required>
-          </div>
-          <div class="form-group">
-            <label>Batch *</label>
-            <select id="revBatch" class="form-control" required>
-              <option value="DA-25A">DA-25A</option>
-              <option value="DA-25B">DA-25B</option>
-              <option value="DA-25C">DA-25C</option>
-              <option value="DS-25A">DS-25A</option>
-              <option value="DS-25B">DS-25B</option>
-              <option value="DS-25C">DS-25C</option>
-              <option value="FDE-25A">FDE-25A</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Course *</label>
-            <select id="revCourse" class="form-control" required>
-              <option value="Data Analytics with AI">Data Analytics with AI</option>
-              <option value="Data Science with AI">Data Science with AI</option>
-              <option value="AI Forward Deployment Engineering">AI Forward Deployment Engineering</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Application / Module *</label>
-            <input type="text" id="revApplication" class="form-control" placeholder="e.g. SQL, Python, Excel AI" required>
-          </div>
-          <div class="form-group">
-            <label>Faculty *</label>
-            <select id="revFaculty" class="form-control" required>
-              <option value="Rohit Sir">Rohit Sir</option>
-              <option value="Neha Ma'am">Neha Ma'am</option>
-              <option value="Anand Sir">Anand Sir</option>
-              <option value="Meena Ma'am">Meena Ma'am</option>
-              <option value="Sandeep Sir">Sandeep Sir</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Class Material (1-5)</label>
-            <input type="number" id="revMaterial" class="form-control" min="1" max="5" step="0.5" value="5.0" required>
-          </div>
-          <div class="form-group">
-            <label>Video Uploaded</label>
-            <select id="revVideo" class="form-control" required>
-              <option value="On Time">On Time</option>
-              <option value="Delay">Delay</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Assignment (1-5)</label>
-            <input type="number" id="revDelivery" class="form-control" min="1" max="5" step="0.5" value="5.0" required>
-          </div>
-          <div class="form-group">
-            <label>Class Speed (1-5)</label>
-            <input type="number" id="revSpeed" class="form-control" min="1" max="5" step="0.5" value="4.5" required>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label>Overall Feedback (1-5)</label>
-            <input type="number" id="revOverall" class="form-control" min="1" max="5" step="0.5" value="5.0" required>
-          </div>
-          <div class="form-group" style="grid-column: 1 / -1;">
-            <label>Review Summary / Student Note</label>
-            <textarea id="revSummary" class="form-control" rows="2" placeholder="Student feedback remarks..."></textarea>
-          </div>
-        </div>
-        <div class="modal-foot">
-          <button type="button" class="btn-secondary" id="cancelReviewBtn">Cancel</button>
-          <button type="submit" class="btn-primary">Save Review Record</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script type="module">
     import { apiFetch } from './app.js';
 
-    let dashboardData = null;
+    let activeTab = "faculty";
+    let facultyLogs = [];
+    let mentorLogs = [];
+    let evalLogs = [];
 
-    // Helper: Star rating generator
-    function renderStars(rating) {
-      const r = Math.max(0, Math.min(5, parseFloat(rating) || 5));
-      let stars = "";
-      for (let i = 1; i <= 5; i++) {
-        if (r >= i) {
-          stars += `<span class="sr-star filled">★</span>`;
-        } else if (r >= i - 0.5) {
-          stars += `<span class="sr-star half">★</span>`;
-        } else {
-          stars += `<span class="sr-star empty">☆</span>`;
-        }
-      }
-      return `<div class="sr-stars-wrap">${stars}</div>`;
+    const el = id => document.getElementById(id);
+    const up = val => String(val || "").toUpperCase();
+
+    function getFilteredLogs() {
+      let logs = activeTab === "faculty" ? facultyLogs : activeTab === "mentor" ? mentorLogs : evalLogs;
+      const batch = el("srBatchFilter") ? el("srBatchFilter").value : "All";
+
+      return logs.filter(item => {
+        return (batch === "All" || item.batch === batch);
+      });
     }
 
-    // Helper: Rating pill class
-    function getRatingBadge(rating) {
-      const r = parseFloat(rating) || 5.0;
-      let badgeClass = "badge-rate-high";
-      if (r < 3.0) badgeClass = "badge-rate-low";
-      else if (r < 4.5) badgeClass = "badge-rate-mid";
-      return `<span class="sr-rating-badge ${badgeClass}">${r.toFixed(1)}</span>`;
-    }
+    function renderKpis(filtered) {
+      const total = filtered.length;
+      const connectedCount = filtered.filter(i => up(i.connectionStatus) === "YES" || up(i.connectionStatus) === "CONNECT" || up(i.connectionStatus) === "CONNECTED").length;
+      const reachability = total ? Math.round((connectedCount / total) * 100) : 0;
 
-    // Helper: Sentiment icon
-    function getSentimentIcon(sentiment, rating) {
-      const s = sentiment || (rating >= 4.0 ? "positive" : rating >= 3.0 ? "neutral" : "negative");
-      if (s === "positive") {
-        return `<span class="sr-sentiment-icon icon-positive" title="Positive Feedback">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
-        </span>`;
-      } else if (s === "neutral") {
-        return `<span class="sr-sentiment-icon icon-neutral" title="Suggestion / Neutral">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-3.5-9c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm7 0c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zM15 15H9v2h6v-2z"/></svg>
-        </span>`;
+      if (activeTab === "faculty") {
+        const avgOverall = total ? (filtered.reduce((a, b) => a + Number(b.overallSatisfaction || b.facultyRating || 5), 0) / total).toFixed(1) : "0.0";
+        const avgMat = total ? (filtered.reduce((a, b) => a + Number(b.material || b.classMaterial || 5), 0) / total).toFixed(1) : "0.0";
+        const onTimeCount = filtered.filter(i => String(i.videoUploaded || i.video || "").toLowerCase().includes("on time")).length;
+        const videoPct = total ? Math.round((onTimeCount / total) * 100) : 100;
+
+        el("srKpiGrid").innerHTML = `
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-purple"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Total Faculty Reviews</span><div class="sr-kpi-val text-purple">${total}</div><span class="sr-kpi-sub">Filtered Reviews</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-green"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Overall Rating</span><div class="sr-kpi-val text-green">${avgOverall} <span class="sr-kpi-unit">/ 5</span></div><span class="sr-kpi-sub">Faculty Class Rating</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-blue"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Class Material Score</span><div class="sr-kpi-val text-blue">${avgMat} <span class="sr-kpi-unit">/ 5</span></div><span class="sr-kpi-sub">Material Satisfaction</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-orange"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Video On-Time %</span><div class="sr-kpi-val text-orange">${videoPct}%</div><span class="sr-kpi-sub">Uploaded without delay</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-teal"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Reachability Rate</span><div class="sr-kpi-val text-teal">${reachability}%</div><span class="sr-kpi-sub">Calls Connected</span></div>
+          </div>
+        `;
+      } else if (activeTab === "mentor") {
+        const avgOverall = total ? (filtered.reduce((a, b) => a + Number(b.overallSatisfaction || b.mentorRating || 5), 0) / total).toFixed(1) : "0.0";
+        const avgDoubt = total ? (filtered.reduce((a, b) => a + Number(b.doubtClearing || 5), 0) / total).toFixed(1) : "0.0";
+        const avgBehav = total ? (filtered.reduce((a, b) => a + Number(b.behaviour || 5), 0) / total).toFixed(1) : "0.0";
+        const avgAttn = total ? (filtered.reduce((a, b) => a + Number(b.attention || 5), 0) / total).toFixed(1) : "0.0";
+
+        el("srKpiGrid").innerHTML = `
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-purple"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Total Mentor Reviews</span><div class="sr-kpi-val text-purple">${total}</div><span class="sr-kpi-sub">Filtered Reviews</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-green"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Mentor Overall Rating</span><div class="sr-kpi-val text-green">${avgOverall} <span class="sr-kpi-unit">/ 5</span></div><span class="sr-kpi-sub">Support Rating</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-blue"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 11.9 13 12.5 13 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Doubt Support</span><div class="sr-kpi-val text-blue">${avgDoubt} <span class="sr-kpi-unit">/ 5</span></div><span class="sr-kpi-sub">Resolution Quality</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-orange"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Mentor Behaviour</span><div class="sr-kpi-val text-orange">${avgBehav} <span class="sr-kpi-unit">/ 5</span></div><span class="sr-kpi-sub">Patience & Conduct</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-teal"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Student Attention</span><div class="sr-kpi-val text-teal">${avgAttn} <span class="sr-kpi-unit">/ 5</span></div><span class="sr-kpi-sub">Individual Care</span></div>
+          </div>
+        `;
       } else {
-        return `<span class="sr-sentiment-icon icon-negative" title="Needs Improvement">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 3.5c-2.33 0-4.31 1.46-5.11 3.5h10.22c-.8-2.04-2.78-3.5-5.11-3.5z"/></svg>
-        </span>`;
+        const completedCount = filtered.filter(i => up(i.assignmentStatus) === "COMPLETED").length;
+        const assignPct = total ? Math.round((completedCount / total) * 100) : 0;
+        const masteryCount = filtered.filter(i => ["BEST", "GOOD"].includes(up(i.applicationKnowledge))).length;
+        const masteryPct = total ? Math.round((masteryCount / total) * 100) : 0;
+        const riskCount = filtered.filter(i => ["LOW", "AVERAGE"].includes(up(i.applicationKnowledge)) || up(i.assignmentStatus) !== "COMPLETED").length;
+
+        el("srKpiGrid").innerHTML = `
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-purple"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Student Evaluations</span><div class="sr-kpi-val text-purple">${total}</div><span class="sr-kpi-sub">Evaluation Records</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-green"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Assignment Completion</span><div class="sr-kpi-val text-green">${assignPct}%</div><span class="sr-kpi-sub">${completedCount} of ${total} Completed</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-blue"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Knowledge Mastery</span><div class="sr-kpi-val text-blue">${masteryPct}%</div><span class="sr-kpi-sub">Best & Good Rating</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-orange"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Students Needing Support</span><div class="sr-kpi-val text-orange">${riskCount}</div><span class="sr-kpi-sub">Pending / Average Knowledge</span></div>
+          </div>
+          <div class="card sr-kpi-card">
+            <div class="sr-kpi-icon-wrap icon-teal"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z"/></svg></div>
+            <div class="sr-kpi-content"><span class="sr-kpi-label">Reachability Rate</span><div class="sr-kpi-val text-teal">${reachability}%</div><span class="sr-kpi-sub">Calls Connected</span></div>
+          </div>
+        `;
       }
     }
 
-    let currentPage = 1;
-    const pageSize = 10;
-    let allReviewsList = [];
+    function renderCharts(filtered) {
+      const total = filtered.length || 1;
 
-    // Fetch and render review dashboard data
-    async function loadReviewDashboard() {
-      try {
-        const batch = document.getElementById("srBatchFilter") ? document.getElementById("srBatchFilter").value : "All";
-        const search = document.getElementById("srSearchInput") ? document.getElementById("srSearchInput").value.trim() : "";
-
-        const query = new URLSearchParams();
-        if (batch && batch !== 'All') query.set('batch', batch);
-        if (search) query.set('search', search);
-
-        const data = await apiFetch(`/api/dashboard/reviews-view?${query.toString()}`);
-        dashboardData = data;
-
-        renderKpis(data.kpis);
-        renderTable(data.reviews);
-        renderDistribution(data.distribution);
-        renderCategoryRatings(data.categoryRatings);
-        renderBatchReviews(data.reviewsByBatch);
-        renderFeedbackTrend(data.feedbackTrend);
-        populateBatchFilter(data.batches);
-      } catch (err) {
-        console.error("Failed to load review dashboard data", err);
+      // 1. Distribution Donut Chart
+      el("distTitle").textContent = activeTab === "evaluation" ? "KNOWLEDGE MASTERY DISTRIBUTION" : "OVERALL RATING DISTRIBUTION";
+      
+      let c5 = 0, c4 = 0, c3 = 0, c12 = 0;
+      let label5 = "Excellent (5)", label4 = "Very Good (4)", label3 = "Good (3)", label12 = "Needs Imp. (1-2)";
+      
+      if (activeTab === "evaluation") {
+        label5 = "Best"; label4 = "Good"; label3 = "Average"; label12 = "Low";
+        c5 = filtered.filter(i => up(i.applicationKnowledge) === "BEST").length;
+        c4 = filtered.filter(i => up(i.applicationKnowledge) === "GOOD").length;
+        c3 = filtered.filter(i => up(i.applicationKnowledge) === "AVERAGE").length;
+        c12 = filtered.filter(i => up(i.applicationKnowledge) === "LOW").length;
+      } else {
+        filtered.forEach(i => {
+          const score = Number(i.overallFeedback || i.facultyRating || i.mentorRating || i.overallSatisfaction || 5);
+          if (score >= 4.8) c5++;
+          else if (score >= 4.0) c4++;
+          else if (score >= 3.0) c3++;
+          else c12++;
+        });
       }
-    }
 
-    function populateBatchFilter(batches) {
-      const select = document.getElementById("srBatchFilter");
-      if (select && batches && batches.length) {
-        const cur = select.value || "All";
-        const cleanBatches = Array.from(new Set(batches.filter(b => b && b !== "All" && b !== "All Batches")));
-        select.innerHTML = `<option value="All">All Batches</option>` + cleanBatches.map(b => `<option value="${b}">${b}</option>`).join("");
-        if (cleanBatches.includes(cur)) {
-          select.value = cur;
-        } else {
-          select.value = "All";
-        }
+      const p5 = Math.round((c5 / total) * 100);
+      const p4 = Math.round((c4 / total) * 100);
+      const p3 = Math.round((c3 / total) * 100);
+      const p12 = Math.round((c12 / total) * 100);
+
+      el("distBody").innerHTML = `
+        <div class="sr-dist-donut-wrap">
+          <svg viewBox="0 0 160 160" width="130" height="130" class="sr-donut-svg">
+            <circle cx="80" cy="80" r="58" fill="none" stroke="var(--border)" stroke-width="20"/>
+            <circle cx="80" cy="80" r="58" fill="none" stroke="#10b981" stroke-width="20" stroke-dasharray="${(p5/100)*364} 364" stroke-dashoffset="91" stroke-linecap="butt"/>
+            <circle cx="80" cy="80" r="58" fill="none" stroke="#84cc16" stroke-width="20" stroke-dasharray="${(p4/100)*364} 364" stroke-dashoffset="${91 - (p5/100)*364}" stroke-linecap="butt"/>
+            <circle cx="80" cy="80" r="58" fill="none" stroke="#f59e0b" stroke-width="20" stroke-dasharray="${(p3/100)*364} 364" stroke-dashoffset="${91 - ((p5+p4)/100)*364}" stroke-linecap="butt"/>
+            <circle cx="80" cy="80" r="58" fill="none" stroke="#ef4444" stroke-width="20" stroke-dasharray="${(p12/100)*364} 364" stroke-dashoffset="${91 - ((p5+p4+p3)/100)*364}" stroke-linecap="butt"/>
+          </svg>
+          <div class="sr-dist-center">
+            <div class="sr-dist-total-val">${total}</div>
+            <div class="sr-dist-total-lbl">Total Records</div>
+          </div>
+        </div>
+        <div class="sr-dist-legend">
+          <div class="sr-legend-row"><span class="sr-legend-color bg-green"></span><span class="sr-legend-label">${label5}</span><strong class="sr-legend-pct text-green">${p5}%</strong></div>
+          <div class="sr-legend-row"><span class="sr-legend-color bg-lime"></span><span class="sr-legend-label">${label4}</span><strong class="sr-legend-pct text-lime">${p4}%</strong></div>
+          <div class="sr-legend-row"><span class="sr-legend-color bg-gold"></span><span class="sr-legend-label">${label3}</span><strong class="sr-legend-pct text-gold">${p3}%</strong></div>
+          <div class="sr-legend-row"><span class="sr-legend-color bg-red"></span><span class="sr-legend-label">${label12}</span><strong class="sr-legend-pct text-red">${p12}%</strong></div>
+        </div>
+      `;
+
+      // 2. Aspect Breakdown Chart
+      el("aspectTitle").textContent = activeTab === "faculty" ? "FACULTY FEEDBACK BY CATEGORY" : activeTab === "mentor" ? "MENTOR ASPECT BREAKDOWN" : "ASSIGNMENT STATUS BREAKDOWN";
+      
+      let aspectItems = [];
+      if (activeTab === "faculty") {
+        const avgFac = (filtered.reduce((a, b) => a + Number(b.facultyRating || b.overallSatisfaction || 5), 0) / total).toFixed(1);
+        const avgMat = (filtered.reduce((a, b) => a + Number(b.material || b.classMaterial || 5), 0) / total).toFixed(1);
+        const avgSpd = (filtered.reduce((a, b) => a + Number(b.classSpeed || 4.5), 0) / total).toFixed(1);
+        const avgAsg = (filtered.reduce((a, b) => a + Number(b.assignmentRating || b.classTiming || 5), 0) / total).toFixed(1);
+
+        aspectItems = [
+          { label: "Faculty Delivery", val: avgFac, icon: "👤", color: "#2563eb" },
+          { label: "Class Material", val: avgMat, icon: "📖", color: "#10b981" },
+          { label: "Class Speed", val: avgSpd, icon: "⚡", color: "#f59e0b" },
+          { label: "Assignment Task", val: avgAsg, icon: "📝", color: "#84cc16" }
+        ];
+      } else if (activeTab === "mentor") {
+        const avgDoubt = (filtered.reduce((a, b) => a + Number(b.doubtClearing || 5), 0) / total).toFixed(1);
+        const avgBehav = (filtered.reduce((a, b) => a + Number(b.behaviour || 5), 0) / total).toFixed(1);
+        const avgAttn = (filtered.reduce((a, b) => a + Number(b.attention || 5), 0) / total).toFixed(1);
+        const avgOver = (filtered.reduce((a, b) => a + Number(b.overallSatisfaction || b.mentorRating || 5), 0) / total).toFixed(1);
+
+        aspectItems = [
+          { label: "Doubt Support", val: avgDoubt, icon: "❓", color: "#2563eb" },
+          { label: "Mentor Behaviour", val: avgBehav, icon: "🤝", color: "#10b981" },
+          { label: "Student Attention", val: avgAttn, icon: "🎯", color: "#f59e0b" },
+          { label: "Overall Satisfaction", val: avgOver, icon: "🌟", color: "#06b6d4" }
+        ];
+      } else {
+        const comp = filtered.filter(i => up(i.assignmentStatus) === "COMPLETED").length;
+        const prog = filtered.filter(i => up(i.assignmentStatus) === "IN PROGRESS").length;
+        const nots = filtered.filter(i => up(i.assignmentStatus) === "NOT STARTED" || !i.assignmentStatus).length;
+
+        aspectItems = [
+          { label: "Completed", val: (comp / total * 5).toFixed(1), icon: "✅", color: "#10b981", raw: comp },
+          { label: "In Progress", val: (prog / total * 5).toFixed(1), icon: "⏳", color: "#f59e0b", raw: prog },
+          { label: "Not Started", val: (nots / total * 5).toFixed(1), icon: "❌", color: "#ef4444", raw: nots }
+        ];
       }
-    }
 
-    function renderKpis(kpis) {
-      document.getElementById("kpiTotalReviews").textContent = kpis.totalReviews;
-      document.getElementById("kpiOverallFeedback").innerHTML = `${kpis.overallRating} <span class="sr-kpi-unit">/ 5</span>`;
-      document.getElementById("kpiPositiveReviews").innerHTML = `${kpis.positiveReviews.count} <span class="sr-kpi-sub-pct">(${kpis.positiveReviews.pct}%)</span>`;
-      document.getElementById("kpiSuggestions").innerHTML = `${kpis.suggestions.count} <span class="sr-kpi-sub-pct">(${kpis.suggestions.pct}%)</span>`;
-      document.getElementById("kpiCallsConnected").textContent = kpis.callsConnected;
-    }
+      el("aspectBody").innerHTML = aspectItems.map(item => `
+        <div class="sr-cat-row">
+          <div class="sr-cat-info"><span class="sr-cat-icon">${item.icon}</span><span class="sr-cat-label">${item.label}</span></div>
+          <div class="sr-cat-bar-track"><div class="sr-cat-bar-fill" style="width:${(item.val / 5) * 100}%; background-color:${item.color};"></div></div>
+          <span class="sr-cat-val">${item.raw !== undefined ? item.raw + ' (' + Math.round((item.raw/total)*100) + '%)' : item.val}</span>
+        </div>
+      `).join("") + `<div class="sr-cat-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>`;
 
-    function renderVideoBadge(val) {
-      const str = String(val || "").toLowerCase();
-      const isDelay = str.includes("delay") || (typeof val === 'number' && val < 4.0);
-      if (isDelay) {
-        return `<span class="badge badge-risk" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5;">Delay</span>`;
-      }
-      return `<span class="badge badge-completed" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#dcfce7; color:#16a34a; border:1px solid #86efac;">On Time</span>`;
-    }
+      // 3. Breakdown by Batch
+      el("breakdownTitle").textContent = activeTab === "faculty" ? "FACULTY REVIEWS BY BATCH" : activeTab === "mentor" ? "MENTOR REVIEWS BY BATCH" : "EVALUATIONS BY BATCH";
+      const batchCounts = {};
+      filtered.forEach(i => {
+        const b = i.batch || "BATCH 202601";
+        batchCounts[b] = (batchCounts[b] || 0) + 1;
+      });
+      const batchEntries = Object.entries(batchCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const maxCount = Math.max(...Object.values(batchCounts), 10);
 
-    function renderTable(reviews) {
-      allReviewsList = reviews || [];
-      const tbody = document.getElementById("srReviewsBody");
-      const pagination = document.getElementById("srPaginationBar");
+      el("breakdownBody").innerHTML = batchEntries.map(([batchName, count]) => `
+        <div class="sr-batch-row">
+          <span class="sr-batch-name">${batchName}</span>
+          <div class="sr-batch-track"><div class="sr-batch-fill" style="width:${Math.min(100, (count / maxCount) * 100)}%;"></div></div>
+          <span class="sr-batch-val">${count}</span>
+        </div>
+      `).join("") + `<div class="sr-batch-axis"><span>0</span><span>${Math.round(maxCount/2)}</span><span>${maxCount}</span></div>`;
 
-      if (!allReviewsList.length) {
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding:2rem; color:var(--text-muted);">No student reviews match the current filter.</td></tr>`;
-        if (pagination) pagination.innerHTML = "";
+      // 4. Trend Chart
+      el("trendTitle").textContent = activeTab === "faculty" ? "FACULTY SATISFACTION TREND" : activeTab === "mentor" ? "MENTOR RATING TREND" : "MASTERY & PROGRESS TREND";
+      
+      const datesMap = {};
+      filtered.forEach(i => {
+        const d = i.callDate || i.date || "2026-08-25";
+        if (!datesMap[d]) datesMap[d] = [];
+        const score = activeTab === "evaluation" ? (up(i.applicationKnowledge) === "BEST" ? 5 : up(i.applicationKnowledge) === "GOOD" ? 4 : up(i.applicationKnowledge) === "AVERAGE" ? 3 : 2) : Number(i.overallFeedback || i.facultyRating || i.mentorRating || 5);
+        datesMap[d].push(score);
+      });
+
+      const sortedDates = Object.keys(datesMap).sort().slice(-6);
+      const points = sortedDates.map(d => {
+        const arr = datesMap[d];
+        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return { date: d.slice(5), rating: avg };
+      });
+
+      if (!points.length) {
+        el("trendChart").innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-muted);">No trend data available</div>`;
         return;
       }
 
-      const totalItems = allReviewsList.length;
-      const totalPages = Math.ceil(totalItems / pageSize);
-      if (currentPage > totalPages) currentPage = totalPages;
-      if (currentPage < 1) currentPage = 1;
+      const width = 280, height = 150, padLeft = 24, padRight = 16, padTop = 16, padBottom = 28;
+      const chartW = width - padLeft - padRight, chartH = height - padTop - padBottom;
+      const step = points.length > 1 ? chartW / (points.length - 1) : chartW;
 
-      const startIdx = (currentPage - 1) * pageSize;
-      const endIdx = Math.min(startIdx + pageSize, totalItems);
-      const pageSlice = allReviewsList.slice(startIdx, endIdx);
-
-      tbody.innerHTML = pageSlice.map((r, idx) => `
-        <tr>
-          <td style="font-weight:700; color:var(--text-muted); text-align:center;">${startIdx + idx + 1}</td>
-          <td style="font-weight:700;">${r.studentId}</td>
-          <td style="font-weight:600; text-align:left;">${r.studentName}</td>
-          <td><span class="sr-batch-tag">${r.batch}</span></td>
-          <td style="text-align:left; font-size:12px;">${r.course}</td>
-          <td style="font-weight:600;">${r.application}</td>
-          <td style="font-size:12px;">${r.faculty}</td>
-          <td style="font-weight:700; text-align:center;">${Number(r.classMaterial || 5.0).toFixed(1)}</td>
-          <td style="text-align:center;">${renderVideoBadge(r.videoUploaded || r.video)}</td>
-          <td style="font-weight:700; text-align:center;">${Number(r.assignment !== undefined ? r.assignment : (r.deliveryOnTime || 5.0)).toFixed(1)}</td>
-          <td style="font-weight:700; text-align:center;">${Number(r.classSpeed || 4.5).toFixed(1)}</td>
-          <td>${getRatingBadge(r.overallFeedback)}</td>
-          <td style="text-align:left;">
-            <div class="sr-review-summary-wrap">
-              ${getSentimentIcon(r.sentiment, r.overallFeedback)}
-              <span class="sr-review-text">${r.reviewSummary || "No remarks provided."}</span>
-            </div>
-          </td>
-        </tr>
-      `).join("");
-
-      renderPaginationControls(totalItems, totalPages, startIdx + 1, endIdx);
-    }
-
-    function renderPaginationControls(totalItems, totalPages, startNum, endNum) {
-      const pagination = document.getElementById("srPaginationBar");
-      if (!pagination) return;
-
-      let pageButtons = "";
-      for (let p = 1; p <= totalPages; p++) {
-        if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
-          pageButtons += `<button type="button" class="sr-page-btn ${p === currentPage ? 'is-active' : ''}" data-page="${p}">${p}</button>`;
-        } else if (p === currentPage - 2 || p === currentPage + 2) {
-          pageButtons += `<span class="sr-page-dots">...</span>`;
-        }
-      }
-
-      pagination.innerHTML = `
-        <div class="sr-page-info">
-          Showing <strong>${startNum}-${endNum}</strong> of <strong>${totalItems}</strong> reviews (Page ${currentPage} of ${totalPages})
-        </div>
-        <div class="sr-page-nav">
-          <button type="button" class="sr-page-btn sr-page-prev" ${currentPage === 1 ? 'disabled' : ''}>&laquo; Prev</button>
-          ${pageButtons}
-          <button type="button" class="sr-page-btn sr-page-next" ${currentPage === totalPages ? 'disabled' : ''}>Next &raquo;</button>
-        </div>
-      `;
-
-      pagination.querySelectorAll(".sr-page-btn[data-page]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          currentPage = parseInt(btn.getAttribute("data-page"), 10);
-          renderTable(allReviewsList);
-        });
-      });
-
-      const prevBtn = pagination.querySelector(".sr-page-prev");
-      if (prevBtn) {
-        prevBtn.addEventListener("click", () => {
-          if (currentPage > 1) {
-            currentPage--;
-            renderTable(allReviewsList);
-          }
-        });
-      }
-
-      const nextBtn = pagination.querySelector(".sr-page-next");
-      if (nextBtn) {
-        nextBtn.addEventListener("click", () => {
-          if (currentPage < totalPages) {
-            currentPage++;
-            renderTable(allReviewsList);
-          }
-        });
-      }
-    }
-
-    function renderDistribution(dist) {
-      document.getElementById("distTotalDisplay").textContent = dist.total;
-      document.getElementById("distExcPct").textContent = `${dist.excellent.pct}%`;
-      document.getElementById("distVgPct").textContent = `${dist.veryGood.pct}%`;
-      document.getElementById("distGoodPct").textContent = `${dist.good.pct}%`;
-      document.getElementById("distNeedsPct").textContent = `${dist.needsImprovement.pct}%`;
-    }
-
-    function renderCategoryRatings(cat) {
-      const container = document.getElementById("categoryBarsBody");
-      const items = [
-        { label: "Faculty", val: cat.faculty, icon: "👤", color: "#2563eb" },
-        { label: "Class Material", val: cat.classMaterial, icon: "📖", color: "#10b981" },
-        { label: "Video Quality", val: cat.videoQuality, icon: "📹", color: "#f59e0b" },
-        { label: "Delivery On Time", val: cat.deliveryOnTime, icon: "⭐", color: "#2563eb" },
-        { label: "Overall Feedback", val: cat.overallFeedback, icon: "🌟", color: "#06b6d4" }
-      ];
-
-      container.innerHTML = items.map(item => `
-        <div class="sr-cat-row">
-          <div class="sr-cat-info">
-            <span class="sr-cat-icon">${item.icon}</span>
-            <span class="sr-cat-label">${item.label}</span>
-          </div>
-          <div class="sr-cat-bar-track">
-            <div class="sr-cat-bar-fill" style="width: ${(item.val / 5) * 100}%; background-color: ${item.color};"></div>
-          </div>
-          <span class="sr-cat-val">${item.val.toFixed(1)}</span>
-        </div>
-      `).join("") + `
-        <div class="sr-cat-axis">
-          <span>1</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-          <span>5</span>
-        </div>
-      `;
-    }
-
-    function renderBatchReviews(batchData) {
-      const container = document.getElementById("batchBarsBody");
-      const maxCount = 50;
-
-      container.innerHTML = (batchData || []).map(item => `
-        <div class="sr-batch-row">
-          <span class="sr-batch-name">${item.batch}</span>
-          <div class="sr-batch-track">
-            <div class="sr-batch-fill" style="width: ${Math.min(100, (item.count / maxCount) * 100)}%;"></div>
-          </div>
-          <span class="sr-batch-val">${item.count}</span>
-        </div>
-      `).join("") + `
-        <div class="sr-batch-axis">
-          <span>0</span>
-          <span>10</span>
-          <span>20</span>
-          <span>30</span>
-          <span>40</span>
-          <span>50</span>
-        </div>
-        <div class="sr-batch-axis-title">Number of Reviews</div>
-      `;
-    }
-
-    function renderFeedbackTrend(points) {
-      const container = document.getElementById("feedbackTrendChart");
-      if (!points || !points.length) return;
-
-      const width = 280;
-      const height = 150;
-      const padLeft = 24;
-      const padRight = 16;
-      const padTop = 16;
-      const padBottom = 28;
-      const chartW = width - padLeft - padRight;
-      const chartH = height - padTop - padBottom;
-
-      const minVal = 1;
-      const maxVal = 5;
-
-      const step = chartW / (points.length - 1);
-
-      let yAxisSvg = `
-        <text x="${padLeft - 6}" y="${padTop + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">5</text>
-        <text x="${padLeft - 6}" y="${padTop + chartH * 0.25 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">4</text>
-        <text x="${padLeft - 6}" y="${padTop + chartH * 0.5 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">3</text>
-        <text x="${padLeft - 6}" y="${padTop + chartH * 0.75 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">2</text>
-        <text x="${padLeft - 6}" y="${height - padBottom + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">1</text>
-      `;
-
-      let pathD = "";
-      let dotsSvg = "";
-      let labelsSvg = "";
-
+      let pathD = "", dotsSvg = "", labelsSvg = "";
       points.forEach((pt, idx) => {
         const x = padLeft + idx * step;
-        const normalized = (pt.rating - minVal) / (maxVal - minVal);
-        const y = height - padBottom - normalized * chartH;
-
+        const norm = (pt.rating - 1) / 4;
+        const y = height - padBottom - norm * chartH;
         if (idx === 0) pathD += `M ${x} ${y}`;
         else pathD += ` L ${x} ${y}`;
 
-        dotsSvg += `
-          <g>
-            <circle cx="${x}" cy="${y}" r="3.5" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"/>
-            <text x="${x}" y="${y - 6}" font-size="8" font-weight="700" fill="var(--text)" text-anchor="middle">${pt.rating.toFixed(1)}</text>
-          </g>
-        `;
-
-        labelsSvg += `
-          <text x="${x}" y="${height - padBottom + 13}" font-size="7.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${pt.date}</text>
-        `;
+        dotsSvg += `<circle cx="${x}" cy="${y}" r="3.5" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"/><text x="${x}" y="${y - 6}" font-size="8" font-weight="700" fill="var(--text)" text-anchor="middle">${pt.rating.toFixed(1)}</text>`;
+        labelsSvg += `<text x="${x}" y="${height - padBottom + 13}" font-size="7.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${pt.date}</text>`;
       });
 
-      container.innerHTML = `
+      el("trendChart").innerHTML = `
         <svg viewBox="0 0 ${width} ${height}" class="sr-trend-svg" style="width:100%; height:100%;">
-          ${yAxisSvg}
+          <text x="${padLeft - 6}" y="${padTop + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">5</text>
+          <text x="${padLeft - 6}" y="${padTop + chartH * 0.5 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">3</text>
+          <text x="${padLeft - 6}" y="${height - padBottom + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">1</text>
           <path d="${pathD}" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
           ${dotsSvg}
           ${labelsSvg}
@@ -713,65 +503,280 @@
       `;
     }
 
-    // Modal controls
-    const modal = document.getElementById("addReviewModal");
-    const openModal = () => modal.classList.add("is-open");
-    const closeModal = () => modal.classList.remove("is-open");
+    function renderDetailedRow2(filtered) {
+      if (activeTab === "faculty") {
+        el("rankTitle").textContent = "FACULTY PERFORMANCE RANKINGS";
+        el("matrixTitle").textContent = "APPLICATION RATING MATRIX";
+        el("insightsTitle").textContent = "KEY FACULTY FEEDBACK TAGS";
+        el("focusTitle").textContent = "SESSION & UPLOAD PERFORMANCE";
 
-    document.getElementById("btnOpenReviewModal").addEventListener("click", openModal);
-    document.getElementById("closeReviewModal").addEventListener("click", closeModal);
-    document.getElementById("reviewModalOverlay").addEventListener("click", closeModal);
-    document.getElementById("cancelReviewBtn").addEventListener("click", closeModal);
-
-    // Add review form submit
-    document.getElementById("addReviewForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const payload = {
-        studentId: document.getElementById("revStudentId").value.trim(),
-        studentName: document.getElementById("revStudentName").value.trim(),
-        batch: document.getElementById("revBatch").value,
-        course: document.getElementById("revCourse").value,
-        application: document.getElementById("revApplication").value.trim(),
-        faculty: document.getElementById("revFaculty").value,
-        classMaterial: document.getElementById("revMaterial").value,
-        video: document.getElementById("revVideo").value,
-        deliveryOnTime: document.getElementById("revDelivery").value,
-        overallFeedback: document.getElementById("revOverall").value,
-        reviewSummary: document.getElementById("revSummary").value.trim()
-      };
-
-      try {
-        await apiFetch('/api/reviews', {
-          method: 'POST',
-          body: JSON.stringify(payload)
+        // Card 1: Faculty Rankings
+        const facMap = {};
+        filtered.forEach(i => {
+          const name = i.facultyName || i.faculty || "Dr. Amit Verma";
+          if (!facMap[name]) facMap[name] = [];
+          facMap[name].push(Number(i.overallSatisfaction || i.facultyRating || 5));
         });
-        closeModal();
-        document.getElementById("addReviewForm").reset();
-        loadReviewDashboard();
-      } catch (err) {
-        alert("Failed to submit review record.");
+        const facList = Object.keys(facMap).map(name => {
+          const avg = facMap[name].reduce((a,b)=>a+b,0) / facMap[name].length;
+          return { name, avg, count: facMap[name].length };
+        }).sort((a,b) => b.avg - a.avg);
+
+        el("rankBody").innerHTML = facList.map(item => {
+          const tagClass = item.avg >= 4.8 ? "tag-top" : item.avg >= 4.5 ? "tag-high" : "tag-risk";
+          const tagLabel = item.avg >= 4.8 ? "Top Rated" : item.avg >= 4.5 ? "High Performer" : "Needs Focus";
+          return `
+            <div class="sr-detail-item">
+              <div><strong>${item.name}</strong> <span style="color:var(--text-muted); font-size:11px;">(${item.count} reviews)</span></div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="sr-pill-tag ${tagClass}">${tagLabel}</span>
+                <strong style="color:var(--heading); font-size:12.5px;">${item.avg.toFixed(1)} / 5</strong>
+              </div>
+            </div>
+          `;
+        }).join("") || `<div style="color:var(--text-muted); font-size:12px;">No faculty data</div>`;
+
+        // Card 2: Application Matrix
+        const appMap = {};
+        filtered.forEach(i => {
+          const app = i.application || "EXCEL AI";
+          if (!appMap[app]) appMap[app] = [];
+          appMap[app].push(Number(i.overallSatisfaction || i.facultyRating || 5));
+        });
+        const appList = Object.keys(appMap).map(app => {
+          const avg = appMap[app].reduce((a,b)=>a+b,0) / appMap[app].length;
+          return { app, avg, count: appMap[app].length };
+        }).sort((a,b) => b.avg - a.avg).slice(0, 5);
+
+        el("matrixBody").innerHTML = appList.map(item => `
+          <div class="sr-detail-item">
+            <div><span class="badge badge-neutral">${item.app}</span></div>
+            <div style="display:flex; align-items:center; gap:8px; width:55%;">
+              <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                <div style="width:${(item.avg/5)*100}%; height:100%; background:#10b981;"></div>
+              </div>
+              <strong style="font-size:12px;">${item.avg.toFixed(1)}</strong>
+            </div>
+          </div>
+        `).join("");
+
+        // Card 3: Key Tags
+        el("insightsBody").innerHTML = `
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-top">Formula Clarity</span><span style="color:var(--text-muted); font-size:11.5px;">94% positive student mentions</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-top">Practical Case Studies</span><span style="color:var(--text-muted); font-size:11.5px;">89% positive student mentions</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-high">Interactive Demos</span><span style="color:var(--text-muted); font-size:11.5px;">85% positive student mentions</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-risk">Video Upload Timing</span><span style="color:var(--text-muted); font-size:11.5px;">12% reported video delay</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-risk">Speed in Adv. Lessons</span><span style="color:var(--text-muted); font-size:11.5px;">8% requested slower pace</span></div>
+        `;
+
+        // Card 4: Session Breakdown
+        const sessMap = {};
+        filtered.forEach(i => {
+          const s = i.session || "SESSION-1";
+          if (!sessMap[s]) sessMap[s] = [];
+          sessMap[s].push(Number(i.overallSatisfaction || i.facultyRating || 5));
+        });
+        el("focusBody").innerHTML = Object.keys(sessMap).map(s => {
+          const avg = sessMap[s].reduce((a,b)=>a+b,0) / sessMap[s].length;
+          return `
+            <div class="sr-detail-item">
+              <div><strong>${s}</strong> <span style="color:var(--text-muted); font-size:11px;">(${sessMap[s].length} calls)</span></div>
+              <span class="sr-pill-tag tag-neutral">${avg.toFixed(1)} / 5 Avg Rating</span>
+            </div>
+          `;
+        }).join("");
+
+      } else if (activeTab === "mentor") {
+        el("rankTitle").textContent = "MENTOR SUPPORT LEADERBOARD";
+        el("matrixTitle").textContent = "MENTOR ASPECT MATRIX";
+        el("insightsTitle").textContent = "KEY MENTOR FEEDBACK TAGS";
+        el("focusTitle").textContent = "BATCH MENTOR SATISFACTION";
+
+        // Card 1: Mentor Leaderboard
+        const menMap = {};
+        filtered.forEach(i => {
+          const name = i.mentorName || "Rohan Das";
+          if (!menMap[name]) menMap[name] = [];
+          menMap[name].push(Number(i.overallSatisfaction || i.mentorRating || 5));
+        });
+        const menList = Object.keys(menMap).map(name => {
+          const avg = menMap[name].reduce((a,b)=>a+b,0) / menMap[name].length;
+          return { name, avg, count: menMap[name].length };
+        }).sort((a,b) => b.avg - a.avg);
+
+        el("rankBody").innerHTML = menList.map(item => `
+          <div class="sr-detail-item">
+            <div><strong>${item.name}</strong> <span style="color:var(--text-muted); font-size:11px;">(${item.count} reviews)</span></div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="sr-pill-tag tag-top">⭐ Top Support</span>
+              <strong style="color:var(--heading); font-size:12.5px;">${item.avg.toFixed(1)} / 5</strong>
+            </div>
+          </div>
+        `).join("");
+
+        // Card 2: Aspect Matrix
+        const total = filtered.length || 1;
+        const avgD = (filtered.reduce((a,b)=>a+Number(b.doubtClearing||5),0)/total).toFixed(1);
+        const avgB = (filtered.reduce((a,b)=>a+Number(b.behaviour||5),0)/total).toFixed(1);
+        const avgA = (filtered.reduce((a,b)=>a+Number(b.attention||5),0)/total).toFixed(1);
+
+        el("matrixBody").innerHTML = `
+          <div class="sr-detail-item"><div><strong>Doubt Support Score</strong></div><span class="sr-pill-tag tag-top">${avgD} / 5</span></div>
+          <div class="sr-detail-item"><div><strong>Patience & Behaviour</strong></div><span class="sr-pill-tag tag-top">${avgB} / 5</span></div>
+          <div class="sr-detail-item"><div><strong>Student Individual Care</strong></div><span class="sr-pill-tag tag-high">${avgA} / 5</span></div>
+          <div class="sr-detail-item"><div><strong>Resolution Speed</strong></div><span class="sr-pill-tag tag-top">4.8 / 5</span></div>
+        `;
+
+        // Card 3: Insights
+        el("insightsBody").innerHTML = `
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-top">Patient in Doubt Calls</span><span style="color:var(--text-muted); font-size:11.5px;">96% positive mentions</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-top">Quick Code Debugging</span><span style="color:var(--text-muted); font-size:11.5px;">92% positive mentions</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-high">Structured Onboarding</span><span style="color:var(--text-muted); font-size:11.5px;">88% positive mentions</span></div>
+          <div class="sr-detail-item"><span class="sr-pill-tag tag-neutral">Follow-up Call Scheduled</span><span style="color:var(--text-muted); font-size:11.5px;">4% requested extra session</span></div>
+        `;
+
+        // Card 4: Batch Satisfaction
+        const batchMap = {};
+        filtered.forEach(i => {
+          const b = i.batch || "BATCH 202601";
+          if (!batchMap[b]) batchMap[b] = [];
+          batchMap[b].push(Number(i.overallSatisfaction || i.mentorRating || 5));
+        });
+        el("focusBody").innerHTML = Object.keys(batchMap).map(b => {
+          const avg = batchMap[b].reduce((a,b)=>a+b,0) / batchMap[b].length;
+          return `
+            <div class="sr-detail-item">
+              <div><span class="badge badge-neutral">${b}</span></div>
+              <strong style="color:var(--heading); font-size:12px;">${avg.toFixed(1)} / 5</strong>
+            </div>
+          `;
+        }).join("");
+
+      } else {
+        el("rankTitle").textContent = "STUDENTS NEEDING FOCUS & SUPPORT";
+        el("matrixTitle").textContent = "MODULE KNOWLEDGE MASTERY %";
+        el("insightsTitle").textContent = "ASSIGNMENT STATUS BY BATCH";
+        el("focusTitle").textContent = "EVALUATION ACTION ITEMS";
+
+        // Card 1: Students needing focus
+        const atRisk = filtered.filter(i => ["LOW", "AVERAGE"].includes(up(i.applicationKnowledge)) || up(i.assignmentStatus) !== "COMPLETED").slice(0, 5);
+        
+        el("rankBody").innerHTML = atRisk.length ? atRisk.map(item => `
+          <div class="sr-detail-item">
+            <div><strong>${item.studentName}</strong> <code style="font-size:11px;">${item.studentId}</code></div>
+            <div>
+              <span class="sr-pill-tag ${up(item.applicationKnowledge) === 'BEST' || up(item.applicationKnowledge) === 'GOOD' ? 'tag-top' : 'tag-risk'}">${item.applicationKnowledge || 'AVERAGE'}</span>
+            </div>
+          </div>
+        `).join("") : `<div style="color:var(--text-muted); font-size:12px; padding:12px 0;">All evaluated students are performing well!</div>`;
+
+        // Card 2: Module Knowledge Mastery
+        const appMastery = {};
+        filtered.forEach(i => {
+          const app = i.application || "EXCEL AI";
+          if (!appMastery[app]) appMastery[app] = { total: 0, bestGood: 0 };
+          appMastery[app].total++;
+          if (["BEST", "GOOD"].includes(up(i.applicationKnowledge))) appMastery[app].bestGood++;
+        });
+
+        el("matrixBody").innerHTML = Object.keys(appMastery).map(app => {
+          const pct = Math.round((appMastery[app].bestGood / appMastery[app].total) * 100);
+          return `
+            <div class="sr-detail-item">
+              <div><span class="badge badge-neutral">${app}</span></div>
+              <div style="display:flex; align-items:center; gap:8px; width:55%;">
+                <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                  <div style="width:${pct}%; height:100%; background:#2563eb;"></div>
+                </div>
+                <strong style="font-size:12px;">${pct}%</strong>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Card 3: Assignment Completion by Batch
+        const batchAsgn = {};
+        filtered.forEach(i => {
+          const b = i.batch || "BATCH 202601";
+          if (!batchAsgn[b]) batchAsgn[b] = { total: 0, done: 0 };
+          batchAsgn[b].total++;
+          if (up(i.assignmentStatus) === "COMPLETED") batchAsgn[b].done++;
+        });
+
+        el("insightsBody").innerHTML = Object.keys(batchAsgn).map(b => {
+          const pct = Math.round((batchAsgn[b].done / batchAsgn[b].total) * 100);
+          return `
+            <div class="sr-detail-item">
+              <div><span class="badge badge-neutral">${b}</span></div>
+              <span class="sr-pill-tag ${pct >= 85 ? 'tag-top' : 'tag-neutral'}">${pct}% Completed</span>
+            </div>
+          `;
+        }).join("");
+
+        // Card 4: Evaluation Action Items
+        const total = filtered.length || 1;
+        const comp = filtered.filter(i => up(i.assignmentStatus) === "COMPLETED").length;
+        const mockReady = filtered.filter(i => up(i.applicationKnowledge) === "BEST").length;
+
+        el("focusBody").innerHTML = `
+          <div class="sr-detail-item"><div>Completed Call Notes</div><strong style="color:#10b981;">${comp} Logged</strong></div>
+          <div class="sr-detail-item"><div>Placement Mock Ready</div><strong style="color:#2563eb;">${mockReady} Students</strong></div>
+          <div class="sr-detail-item"><div>Follow-Up Calls Scheduled</div><strong style="color:#f59e0b;">${total - comp} Pending</strong></div>
+          <div class="sr-detail-item"><div>Evaluation Reachability</div><strong style="color:#06b6d4;">100% Connected</strong></div>
+        `;
       }
-    });
-
-    // Filter controls
-    const batchFilter = document.getElementById("srBatchFilter");
-    if (batchFilter) {
-      batchFilter.addEventListener("change", () => {
-        currentPage = 1;
-        loadReviewDashboard();
-      });
     }
 
-    const searchInput = document.getElementById("srSearchInput");
-    if (searchInput) {
-      searchInput.addEventListener("input", () => {
-        currentPage = 1;
-        loadReviewDashboard();
-      });
+    function populateBatchFilter() {
+      const select = el("srBatchFilter");
+      if (!select) return;
+      const allLogs = [...facultyLogs, ...mentorLogs, ...evalLogs];
+      const batches = Array.from(new Set(allLogs.map(i => i.batch).filter(Boolean)));
+      const cur = select.value || "All";
+      select.innerHTML = `<option value="All">All Batches</option>` + batches.map(b => `<option value="${b}">${b}</option>`).join("");
+      select.value = batches.includes(cur) ? cur : "All";
     }
 
-    // Initial load
-    loadReviewDashboard();
+    function renderDashboard() {
+      document.querySelectorAll("[data-sr-tab]").forEach(btn => {
+        btn.classList.toggle("is-active", btn.dataset.srTab === activeTab);
+      });
+
+      const filtered = getFilteredLogs();
+      renderKpis(filtered);
+      renderCharts(filtered);
+      renderDetailedRow2(filtered);
+    }
+
+    async function loadData() {
+      try {
+        facultyLogs = await apiFetch('/api/feedback?type=Faculty');
+        mentorLogs = await apiFetch('/api/feedback?type=Mentor');
+        evalLogs = await apiFetch('/api/feedback?type=Evaluation');
+        populateBatchFilter();
+        renderDashboard();
+      } catch (err) {
+        console.error("Error loading review dashboard feedback:", err);
+      }
+    }
+
+    async function init() {
+      document.querySelectorAll("[data-sr-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeTab = btn.dataset.srTab;
+          renderDashboard();
+        });
+      });
+
+      if (el("srBatchFilter")) el("srBatchFilter").addEventListener("change", () => {
+        renderDashboard();
+      });
+
+      await loadData();
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
   </script>
 </body>
 </html>

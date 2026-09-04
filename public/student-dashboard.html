@@ -56,17 +56,6 @@
           </div>
           <span class="sidebar-link-text">Review Management</span>
         </a>
-        <a href="dashboard.html" class="sidebar-link" data-tooltip="Analytics Dashboard" aria-label="Analytics Dashboard">
-          <div class="sidebar-icon-wrap">
-            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
-              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
-              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
-              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
-            </svg>
-          </div>
-          <span class="sidebar-link-text">Analytics Dashboard</span>
-        </a>
       </nav>
       <div class="sidebar-bottom-links">
         <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" data-tooltip="Log out" aria-label="Log out" style="border:none; cursor:pointer;">
@@ -84,7 +73,7 @@
     <div class="main-content">
       <header class="topbar">
         <div class="topbar-title">
-          <h1 id="pageTitle">Student Dashboard</h1>
+          <h1 id="pageTitle">Update Details</h1>
           <p id="pageSubtitle">Loading scorecard...</p>
         </div>
         <div class="topbar-actions">
@@ -103,19 +92,6 @@
       </header>
 
       <main class="page-container">
-        <section class="profile-banner" id="profileBanner"></section>
-        <section class="metric-grid" id="metricGrid"></section>
-
-        <section>
-          <div class="page-toolbar" style="margin-bottom:12px;">
-            <div class="section-title">
-              <h2>Module Dashboard</h2>
-              <p>Attendance, attention, assignments, and assessment strength by application.</p>
-            </div>
-          </div>
-          <div class="module-grid" id="moduleGrid"></div>
-        </section>
-
         <section class="card">
           <div class="card-head">
             <div>
@@ -161,8 +137,11 @@
               <span style="font-size:10px; color:var(--text-muted); text-transform:none;">(Counts towards Application LMS Score: MCQ + Practical + Attendance)</span>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-              <div class="form-group"><label for="rowAttended">Classes Attended (of 10)</label><input type="number" id="rowAttended" class="form-control" min="0" max="10" required></div>
-              <div class="form-group"><label for="rowAttention">Focused Minutes (of 1200)</label><input type="number" id="rowAttention" class="form-control" min="0" max="1200" required></div>
+              <div class="form-group"><label for="rowAttended">Classes Attended</label><input type="number" id="rowAttended" class="form-control" min="0" required></div>
+              <div class="form-group"><label for="rowClasses">Total Classes</label><input type="number" id="rowClasses" class="form-control" min="1" required></div>
+              <div class="form-group"><label for="rowAttention">Focused Minutes</label><input type="number" id="rowAttention" class="form-control" min="0" required></div>
+              <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" required></div>
+              <div class="form-group" style="grid-column: 1 / -1;"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" required></div>
               <div class="form-group" style="grid-column: 1 / -1;">
                 <label>Assignments S1 to S6</label>
                 <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
@@ -174,8 +153,6 @@
                   <label><input type="checkbox" id="rowS6"> S6</label>
                 </div>
               </div>
-              <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" required></div>
-              <div class="form-group"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" required></div>
             </div>
           </div>
 
@@ -235,62 +212,9 @@
     }
 
     function render() {
-      document.title = `i-SMS | ${student.name}`;
-      document.getElementById("pageTitle").textContent = `${student.name} Dashboard`;
-      document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch} / ${student.session}`;
-
-      const statusBadges = [
-        student.dvEliteEligible ? badge("DV Elite eligible", "completed") : badge("DV Elite pending", "risk"),
-        student.placementSupportEligible ? badge("Placement ready", "completed") : badge("Placement pending", "risk"),
-        student.attendance < 75 ? badge("Attendance risk", "risk") : badge("Attendance ok", "completed"),
-        student.attention < 60 ? badge("Focus risk", "risk") : badge("Focus ok", "completed")
-      ].join("");
-
-      document.getElementById("profileBanner").innerHTML = `
-        <div>
-          <div class="profile-title">
-            <h2>${student.name}</h2>
-            <p>${student.email || "No email recorded"} / ${student.mobile || "No mobile recorded"}</p>
-          </div>
-          <div class="status-stack">${statusBadges}</div>
-          <div style="margin-top:14px;">
-            <a class="btn-primary btn-sm" id="downloadReportBtn" href="/api/students/${encodeURIComponent(student.id)}/report.pdf" target="_blank" rel="noopener" style="text-decoration:none; display:inline-flex;">Download Report</a>
-          </div>
-          <p style="margin:14px 0 0; color:var(--text-muted); font-size:12px; line-height:1.5;">${student.notes || "No counselor note recorded."}</p>
-        </div>
-        <div class="rule-panel">
-          <div class="rule-item"><span>Attendance Result</span><strong>${student.attendanceResult}</strong></div>
-          <div class="rule-item"><span>Attention Result</span><strong>${student.attentionResult}</strong></div>
-          <div class="rule-item"><span>DV Elite Rule</span><strong>Application competence & Pen & Paper $\\ge$ 70%</strong></div>
-          <div class="rule-item"><span>Placement Rule</span><strong>Mock interview & Pen & Paper $\\ge$ 70%</strong></div>
-        </div>
-      `;
-
-      document.getElementById("metricGrid").innerHTML = [
-        metric("Attendance", `${student.attendance}%`, `${student.modules.reduce((a, m) => a + m.attended, 0)} of ${student.modules.reduce((a, m) => a + m.classes, 0)} classes attended`),
-        metric("Focus Rate", `${student.attention}%`, "Class attention minutes"),
-        metric("Assignments", `${student.assignmentCompletion}%`, "S1-S6 completion"),
-        metric("LMS Score", `${student.lmsScore}%`, "MCQ, Practical, and Attendance average")
-      ].join("");
-
-      document.getElementById("moduleGrid").innerHTML = student.modules.map(m => {
-        const score = assessmentScore(m);
-        return `
-          <article class="module-card">
-            <div class="module-card-head">
-              <div>
-                <h3>${m.name}</h3>
-                <div class="student-meta">${m.attended}/${m.classes} classes / ${m.assignmentTotal}/${m.assignmentTarget} assignments</div>
-              </div>
-              <div class="module-score" style="color:${score >= 70 ? 'var(--success)' : 'var(--danger)'};">${score}%</div>
-            </div>
-            ${progress("Attendance", m.attendancePct, pctClass(m.attendancePct))}
-            ${progress("Attention", m.attentionPct, pctClass(m.attentionPct))}
-            ${progress("Learning Score (MCQ+Test+Att)", score, scoreClass(score))}
-            <div class="assignment-dots">${assignmentDots(m.assignments)}</div>
-          </article>
-        `;
-      }).join("");
+      document.title = `i-SMS | Update Details - ${student.name}`;
+      document.getElementById("pageTitle").textContent = `${student.name} Details`;
+      document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch}`;
 
       document.getElementById("scorecardBody").innerHTML = student.modules.map(m => {
         const score = assessmentScore(m);
@@ -312,7 +236,7 @@
 
     async function loadStudent() {
       if (!studentId) {
-        document.getElementById("profileBanner").innerHTML = `<div class="empty-state">No student selected.</div>`;
+        document.getElementById("scorecardBody").innerHTML = `<tr><td colspan="7"><div class="empty-state">No student selected.</div></td></tr>`;
         return;
       }
       student = await apiFetch(`/api/students/${encodeURIComponent(studentId)}`);
@@ -331,6 +255,7 @@
       document.getElementById("modalModTitle").textContent = `Edit ${mod.name}`;
       document.getElementById("editModName").value = mod.name;
       document.getElementById("rowAttended").value = mod.attended;
+      document.getElementById("rowClasses").value = mod.classes || 10;
       document.getElementById("rowAttention").value = mod.classAttention;
       ["s1", "s2", "s3", "s4", "s5", "s6"].forEach(key => {
         document.getElementById(`row${key.toUpperCase()}`).checked = !!mod.assignments?.[key];
@@ -347,6 +272,7 @@
       const modName = document.getElementById("editModName").value;
       const payload = {
         attended: parseInt(document.getElementById("rowAttended").value, 10) || 0,
+        classes: parseInt(document.getElementById("rowClasses").value, 10) || 10,
         classAttention: parseInt(document.getElementById("rowAttention").value, 10) || 0,
         assignments: {
           s1: document.getElementById("rowS1").checked,
