@@ -672,8 +672,8 @@
       // 3. Test Score Bar Chart
       renderVerticalBarChart("barChartTest", modules.map(m => ({ label: m.name, val: m.testScorePct })), "#8b5cf6");
 
-      // 4. Performance Trend Line Chart
-      renderTrendLineChart("lineChartTrend", student.performanceTrend || []);
+      // 4. Performance Trend Bar Chart
+      renderVerticalBarChart("lineChartTrend", (student.performanceTrend || []).map(pt => ({ label: pt.month, val: pt.score })), "#0284c7");
     }
 
     function renderVerticalBarChart(containerId, items, barColor) {
