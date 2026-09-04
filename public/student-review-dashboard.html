@@ -353,7 +353,7 @@
     }
 
     function renderCharts(filtered) {
-      const total = filtered.length || 1;
+      const total = filtered.length;
 
       // 1. Distribution Donut Chart
       el("distTitle").textContent = activeTab === "evaluation" ? "KNOWLEDGE MASTERY DISTRIBUTION" : "OVERALL RATING DISTRIBUTION";
@@ -377,10 +377,10 @@
         });
       }
 
-      const p5 = Math.round((c5 / total) * 100);
-      const p4 = Math.round((c4 / total) * 100);
-      const p3 = Math.round((c3 / total) * 100);
-      const p12 = Math.round((c12 / total) * 100);
+      const p5 = total ? Math.round((c5 / total) * 100) : 0;
+      const p4 = total ? Math.round((c4 / total) * 100) : 0;
+      const p3 = total ? Math.round((c3 / total) * 100) : 0;
+      const p12 = total ? Math.round((c12 / total) * 100) : 0;
 
       el("distBody").innerHTML = `
         <div class="sr-dist-donut-wrap">
@@ -409,10 +409,10 @@
       
       let aspectItems = [];
       if (activeTab === "faculty") {
-        const avgFac = (filtered.reduce((a, b) => a + Number(b.facultyRating || b.overallSatisfaction || 5), 0) / total).toFixed(1);
-        const avgMat = (filtered.reduce((a, b) => a + Number(b.material || b.classMaterial || 5), 0) / total).toFixed(1);
-        const avgSpd = (filtered.reduce((a, b) => a + Number(b.classSpeed || 4.5), 0) / total).toFixed(1);
-        const avgAsg = (filtered.reduce((a, b) => a + Number(b.assignmentRating || b.classTiming || 5), 0) / total).toFixed(1);
+        const avgFac = total ? (filtered.reduce((a, b) => a + Number(b.facultyRating || b.overallSatisfaction || 5), 0) / total).toFixed(1) : "0.0";
+        const avgMat = total ? (filtered.reduce((a, b) => a + Number(b.material || b.classMaterial || 5), 0) / total).toFixed(1) : "0.0";
+        const avgSpd = total ? (filtered.reduce((a, b) => a + Number(b.classSpeed || 4.5), 0) / total).toFixed(1) : "0.0";
+        const avgAsg = total ? (filtered.reduce((a, b) => a + Number(b.assignmentRating || b.classTiming || 5), 0) / total).toFixed(1) : "0.0";
 
         aspectItems = [
           { label: "Faculty Delivery", val: avgFac, icon: "👤", color: "#2563eb" },
@@ -421,10 +421,10 @@
           { label: "Assignment Task", val: avgAsg, icon: "📝", color: "#84cc16" }
         ];
       } else if (activeTab === "mentor") {
-        const avgDoubt = (filtered.reduce((a, b) => a + Number(b.doubtClearing || 5), 0) / total).toFixed(1);
-        const avgBehav = (filtered.reduce((a, b) => a + Number(b.behaviour || 5), 0) / total).toFixed(1);
-        const avgAttn = (filtered.reduce((a, b) => a + Number(b.attention || 5), 0) / total).toFixed(1);
-        const avgOver = (filtered.reduce((a, b) => a + Number(b.overallSatisfaction || b.mentorRating || 5), 0) / total).toFixed(1);
+        const avgDoubt = total ? (filtered.reduce((a, b) => a + Number(b.doubtClearing || 5), 0) / total).toFixed(1) : "0.0";
+        const avgBehav = total ? (filtered.reduce((a, b) => a + Number(b.behaviour || 5), 0) / total).toFixed(1) : "0.0";
+        const avgAttn = total ? (filtered.reduce((a, b) => a + Number(b.attention || 5), 0) / total).toFixed(1) : "0.0";
+        const avgOver = total ? (filtered.reduce((a, b) => a + Number(b.overallSatisfaction || b.mentorRating || 5), 0) / total).toFixed(1) : "0.0";
 
         aspectItems = [
           { label: "Doubt Support", val: avgDoubt, icon: "❓", color: "#2563eb" },
@@ -438,9 +438,9 @@
         const nots = filtered.filter(i => up(i.assignmentStatus) === "NOT STARTED" || !i.assignmentStatus).length;
 
         aspectItems = [
-          { label: "Completed", val: (comp / total * 5).toFixed(1), icon: "✅", color: "#10b981", raw: comp },
-          { label: "In Progress", val: (prog / total * 5).toFixed(1), icon: "⏳", color: "#f59e0b", raw: prog },
-          { label: "Not Started", val: (nots / total * 5).toFixed(1), icon: "❌", color: "#ef4444", raw: nots }
+          { label: "Completed", val: total ? (comp / total * 5).toFixed(1) : "0.0", icon: "✅", color: "#10b981", raw: comp },
+          { label: "In Progress", val: total ? (prog / total * 5).toFixed(1) : "0.0", icon: "⏳", color: "#f59e0b", raw: prog },
+          { label: "Not Started", val: total ? (nots / total * 5).toFixed(1) : "0.0", icon: "❌", color: "#ef4444", raw: nots }
         ];
       }
 
@@ -448,7 +448,7 @@
         <div class="sr-cat-row">
           <div class="sr-cat-info"><span class="sr-cat-icon">${item.icon}</span><span class="sr-cat-label">${item.label}</span></div>
           <div class="sr-cat-bar-track"><div class="sr-cat-bar-fill" style="width:${(item.val / 5) * 100}%; background-color:${item.color};"></div></div>
-          <span class="sr-cat-val">${item.raw !== undefined ? item.raw + ' (' + Math.round((item.raw/total)*100) + '%)' : item.val}</span>
+          <span class="sr-cat-val">${item.raw !== undefined ? item.raw + ' (' + (total ? Math.round((item.raw/total)*100) : 0) + '%)' : item.val}</span>
         </div>
       `).join("") + `<div class="sr-cat-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>`;
 
@@ -460,7 +460,7 @@
         batchCounts[b] = (batchCounts[b] || 0) + 1;
       });
       const batchEntries = Object.entries(batchCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
-      const maxCount = Math.max(...Object.values(batchCounts), 10);
+      const maxCount = Math.max(...Object.values(batchCounts), 0);
 
       el("breakdownBody").innerHTML = batchEntries.map(([batchName, count]) => `
         <div class="sr-batch-row">
@@ -527,6 +527,13 @@
         el("matrixTitle").textContent = "APPLICATION RATING MATRIX";
         el("insightsTitle").textContent = "KEY FACULTY FEEDBACK TAGS";
         el("focusTitle").textContent = "SESSION & UPLOAD PERFORMANCE";
+        if (!filtered.length) {
+          el("rankBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No faculty data</div>`;
+          el("matrixBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No application data</div>`;
+          el("insightsBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No feedback tags available</div>`;
+          el("focusBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No session data</div>`;
+          return;
+        }
 
         // Card 1: Faculty Rankings
         const facMap = {};
@@ -609,6 +616,13 @@
         el("matrixTitle").textContent = "MENTOR ASPECT MATRIX";
         el("insightsTitle").textContent = "KEY MENTOR FEEDBACK TAGS";
         el("focusTitle").textContent = "BATCH MENTOR SATISFACTION";
+        if (!filtered.length) {
+          el("rankBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No mentor data</div>`;
+          el("matrixBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No mentor aspect data</div>`;
+          el("insightsBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No feedback tags available</div>`;
+          el("focusBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No batch data</div>`;
+          return;
+        }
 
         // Card 1: Mentor Leaderboard
         const menMap = {};
@@ -633,10 +647,10 @@
         `).join("");
 
         // Card 2: Aspect Matrix
-        const total = filtered.length || 1;
-        const avgD = (filtered.reduce((a,b)=>a+Number(b.doubtClearing||5),0)/total).toFixed(1);
-        const avgB = (filtered.reduce((a,b)=>a+Number(b.behaviour||5),0)/total).toFixed(1);
-        const avgA = (filtered.reduce((a,b)=>a+Number(b.attention||5),0)/total).toFixed(1);
+        const total = filtered.length;
+        const avgD = total ? (filtered.reduce((a,b)=>a+Number(b.doubtClearing||5),0)/total).toFixed(1) : "0.0";
+        const avgB = total ? (filtered.reduce((a,b)=>a+Number(b.behaviour||5),0)/total).toFixed(1) : "0.0";
+        const avgA = total ? (filtered.reduce((a,b)=>a+Number(b.attention||5),0)/total).toFixed(1) : "0.0";
 
         el("matrixBody").innerHTML = `
           <div class="sr-detail-item"><div><strong>Doubt Support Score</strong></div><span class="sr-pill-tag tag-top">${avgD} / 5</span></div>
@@ -675,6 +689,13 @@
         el("matrixTitle").textContent = "MODULE KNOWLEDGE MASTERY %";
         el("insightsTitle").textContent = "ASSIGNMENT STATUS BY BATCH";
         el("focusTitle").textContent = "EVALUATION ACTION ITEMS";
+        if (!filtered.length) {
+          el("rankBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No student evaluation data</div>`;
+          el("matrixBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No module mastery data</div>`;
+          el("insightsBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No assignment status data</div>`;
+          el("focusBody").innerHTML = `<div style="color:var(--text-muted); font-size:12px;">No evaluation action items</div>`;
+          return;
+        }
 
         // Card 1: Students needing focus
         const atRisk = filtered.filter(i => ["LOW", "AVERAGE"].includes(up(i.applicationKnowledge)) || up(i.assignmentStatus) !== "COMPLETED").slice(0, 5);
@@ -732,7 +753,7 @@
         }).join("");
 
         // Card 4: Evaluation Action Items
-        const total = filtered.length || 1;
+        const total = filtered.length;
         const comp = filtered.filter(i => up(i.assignmentStatus) === "COMPLETED").length;
         const mockReady = filtered.filter(i => up(i.applicationKnowledge) === "BEST").length;
 
