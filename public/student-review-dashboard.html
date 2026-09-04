@@ -252,7 +252,7 @@
       const caller = el("srCallerFilter") ? el("srCallerFilter").value : "All";
 
       return logs.filter(item => {
-        const itemCaller = item.calledBy || item.callBy || "Sunita Deshmukh";
+        const itemCaller = item.calledBy || item.callBy || "--";
         const matchesBatch = (batch === "All" || item.batch === batch);
         const matchesCaller = (caller === "All" || itemCaller === caller);
         return matchesBatch && matchesCaller;
@@ -456,7 +456,7 @@
       el("breakdownTitle").textContent = activeTab === "faculty" ? "FACULTY REVIEWS BY BATCH" : activeTab === "mentor" ? "MENTOR REVIEWS BY BATCH" : "EVALUATIONS BY BATCH";
       const batchCounts = {};
       filtered.forEach(i => {
-        const b = i.batch || "BATCH 202601";
+        const b = i.batch || "Unassigned";
         batchCounts[b] = (batchCounts[b] || 0) + 1;
       });
       const batchEntries = Object.entries(batchCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
@@ -531,7 +531,7 @@
         // Card 1: Faculty Rankings
         const facMap = {};
         filtered.forEach(i => {
-          const name = i.facultyName || i.faculty || "Dr. Amit Verma";
+          const name = i.facultyName || i.faculty || "Unassigned Faculty";
           if (!facMap[name]) facMap[name] = [];
           facMap[name].push(Number(i.overallSatisfaction || i.facultyRating || 5));
         });
@@ -613,7 +613,7 @@
         // Card 1: Mentor Leaderboard
         const menMap = {};
         filtered.forEach(i => {
-          const name = i.mentorName || "Rohan Das";
+          const name = i.mentorName || "Unassigned Mentor";
           if (!menMap[name]) menMap[name] = [];
           menMap[name].push(Number(i.overallSatisfaction || i.mentorRating || 5));
         });
@@ -656,7 +656,7 @@
         // Card 4: Batch Satisfaction
         const batchMap = {};
         filtered.forEach(i => {
-          const b = i.batch || "BATCH 202601";
+          const b = i.batch || "Unassigned";
           if (!batchMap[b]) batchMap[b] = [];
           batchMap[b].push(Number(i.overallSatisfaction || i.mentorRating || 5));
         });
@@ -715,7 +715,7 @@
         // Card 3: Assignment Completion by Batch
         const batchAsgn = {};
         filtered.forEach(i => {
-          const b = i.batch || "BATCH 202601";
+          const b = i.batch || "Unassigned";
           if (!batchAsgn[b]) batchAsgn[b] = { total: 0, done: 0 };
           batchAsgn[b].total++;
           if (up(i.assignmentStatus) === "COMPLETED") batchAsgn[b].done++;
@@ -759,7 +759,7 @@
       const select = el("srCallerFilter");
       if (!select) return;
       const allLogs = [...facultyLogs, ...mentorLogs, ...evalLogs];
-      const callers = Array.from(new Set(allLogs.map(i => i.calledBy || i.callBy || "Sunita Deshmukh").filter(Boolean))).sort();
+      const callers = Array.from(new Set(allLogs.map(i => i.calledBy || i.callBy).filter(Boolean))).sort();
       const cur = select.value || "All";
       select.innerHTML = `<option value="All">All Callers (Call By)</option>` + callers.map(c => `<option value="${c}">${c}</option>`).join("");
       select.value = callers.includes(cur) ? cur : "All";
@@ -780,7 +780,7 @@
       // Group by caller
       const callerMap = {};
       logsForBatch.forEach(i => {
-        const c = i.calledBy || i.callBy || "Sunita Deshmukh";
+        const c = i.calledBy || i.callBy || "--";
         if (!callerMap[c]) callerMap[c] = { total: 0, connected: 0, scores: [] };
         callerMap[c].total++;
         if (up(i.connectionStatus) === "YES" || up(i.connectionStatus) === "CONNECT" || up(i.connectionStatus) === "CONNECTED") {

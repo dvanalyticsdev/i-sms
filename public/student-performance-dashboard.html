@@ -124,11 +124,11 @@
               <div class="sp-profile-details">
                 <div class="sp-profile-item">
                   <span class="sp-profile-lbl">Student Name</span>
-                  <strong class="sp-profile-val sp-name-val" id="profileName">Aarav Sharma</strong>
+                  <strong class="sp-profile-val sp-name-val" id="profileName">--</strong>
                 </div>
                 <div class="sp-profile-item">
                   <span class="sp-profile-lbl">Student ID</span>
-                  <span class="sp-profile-val" id="profileId">STU20250123</span>
+                  <span class="sp-profile-val" id="profileId">--</span>
                 </div>
                 <div class="sp-profile-item">
                   <span class="sp-profile-lbl">Batch</span>
@@ -155,7 +155,7 @@
                 </div>
                 <div class="sp-kpi-text-wrap">
                   <div class="sp-kpi-value text-green" id="kpiAttendanceVal">92%</div>
-                  <div class="sp-kpi-subtext" id="kpiAttendanceSub">(107 / 116 Days)</div>
+                  <div class="sp-kpi-subtext" id="kpiAttendanceSub">(0 / 0 Days)</div>
                 </div>
               </div>
             </div>
@@ -218,7 +218,7 @@
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 </div>
                 <div class="sp-kpi-text-wrap">
-                  <div class="sp-kpi-status-badge badge-elite-selected" id="kpiEliteVal">SELECTED</div>
+                  <div class="sp-kpi-status-badge badge-elite-notselected" id="kpiEliteVal">NOT SELECTED</div>
                   <div class="sp-kpi-subtext" id="kpiEliteSub">(Eligible)</div>
                 </div>
               </div>
@@ -254,7 +254,7 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     <span>Total Days Attended</span>
                   </div>
-                  <strong class="sp-summary-value" id="sumDaysVal">107 / 116</strong>
+                  <strong class="sp-summary-value" id="sumDaysVal">0 / 0</strong>
                 </div>
 
                 <div class="sp-summary-row">
@@ -382,7 +382,7 @@
                     </div>
                     <span>Elite Group</span>
                   </div>
-                  <span class="sp-status-tag tag-elite" id="statusEliteTag">SELECTED</span>
+                  <span class="sp-status-tag tag-notselected" id="statusEliteTag">NOT SELECTED</span>
                 </div>
 
                 <div class="sp-status-row">
@@ -412,7 +412,7 @@
                     </div>
                     <span>Current Status</span>
                   </div>
-                  <span class="sp-status-tag tag-ontrack" id="statusCurrentTag">On Track</span>
+                  <span class="sp-status-tag tag-notselected" id="statusCurrentTag">No student selected</span>
                 </div>
               </div>
             </div>
@@ -467,6 +467,31 @@
     let studentsList = [];
     let batchesList = [];
 
+    function getEmptyStudent() {
+      return {
+        id: "",
+        studentId: "--",
+        name: "--",
+        batch: "--",
+        course: "--",
+        attendancePct: 0,
+        attendedDays: 0,
+        totalDays: 0,
+        attendedHours: 0,
+        totalHours: 0,
+        assignmentCompletion: 0,
+        testScoreAvg: 0,
+        overallScore: 0,
+        overallLevel: "Not Rated",
+        eliteGroup: "NOT SELECTED",
+        placementSupport: "NO",
+        placementReadiness: 0,
+        currentStatus: "No student selected",
+        performanceTrend: [],
+        modules: []
+      };
+    }
+
     // Helper level badge class
     function getLevelBadge(level) {
       const l = String(level || "").toLowerCase();
@@ -484,17 +509,18 @@
         if (batch && batch !== 'All') query.set('batch', batch);
 
         const data = await apiFetch(`/api/dashboard/performance-view?${query.toString()}`);
-        currentStudent = data.student;
+        const student = data.student || getEmptyStudent();
+        currentStudent = student;
         studentsList = data.studentsList || [];
         batchesList = data.batches || [];
 
-        renderStudentProfile(data.student);
-        renderKpis(data.student);
-        renderPerformanceSummary(data.student);
-        renderTable(data.student.modules);
-        renderDonut(data.student);
-        renderStatus(data.student);
-        renderCharts(data.student);
+        renderStudentProfile(student);
+        renderKpis(student);
+        renderPerformanceSummary(student);
+        renderTable(student.modules);
+        renderDonut(student);
+        renderStatus(student);
+        renderCharts(student);
         renderBatchSummary(data.batchSummary);
         setupStudentSearch(data.studentsList);
       } catch (err) {
@@ -582,29 +608,29 @@
 
     function renderKpis(student) {
       document.getElementById("kpiAttendanceVal").textContent = `${student.attendancePct}%`;
-      document.getElementById("kpiAttendanceSub").textContent = `(${student.attendedDays || 107} / ${student.totalDays || 116} Days)`;
+      document.getElementById("kpiAttendanceSub").textContent = `(${student.attendedDays || 0} / ${student.totalDays || 0} Days)`;
       document.getElementById("kpiAssignmentVal").textContent = `${student.assignmentCompletion}%`;
       document.getElementById("kpiTestVal").textContent = `${student.testScoreAvg}%`;
       document.getElementById("kpiOverallVal").textContent = `${student.overallScore}%`;
 
       const eliteBadge = document.getElementById("kpiEliteVal");
-      eliteBadge.textContent = student.eliteGroup || "SELECTED";
+      eliteBadge.textContent = student.eliteGroup || "NOT SELECTED";
       eliteBadge.className = `sp-kpi-status-badge ${student.eliteGroup === 'SELECTED' ? 'badge-elite-selected' : 'badge-elite-notselected'}`;
       document.getElementById("kpiEliteSub").textContent = student.eliteGroup === 'SELECTED' ? '(Eligible)' : '(Not Eligible)';
 
       const placementBadge = document.getElementById("kpiPlacementVal");
-      placementBadge.textContent = student.placementSupport || "YES";
+      placementBadge.textContent = student.placementSupport || "NO";
       placementBadge.className = `sp-kpi-status-badge ${student.placementSupport === 'YES' ? 'badge-placement-yes' : 'badge-placement-no'}`;
       document.getElementById("kpiPlacementSub").textContent = student.placementSupport === 'YES' ? '(Eligible)' : '(Not Eligible)';
     }
 
     function renderPerformanceSummary(student) {
-      const daysAtt = student.attendedDays || 97;
-      const daysTot = student.totalDays || 104;
-      const daysPct = Math.round((daysAtt / daysTot) * 100);
+      const daysAtt = student.attendedDays || 0;
+      const daysTot = student.totalDays || 0;
+      const daysPct = daysTot ? Math.round((daysAtt / daysTot) * 100) : 0;
       const hrsAtt = student.attendedHours || (daysAtt * 2);
       const hrsTot = student.totalHours || (daysTot * 2);
-      const hrsPct = Math.round((hrsAtt / hrsTot) * 100);
+      const hrsPct = hrsTot ? Math.round((hrsAtt / hrsTot) * 100) : 0;
       document.getElementById("sumDaysVal").innerHTML = `${daysAtt} / ${daysTot} <span style="font-size:12px; font-weight:700; color:var(--success); margin-left:4px;">(${daysPct}%)</span>`;
       document.getElementById("sumHoursVal").innerHTML = `${hrsAtt} / ${hrsTot} <span style="font-size:12px; font-weight:700; color:var(--success); margin-left:4px;">(${hrsPct}%)</span>`;
       document.getElementById("sumAssignVal").textContent = `${student.assignmentCompletion}%`;
@@ -634,7 +660,7 @@
       document.getElementById("footAttPct").textContent = `${currentStudent.attendancePct}%`;
       document.getElementById("footAssignPct").textContent = `${currentStudent.assignmentCompletion}%`;
       document.getElementById("footTestPct").textContent = `${currentStudent.testScoreAvg}%`;
-      document.getElementById("footLevel").textContent = currentStudent.overallLevel || "Very Good";
+      document.getElementById("footLevel").textContent = currentStudent.overallLevel || "Not Rated";
       document.getElementById("footLevel").className = `sp-level-badge ${currentStudent.overallLevel === 'Excellent' ? 'badge-excellent' : 'badge-verygood'}`;
     }
 
@@ -654,8 +680,8 @@
       placementTag.textContent = student.placementSupport;
       placementTag.className = `sp-status-tag ${student.placementSupport === 'YES' ? 'tag-placement' : 'tag-notselected'}`;
 
-      document.getElementById("statusReadinessTag").textContent = `${student.placementReadiness || 86}%`;
-      document.getElementById("statusCurrentTag").textContent = student.currentStatus || "On Track";
+      document.getElementById("statusReadinessTag").textContent = `${student.placementReadiness || 0}%`;
+      document.getElementById("statusCurrentTag").textContent = student.currentStatus || "No student selected";
     }
 
     // Interactive SVG Charts
