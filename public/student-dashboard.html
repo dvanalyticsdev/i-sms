@@ -216,6 +216,11 @@
       document.getElementById("pageTitle").textContent = `${student.name} Details`;
       document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch}`;
 
+      if (!student.modules || !student.modules.length) {
+        document.getElementById("scorecardBody").innerHTML = `<tr><td colspan="7"><div class="empty-state">No scorecard data available for this student yet.</div></td></tr>`;
+        return;
+      }
+
       document.getElementById("scorecardBody").innerHTML = student.modules.map(m => {
         const score = assessmentScore(m);
         return `

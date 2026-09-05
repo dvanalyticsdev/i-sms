@@ -268,7 +268,7 @@
         const avgOverall = total ? (filtered.reduce((a, b) => a + Number(b.overallSatisfaction || b.facultyRating || 5), 0) / total).toFixed(1) : "0.0";
         const avgMat = total ? (filtered.reduce((a, b) => a + Number(b.material || b.classMaterial || 5), 0) / total).toFixed(1) : "0.0";
         const onTimeCount = filtered.filter(i => String(i.videoUploaded || i.video || "").toLowerCase().includes("on time")).length;
-        const videoPct = total ? Math.round((onTimeCount / total) * 100) : 100;
+        const videoPct = total ? Math.round((onTimeCount / total) * 100) : 0;
 
         el("srKpiGrid").innerHTML = `
           <div class="card sr-kpi-card">
@@ -761,7 +761,7 @@
           <div class="sr-detail-item"><div>Completed Call Notes</div><strong style="color:#10b981;">${comp} Logged</strong></div>
           <div class="sr-detail-item"><div>Placement Mock Ready</div><strong style="color:#2563eb;">${mockReady} Students</strong></div>
           <div class="sr-detail-item"><div>Follow-Up Calls Scheduled</div><strong style="color:#f59e0b;">${total - comp} Pending</strong></div>
-          <div class="sr-detail-item"><div>Evaluation Reachability</div><strong style="color:#06b6d4;">100% Connected</strong></div>
+          <div class="sr-detail-item"><div>Evaluation Reachability</div><strong style="color:#06b6d4;">${total ? '100' : '0'}% Connected</strong></div>
         `;
       }
     }

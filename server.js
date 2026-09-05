@@ -2,8 +2,11 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const CMS_MONGODB_URI = process.env.CMS_MONGODB_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/i-cms';
+const SCORECARD_DATA_FILE = process.env.SMS_SCORECARD_DATA_FILE || path.join(__dirname, 'data', 'sms-scorecards.json');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,7 +27,7 @@ const CURRICULUM_MODULES = [
 
 // Helper to compute module stats
 function computeModuleMetrics(m) {
-  const classes = Math.max(1, parseInt(m.classes, 10) || 10);
+  const classes = Math.max(0, parseInt(m.classes, 10) || 0);
   const attended = Math.min(classes, Math.max(0, parseInt(m.attended, 10) || 0));
   const attendancePct = classes > 0 ? Math.round((attended / classes) * 100) : 0;
   
@@ -84,19 +87,19 @@ function computeModuleMetrics(m) {
 function computeStudentAggregates(student) {
   const modules = (student.modules || []).map(computeModuleMetrics);
   
-  const totalClasses = modules.reduce((a, b) => a + b.classes, 0) || 100;
+  const totalClasses = modules.reduce((a, b) => a + b.classes, 0);
   const totalAttended = modules.reduce((a, b) => a + b.attended, 0);
   const overallAttendance = totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0;
 
   const totalHours = modules.reduce((a, b) => a + b.classHours, 0) || (totalClasses * 2);
   const totalHoursAttended = modules.reduce((a, b) => a + b.hoursAttended, 0);
 
-  const totalDuration = modules.reduce((a, b) => a + b.classDuration, 0) || 12000;
+  const totalDuration = modules.reduce((a, b) => a + b.classDuration, 0);
   const totalAttention = modules.reduce((a, b) => a + b.classAttention, 0);
   const overallAttention = totalDuration > 0 ? Math.round((totalAttention / totalDuration) * 100) : 0;
 
   const totalAssignments = modules.reduce((a, b) => a + b.assignmentTotal, 0);
-  const totalTargetAssignments = modules.reduce((a, b) => a + b.assignmentTarget, 0) || 60;
+  const totalTargetAssignments = modules.reduce((a, b) => a + b.assignmentTarget, 0);
   const overallAssignmentPct = modules.length ? Math.round(modules.reduce((a, b) => a + b.assignmentPct, 0) / modules.length) : 0;
 
   const avgMcq = modules.length ? Math.round(modules.reduce((a, b) => a + b.mcq, 0) / modules.length) : 0;
@@ -119,15 +122,7 @@ function computeStudentAggregates(student) {
   else if (weightedScore >= 65) overallLevel = "Good";
   else overallLevel = "Needs Improvement";
 
-  // Trend history
-  const performanceTrend = student.performanceTrend || [
-    { month: "Dec'24", score: Math.max(50, weightedScore - 16) },
-    { month: "Jan'25", score: Math.max(55, weightedScore - 13) },
-    { month: "Feb'25", score: Math.max(60, weightedScore - 10) },
-    { month: "Mar'25", score: Math.max(65, weightedScore - 7) },
-    { month: "Apr'25", score: Math.max(70, weightedScore - 3) },
-    { month: "May'25", score: weightedScore }
-  ];
+  const performanceTrend = Array.isArray(student.performanceTrend) ? student.performanceTrend : [];
 
   // Attendance Result Tag
   let attendanceResult = "REGULAR ATTENDANCE";
@@ -717,24 +712,21 @@ function createStudentDashboardPdf(student) {
   rect(620, botY + botH - 18, 202, 18, cCardHead, null);
   textCenter("STUDENT PERFORMANCE TREND (OVERALL SCORE %)", 721, botY + botH - 13, 6.2, true, cBlue);
 
-  const trendMonths = student.performanceTrend || [
-    { month: "Dec'24", score: 72 },
-    { month: "Jan'25", score: 75 },
-    { month: "Feb'25", score: 78 },
-    { month: "Mar'25", score: 81 },
-    { month: "Apr'25", score: 85 },
-    { month: "May'25", score: 88 }
-  ];
+  const trendMonths = Array.isArray(student.performanceTrend) ? student.performanceTrend : [];
 
   const trendInnerH = 135;
   const trendInnerY = botY + 28;
-  const trendBarStep = 180 / trendMonths.length;
+  const trendBarStep = trendMonths.length ? 180 / trendMonths.length : 180;
 
   // Grid lines
   [25, 50, 75, 100].forEach(p => {
     const gy = trendInnerY + (p / 100) * trendInnerH;
     line(630, gy, 810, gy, cBorder, 0.4);
   });
+
+  if (!trendMonths.length) {
+    textCenter("No performance trend data", 721, botY + 86, 7.5, false, cSubText);
+  }
 
   trendMonths.forEach((pt, idx) => {
     const val = pt.score || 0;
@@ -816,9 +808,177 @@ let upcomingClasses = [];
 
 let alerts = [];
 
-// Re-sync all students
-function refreshStudents() {
+function loadScorecardStore() {
+  try {
+    if (!fs.existsSync(SCORECARD_DATA_FILE)) return {};
+    return JSON.parse(fs.readFileSync(SCORECARD_DATA_FILE, 'utf8'));
+  } catch (error) {
+    console.error('Unable to load SMS scorecard data:', error.message);
+    return {};
+  }
+}
+
+function saveScorecardStore() {
+  fs.mkdirSync(path.dirname(SCORECARD_DATA_FILE), { recursive: true });
+  const tempFile = `${SCORECARD_DATA_FILE}.tmp`;
+  fs.writeFileSync(tempFile, JSON.stringify(scorecardStore, null, 2));
+  fs.renameSync(tempFile, SCORECARD_DATA_FILE);
+}
+
+const scorecardStore = loadScorecardStore();
+
+const cmsStudentSchema = new mongoose.Schema(
+  {
+    lmsId: String,
+    name: String,
+    mobile: String,
+    emailId: String,
+    batch: String,
+    batches: [String],
+    course: [String],
+    updatedAt: Date
+  },
+  { collection: 'students' }
+);
+
+const CmsStudent = mongoose.model('CmsStudent', cmsStudentSchema);
+let mongoConnectPromise = null;
+let hasLoggedMongoFailure = false;
+
+function normalizeTags(value) {
+  const list = Array.isArray(value) ? value : String(value || '').split(',');
+  return Array.from(new Set(
+    list
+      .map(item => String(item || '').trim())
+      .filter(Boolean)
+  ));
+}
+
+function createDefaultModules() {
+  return CURRICULUM_MODULES.map(name => ({
+    name,
+    classes: 0,
+    attended: 0,
+    classDuration: 0,
+    classAttention: 0,
+    assignments: { s1: false, s2: false, s3: false, s4: false, s5: false, s6: false },
+    mcq: 0,
+    test: 0,
+    penAndPaper: 0,
+    mockInterview: 0
+  }));
+}
+
+function mapCmsStudent(student) {
+  const batchesList = normalizeTags(
+    Array.isArray(student.batches) && student.batches.length ? student.batches : student.batch
+  );
+  const coursesList = normalizeTags(student.course);
+  const primaryBatch = batchesList[0] || String(student.batch || '').trim();
+  const displayCourse = coursesList.join(', ');
+  const savedScorecard = scorecardStore[student.lmsId] || {};
+  const savedModules = Array.isArray(savedScorecard.modules) && savedScorecard.modules.length
+    ? savedScorecard.modules
+    : createDefaultModules();
+
+  return {
+    id: student.lmsId,
+    studentId: student.lmsId,
+    name: student.name || 'Unnamed Student',
+    mobile: student.mobile || '',
+    phone: student.mobile || '',
+    email: student.emailId || '',
+    emailId: student.emailId || '',
+    program: displayCourse || 'Unassigned',
+    course: displayCourse,
+    courses: coursesList,
+    batch: primaryBatch,
+    batches: batchesList,
+    batchDisplay: batchesList.join(', '),
+    courseDisplay: displayCourse,
+    session: 'SESSION-1',
+    faculty: '',
+    counselor: '',
+    status: 'Active',
+    enrollmentDate: '',
+    notes: savedScorecard.notes || '',
+    documents: [],
+    timeline: Array.isArray(savedScorecard.timeline) ? savedScorecard.timeline : [],
+    modules: savedModules,
+    cmsUpdatedAt: student.updatedAt
+  };
+}
+
+async function ensureCmsConnection() {
+  if (mongoose.connection.readyState === 1) return true;
+  if (!CMS_MONGODB_URI) return false;
+
+  if (!mongoConnectPromise) {
+    mongoConnectPromise = mongoose.connect(CMS_MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000
+    })
+      .then(() => {
+        hasLoggedMongoFailure = false;
+        return true;
+      })
+      .catch(error => {
+        mongoConnectPromise = null;
+        if (!hasLoggedMongoFailure) {
+          console.error('CMS MongoDB connection failed:', error.message);
+          hasLoggedMongoFailure = true;
+        }
+        return false;
+      });
+  }
+
+  return mongoConnectPromise;
+}
+
+async function loadCmsStudents() {
+  const connected = await ensureCmsConnection();
+  if (!connected) return null;
+
+  return CmsStudent.find({})
+    .select('lmsId name mobile emailId batch batches course updatedAt')
+    .sort({ name: 1, lmsId: 1 })
+    .lean();
+}
+
+// Re-sync all students from CMS when available.
+async function refreshStudents() {
+  const cmsStudents = await loadCmsStudents();
+  rawStudents = Array.isArray(cmsStudents) ? cmsStudents.map(mapCmsStudent) : rawStudents;
   students = rawStudents.map(computeStudentAggregates);
+  batches = Array.from(new Set(students.flatMap(s => s.batches || [s.batch]).filter(Boolean))).sort();
+  return students;
+}
+
+function studentMatchesBatch(student, batch) {
+  if (!batch || batch === 'All' || batch === 'All Batches') return true;
+  return (student.batches || [student.batch]).includes(batch);
+}
+
+function studentMatchesCourse(student, course) {
+  if (!course || course === 'All' || course === 'All Courses') return true;
+  return (student.courses || normalizeTags(student.course)).includes(course);
+}
+
+function toStudentDirectoryRecord(student) {
+  return {
+    id: student.id,
+    studentId: student.studentId || student.id,
+    name: student.name,
+    mobile: student.mobile || '',
+    phone: student.phone || student.mobile || '',
+    email: student.email || '',
+    emailId: student.emailId || student.email || '',
+    batch: student.batchDisplay || student.batch || '',
+    batches: student.batches || [],
+    course: student.courseDisplay || student.course || '',
+    courses: student.courses || [],
+    program: student.program || student.courseDisplay || student.course || ''
+  };
 }
 
 // ----------------------------------------------------
@@ -848,13 +1008,24 @@ app.get('/api/modules', (req, res) => {
 });
 
 // 3. Batches & Sessions
-app.get('/api/batches', (req, res) => res.json(batches));
+app.get('/api/batches', async (req, res) => {
+  await refreshStudents();
+  res.json(batches);
+});
+app.get('/api/courses', async (req, res) => {
+  await refreshStudents();
+  const courses = Array.from(new Set(students.flatMap(s => s.courses || normalizeTags(s.course)).filter(Boolean))).sort();
+  res.json(courses);
+});
 app.get('/api/sessions', (req, res) => res.json(sessions));
 
 // 4. Students API
-app.get('/api/students', (req, res) => {
-  refreshStudents();
-  const { search, status, batch, session, dvElite, placementSupport } = req.query;
+app.get('/api/students', async (req, res) => {
+  await refreshStudents();
+  const { search, status, batch, course, session, dvElite, placementSupport } = req.query;
+  const wantsPagination = req.query.page !== undefined || req.query.limit !== undefined;
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 100, 1), 500);
   let filtered = [...students];
 
   if (search) {
@@ -863,14 +1034,19 @@ app.get('/api/students', (req, res) => {
       s.id.toLowerCase().includes(q) ||
       s.name.toLowerCase().includes(q) ||
       s.email.toLowerCase().includes(q) ||
-      s.mobile.includes(q)
+      s.mobile.includes(q) ||
+      (s.batchDisplay || s.batch || '').toLowerCase().includes(q) ||
+      (s.courseDisplay || s.course || '').toLowerCase().includes(q)
     );
   }
   if (status && status !== 'All') {
     filtered = filtered.filter(s => s.status === status);
   }
   if (batch && batch !== 'All') {
-    filtered = filtered.filter(s => s.batch === batch);
+    filtered = filtered.filter(s => studentMatchesBatch(s, batch));
+  }
+  if (course && course !== 'All') {
+    filtered = filtered.filter(s => studentMatchesCourse(s, course));
   }
   if (session && session !== 'All') {
     filtered = filtered.filter(s => s.session === session);
@@ -882,11 +1058,24 @@ app.get('/api/students', (req, res) => {
     filtered = filtered.filter(s => s.placementSupportEligible);
   }
 
-  res.json(filtered);
+  const records = filtered.map(toStudentDirectoryRecord);
+  if (!wantsPagination) {
+    return res.json(records);
+  }
+
+  const total = records.length;
+  const start = (page - 1) * limit;
+  res.json({
+    students: records.slice(start, start + limit),
+    total,
+    page,
+    limit,
+    totalPages: Math.max(Math.ceil(total / limit), 1)
+  });
 });
 
-app.get('/api/students/:id/report.pdf', (req, res) => {
-  refreshStudents();
+app.get('/api/students/:id/report.pdf', async (req, res) => {
+  await refreshStudents();
   const student = students.find(s => s.id === req.params.id);
   if (!student) {
     return res.status(404).json({ error: "Student not found" });
@@ -911,8 +1100,8 @@ app.get('/api/students/:id/report.pdf', (req, res) => {
   }
 });
 
-app.get('/api/students/:id', (req, res) => {
-  refreshStudents();
+app.get('/api/students/:id', async (req, res) => {
+  await refreshStudents();
   const student = students.find(s => s.id === req.params.id);
   if (student) {
     const facFeedback = facultyFeedbackLogs.filter(f => f.studentId === student.id);
@@ -998,12 +1187,15 @@ app.delete('/api/students/:id', (req, res) => {
 });
 
 // 5. Performance APIs
-app.get('/api/performance', (req, res) => {
-  refreshStudents();
-  const { batch, session, dvElite, placementSupport } = req.query;
+app.get('/api/performance', async (req, res) => {
+  await refreshStudents();
+  const { batch, course, session, dvElite, placementSupport } = req.query;
   let filtered = [...students];
   if (batch && batch !== 'All') {
-    filtered = filtered.filter(s => s.batch === batch);
+    filtered = filtered.filter(s => studentMatchesBatch(s, batch));
+  }
+  if (course && course !== 'All') {
+    filtered = filtered.filter(s => studentMatchesCourse(s, course));
   }
   if (session && session !== 'All') {
     filtered = filtered.filter(s => s.session === session);
@@ -1018,16 +1210,26 @@ app.get('/api/performance', (req, res) => {
 });
 
 // Update specific module for student
-app.put('/api/performance/:id/module/:moduleName', (req, res) => {
+app.put('/api/performance/:id/module/:moduleName', async (req, res) => {
   const { id, moduleName } = req.params;
+  await refreshStudents();
   const student = rawStudents.find(s => s.id === id);
   if (!student) {
     return res.status(404).json({ error: "Student not found" });
   }
 
-  const modIndex = student.modules.findIndex(m => m.name.toUpperCase() === decodeURIComponent(moduleName).toUpperCase());
+  const decodedModuleName = decodeURIComponent(moduleName);
+  if (!Array.isArray(student.modules) || !student.modules.length) {
+    student.modules = createDefaultModules();
+  }
+
+  let modIndex = student.modules.findIndex(m => m.name.toUpperCase() === decodedModuleName.toUpperCase());
   if (modIndex === -1) {
-    return res.status(404).json({ error: "Module not found" });
+    student.modules.push({
+      ...createDefaultModules()[0],
+      name: decodedModuleName
+    });
+    modIndex = student.modules.length - 1;
   }
 
   student.modules[modIndex] = {
@@ -1040,13 +1242,20 @@ app.put('/api/performance/:id/module/:moduleName', (req, res) => {
     event: `Scorecard updated for ${student.modules[modIndex].name}`
   });
 
-  refreshStudents();
+  scorecardStore[id] = {
+    modules: student.modules,
+    notes: student.notes || '',
+    timeline: student.timeline || []
+  };
+  saveScorecardStore();
+  await refreshStudents();
   res.json(students.find(s => s.id === id));
 });
 
 // Bulk update entire scorecard
-app.put('/api/performance/:id', (req, res) => {
+app.put('/api/performance/:id', async (req, res) => {
   const { id } = req.params;
+  await refreshStudents();
   const student = rawStudents.find(s => s.id === id);
   if (!student) {
     return res.status(404).json({ error: "Student not found" });
@@ -1064,7 +1273,13 @@ app.put('/api/performance/:id', (req, res) => {
     event: "Academic performance scorecard synchronized."
   });
 
-  refreshStudents();
+  scorecardStore[id] = {
+    modules: student.modules,
+    notes: student.notes || '',
+    timeline: student.timeline || []
+  };
+  saveScorecardStore();
+  await refreshStudents();
   res.json(students.find(s => s.id === id));
 });
 
@@ -1729,7 +1944,7 @@ app.get('/api/dashboard/srm', (req, res) => {
   const totalCalls = filteredEvals.length + filteredFaculty.length + filteredMentor.length;
   const allFeedbackCalls = [...filteredEvals, ...filteredFaculty, ...filteredMentor];
   const connectedCalls = allFeedbackCalls.filter(m => String(m.connectionStatus).toUpperCase() === 'YES').length;
-  const connectionRate = allFeedbackCalls.length ? Math.round((connectedCalls / allFeedbackCalls.length) * 100) : 100;
+  const connectionRate = allFeedbackCalls.length ? Math.round((connectedCalls / allFeedbackCalls.length) * 100) : 0;
 
   // Faculty Feedback Calculations (Connected Calls with valid rating)
   const connectedFacultyLogs = filteredFaculty.filter(f => String(f.connectionStatus).toUpperCase() === 'YES' && Number(f.facultyRating) > 0);
@@ -1888,8 +2103,8 @@ const baseCallReviews = [];
 let generatedReviews = [];
 let callReviewsList = generatedReviews;
 
-app.get('/api/dashboard/performance-view', (req, res) => {
-  refreshStudents();
+app.get('/api/dashboard/performance-view', async (req, res) => {
+  await refreshStudents();
   const { studentId, batch } = req.query;
 
   let targetStudent = null;
@@ -1901,7 +2116,7 @@ app.get('/api/dashboard/performance-view', (req, res) => {
     ));
   }
   if (!targetStudent && batch && batch !== 'All') {
-    targetStudent = students.find(s => s.batch === batch);
+    targetStudent = students.find(s => studentMatchesBatch(s, batch));
   }
   if (!targetStudent) {
     targetStudent = students[0] || null;
@@ -1910,10 +2125,12 @@ app.get('/api/dashboard/performance-view', (req, res) => {
   const studentsList = students.map(s => ({
     id: s.id,
     name: s.name,
-    batch: s.batch,
-    course: s.course
+    batch: s.batchDisplay || s.batch,
+    batches: s.batches || [],
+    course: s.courseDisplay || s.course,
+    courses: s.courses || []
   }));
-  const batchNames = [...new Set(students.map(s => s.batch).filter(Boolean))];
+  const batchNames = [...new Set(students.flatMap(s => s.batches || [s.batch]).filter(Boolean))].sort();
 
   if (!targetStudent) {
     return res.json({
@@ -1932,7 +2149,7 @@ app.get('/api/dashboard/performance-view', (req, res) => {
   }
 
   const currentBatch = targetStudent.batch || "";
-  const batchStudents = students.filter(s => s.batch === currentBatch);
+  const batchStudents = students.filter(s => studentMatchesBatch(s, currentBatch));
   const selectedEliteCount = batchStudents.filter(s => s.dvEliteEligible).length;
   const placementEligibleCount = batchStudents.filter(s => s.placementSupportEligible).length;
   const totalStudents = batchStudents.length;
@@ -1957,8 +2174,10 @@ app.get('/api/dashboard/performance-view', (req, res) => {
       id: targetStudent.id,
       studentId: targetStudent.studentId || targetStudent.id,
       name: targetStudent.name,
-      batch: targetStudent.batch,
-      course: targetStudent.course,
+      batch: targetStudent.batchDisplay || targetStudent.batch,
+      batches: targetStudent.batches || [],
+      course: targetStudent.courseDisplay || targetStudent.course,
+      courses: targetStudent.courses || [],
       avatar: targetStudent.avatar || "",
       attendancePct: targetStudent.attendancePct || 0,
       attendanceDays: `${targetStudent.totalAttended || 0} / ${targetStudent.totalClasses || 0}`,

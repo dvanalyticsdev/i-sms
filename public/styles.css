@@ -1886,6 +1886,64 @@ html[data-theme="dark"] .alert-item {
   text-align: center;
 }
 
+.feedback-wide-modal {
+  width: min(1180px, calc(100vw - 48px));
+  max-width: min(1180px, calc(100vw - 48px));
+  max-height: min(760px, calc(100vh - 48px));
+}
+
+.feedback-wide-modal form {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.feedback-wide-modal .feedback-form-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+  max-height: calc(100vh - 190px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.feedback-wide-modal .form-group {
+  min-width: 0;
+}
+
+.feedback-wide-modal .form-control {
+  min-width: 0;
+  width: 100%;
+}
+
+.feedback-wide-modal .form-group[style*="grid-column"] {
+  grid-column: span 2 !important;
+}
+
+.feedback-wide-modal textarea.form-control {
+  min-height: 76px;
+}
+
+@media (max-width: 1024px) {
+  .feedback-wide-modal .feedback-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .feedback-wide-modal {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+  }
+
+  .feedback-wide-modal .feedback-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .feedback-wide-modal .form-group[style*="grid-column"] {
+    grid-column: 1 / -1 !important;
+  }
+}
+
 .help-text {
   font-size: 11px;
   color: var(--text-muted);
@@ -3482,7 +3540,7 @@ html[data-theme="dark"] .sp-search-item-batch {
 
 .sp-top-grid {
   display: grid;
-  grid-template-columns: 290px 1fr;
+  grid-template-columns: minmax(380px, 0.95fr) minmax(760px, 2fr);
   gap: 12px;
   align-items: stretch;
 }
@@ -3537,15 +3595,17 @@ html[data-theme="dark"] .sp-avatar-circle {
 
 .sp-profile-details {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
   gap: 4px 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .sp-profile-item {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
 }
 
 .sp-profile-lbl {
@@ -3568,6 +3628,8 @@ html[data-theme="dark"] .sp-avatar-circle {
   font-size: 12.5px;
   font-weight: 800;
   color: #0f172a;
+  white-space: normal;
+  line-height: 1.2;
 }
 
 html[data-theme="dark"] .sp-name-val {

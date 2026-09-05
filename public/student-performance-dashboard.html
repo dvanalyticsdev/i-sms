@@ -640,7 +640,10 @@
 
     function renderTable(modules) {
       const tbody = document.getElementById("spTableBody");
-      tbody.innerHTML = (modules || []).map((m, idx) => {
+      if (!modules || !modules.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No performance data available for this student.</div></td></tr>`;
+      } else {
+        tbody.innerHTML = modules.map((m, idx) => {
         const attPct = m.attendancePct !== undefined ? m.attendancePct : Math.round(((m.attendedDays || 0) / (m.totalDays || 1)) * 100);
         const hrsPct = m.hoursPct !== undefined ? m.hoursPct : Math.round(((m.attendedHours || (m.attendedDays * 2)) / (m.totalHours || (m.totalDays * 2) || 1)) * 100);
         return `
@@ -654,7 +657,8 @@
           <td style="font-weight:700;">${m.testScorePct}%</td>
           <td>${getLevelBadge(m.performanceLevel)}</td>
         </tr>`;
-      }).join("");
+        }).join("");
+      }
 
       // Overall Row
       document.getElementById("footAttPct").textContent = `${currentStudent.attendancePct}%`;
@@ -704,7 +708,16 @@
 
     function renderVerticalBarChart(containerId, items, barColor) {
       const container = document.getElementById(containerId);
-      if (!container || !items.length) return;
+      if (!container) return;
+      if (!items || !items.length) {
+        container.innerHTML = `<div class="empty-state">No performance data available</div>`;
+        return;
+      }
+      const hasValues = items.some(item => Number(item.val) > 0);
+      if (!hasValues) {
+        container.innerHTML = `<div class="empty-state">No performance data available</div>`;
+        return;
+      }
 
       const width = 280;
       const height = 140;

@@ -98,13 +98,9 @@
             <p>Find a student and open their dashboard in a separate tab.</p>
           </div>
           <div class="toolbar-group">
-            <input type="search" class="filter-input" id="searchInput" placeholder="Search name, LMS ID, batch">
+            <input type="search" class="filter-input" id="searchInput" placeholder="Search name, LMS ID, phone, email, course, batch">
             <select class="filter-select" id="batchFilter"><option value="All">All batches</option></select>
-            <select class="filter-select" id="statusFilter">
-              <option value="All">All statuses</option>
-              <option value="Risk">Needs focus</option>
-              <option value="Ready">Ready/eligible</option>
-            </select>
+            <select class="filter-select" id="courseFilter"><option value="All">All courses</option></select>
           </div>
         </section>
 
@@ -116,6 +112,11 @@
               <h3>Student Directory</h3>
               <p id="resultCount">Loading students...</p>
             </div>
+            <div class="toolbar-group">
+              <button type="button" class="btn-secondary btn-sm" id="prevPageBtn">Previous</button>
+              <span class="student-meta" id="pageInfo">Page 1</span>
+              <button type="button" class="btn-secondary btn-sm" id="nextPageBtn">Next</button>
+            </div>
           </div>
           <div class="table-responsive" style="border:0;">
             <table class="compact-table student-directory-table">
@@ -123,13 +124,10 @@
                 <tr>
                   <th>Student</th>
                   <th>LMS ID</th>
+                  <th>Phone</th>
+                  <th>Email</th>
                   <th>Course</th>
                   <th>Batch</th>
-                  <th>Attendance</th>
-                  <th>Focus</th>
-                  <th>LMS Score</th>
-                  <th>Readiness</th>
-                  <th>Status</th>
                   <th></th>
                 </tr>
               </thead>
@@ -144,29 +142,40 @@
   <script type="module">
     import { apiFetch } from './app.js';
 
-    let allStudents = [];
     let filteredStudents = [];
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalStudents = 0;
+    const pageSize = 100;
+    let searchTimer = null;
 
-    const avg = arr => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
-
-    function badge(text, type) {
-      return `<span class="badge badge-${type}">${text}</span>`;
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    function statusFor(student) {
-      if (student.attendance < 75 || student.attention < 60 || student.lmsScore < 60) return { label: "Needs focus", type: "risk" };
-      if (student.dvEliteEligible || student.placementSupportEligible) return { label: "Ready", type: "completed" };
-      return { label: "On track", type: "completed" };
+    function tags(values) {
+      const list = Array.isArray(values) ? values : String(values || "").split(",");
+      const clean = [...new Set(list.map(item => String(item || "").trim()).filter(Boolean))];
+      return clean.length
+        ? clean.map(item => `<span class="badge badge-neutral">${escapeHtml(item)}</span>`).join(" ")
+        : `<span class="student-meta">Unassigned</span>`;
     }
 
     function renderMetrics() {
       const list = filteredStudents;
-      const risk = list.filter(s => statusFor(s).type === "risk").length;
+      const batchCount = new Set(list.flatMap(s => s.batches || [s.batch]).filter(Boolean)).size;
+      const courseCount = new Set(list.flatMap(s => s.courses || [s.course]).filter(Boolean)).size;
+      const multiBatch = list.filter(s => (s.batches || []).length > 1).length;
       document.getElementById("metricGrid").innerHTML = [
-        ["Students", list.length, "Matching current filters"],
-        ["Average Attendance", `${avg(list.map(s => s.attendance))}%`, "Across listed students"],
-        ["Average LMS Score", `${avg(list.map(s => s.lmsScore))}%`, "Assessment pillar average"],
-        ["Needs Focus", risk, "Low attendance, focus, or LMS score"]
+        ["Students", totalStudents, "Matching current filters"],
+        ["This Page", list.length, "Loaded student rows"],
+        ["Batches", batchCount, "Tagged on this page"],
+        ["Courses", courseCount, "Tagged on this page"]
       ].map(item => `
         <div class="metric-card">
           <p class="metric-label">${item[0]}</p>
@@ -176,72 +185,81 @@
       `).join("");
     }
 
-    function readiness(student) {
-      const items = [];
-      if (student.dvEliteEligible) items.push(badge("DV Elite", "completed"));
-      if (student.placementSupportEligible) items.push(badge("Placement", "completed"));
-      return items.length ? items.join(" ") : badge("Pending", "risk");
-    }
-
     function renderRows() {
       const body = document.getElementById("studentBody");
-      document.getElementById("resultCount").textContent = `${filteredStudents.length} student${filteredStudents.length === 1 ? "" : "s"} found`;
+      const start = totalStudents ? ((currentPage - 1) * pageSize) + 1 : 0;
+      const end = Math.min(currentPage * pageSize, totalStudents);
+      document.getElementById("resultCount").textContent = `${start}-${end} of ${totalStudents} students`;
+      document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById("prevPageBtn").disabled = currentPage <= 1;
+      document.getElementById("nextPageBtn").disabled = currentPage >= totalPages;
 
       body.innerHTML = filteredStudents.length ? filteredStudents.map(student => {
-        const status = statusFor(student);
         return `
           <tr>
             <td>
               <a href="student-dashboard.html?id=${encodeURIComponent(student.id)}" class="student-name-link" title="Click to view student scorecard (Ctrl+Click for new tab)">
-                <strong>${student.name}</strong>
+                <strong>${escapeHtml(student.name)}</strong>
               </a>
-              <div class="student-meta">${student.email || "No email recorded"}</div>
+              <div class="student-meta">${escapeHtml(student.email || "No email recorded")}</div>
             </td>
-            <td><code>${student.id}</code></td>
-            <td>${student.program}</td>
-            <td>${student.batch}</td>
-            <td><strong>${student.attendance}%</strong><div class="student-meta">${student.attendanceResult}</div></td>
-            <td><strong>${student.attention}%</strong><div class="student-meta">${student.attentionResult}</div></td>
-            <td><strong>${student.lmsScore}%</strong><div class="student-meta">4-pillar average</div></td>
-            <td>${readiness(student)}</td>
-            <td>${badge(status.label, status.type)}</td>
+            <td><code>${escapeHtml(student.id)}</code></td>
+            <td>${escapeHtml(student.mobile || student.phone || "No phone")}</td>
+            <td>${escapeHtml(student.email || "No email")}</td>
+            <td>${tags(student.courses || student.course)}</td>
+            <td>${tags(student.batches || student.batch)}</td>
             <td class="table-actions">
               <a class="btn-primary btn-sm" href="student-dashboard.html?id=${encodeURIComponent(student.id)}" target="_blank" rel="noopener">Update details</a>
             </td>
           </tr>
         `;
-      }).join("") : `<tr><td colspan="10"><div class="empty-state">No students match the current filters.</div></td></tr>`;
+      }).join("") : `<tr><td colspan="7"><div class="empty-state">No students match the current filters.</div></td></tr>`;
     }
 
-    function applyFilters() {
+    async function loadStudents(page = 1) {
       const q = document.getElementById("searchInput").value.trim().toLowerCase();
       const batch = document.getElementById("batchFilter").value;
-      const status = document.getElementById("statusFilter").value;
-
-      filteredStudents = allStudents.filter(student => {
-        const text = `${student.name} ${student.id} ${student.email} ${student.batch} ${student.program}`.toLowerCase();
-        const studentStatus = statusFor(student);
-        const matchesSearch = !q || text.includes(q);
-        const matchesBatch = batch === "All" || student.batch === batch;
-        const matchesStatus = status === "All" ||
-          (status === "Risk" && studentStatus.type === "risk") ||
-          (status === "Ready" && (student.dvEliteEligible || student.placementSupportEligible));
-        return matchesSearch && matchesBatch && matchesStatus;
+      const course = document.getElementById("courseFilter").value;
+      const query = new URLSearchParams({
+        page: String(page),
+        limit: String(pageSize)
       });
+      if (q) query.set("search", q);
+      if (batch !== "All") query.set("batch", batch);
+      if (course !== "All") query.set("course", course);
+
+      const data = await apiFetch(`/api/students?${query.toString()}`);
+      filteredStudents = data.students || [];
+      currentPage = data.page || page;
+      totalPages = data.totalPages || 1;
+      totalStudents = data.total || filteredStudents.length;
 
       renderMetrics();
       renderRows();
     }
 
+    function applyFilters() {
+      loadStudents(1);
+    }
+
+    function queueSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => loadStudents(1), 250);
+    }
+
     async function init() {
-      allStudents = await apiFetch('/api/students');
-      const batches = [...new Set(allStudents.map(s => s.batch))];
-      document.getElementById("batchFilter").innerHTML = `<option value="All">All batches</option>${batches.map(batch => `<option value="${batch}">${batch}</option>`).join("")}`;
-      document.getElementById("searchInput").addEventListener("input", applyFilters);
+      const [batches, courses] = await Promise.all([
+        apiFetch('/api/batches'),
+        apiFetch('/api/courses')
+      ]);
+      document.getElementById("batchFilter").innerHTML = `<option value="All">All batches</option>${batches.map(batch => `<option value="${escapeHtml(batch)}">${escapeHtml(batch)}</option>`).join("")}`;
+      document.getElementById("courseFilter").innerHTML = `<option value="All">All courses</option>${courses.map(course => `<option value="${escapeHtml(course)}">${escapeHtml(course)}</option>`).join("")}`;
+      document.getElementById("searchInput").addEventListener("input", queueSearch);
       document.getElementById("batchFilter").addEventListener("change", applyFilters);
-      document.getElementById("statusFilter").addEventListener("change", applyFilters);
-      filteredStudents = [...allStudents];
-      applyFilters();
+      document.getElementById("courseFilter").addEventListener("change", applyFilters);
+      document.getElementById("prevPageBtn").addEventListener("click", () => loadStudents(currentPage - 1));
+      document.getElementById("nextPageBtn").addEventListener("click", () => loadStudents(currentPage + 1));
+      loadStudents(1);
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
