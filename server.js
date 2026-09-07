@@ -873,7 +873,7 @@ const NON_MENTOR_PATTERNS = [
   /already assigned/i,
   /^tbd$/i,
   /drop/i,
-  /got plac?ed/i,
+  /got\s+pal?c?ed/i,
   /will rejoin/i,
   /lms issue/i,
   /^not assigned$/i,
@@ -887,20 +887,50 @@ const NON_MENTOR_PATTERNS = [
   /continuing with/i
 ];
 
+const MENTOR_NAME_ALIASES = {
+  sangeeta: "Sangeetha",
+  sangeetha: "Sangeetha",
+  pravat: "Pravat Panda",
+  pravatpanda: "Pravat Panda",
+  rajbirje: "Raj Birje",
+  rajbirjie: "Raj Birje",
+  ujwaldeep: "Dr. Ujwal Deep",
+  drujwaldeep: "Dr. Ujwal Deep",
+  lakshminr: "Dr. Lakshmi N R",
+  drlakshminr: "Dr. Lakshmi N R"
+};
+
+function mentorNameKey(value) {
+  return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 function isMentorName(value) {
   const text = String(value || '').trim();
   return text && !NON_MENTOR_PATTERNS.some(pattern => pattern.test(text));
 }
 
+function canonicalMentorName(value) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  if (!isMentorName(text)) return '';
+  return MENTOR_NAME_ALIASES[mentorNameKey(text)] || text;
+}
+
 function parseMentorNames(value) {
   return String(value || '')
     .split(/\s*(?:\/| - )\s*/)
-    .map(name => name.trim())
-    .filter(isMentorName);
+    .map(canonicalMentorName)
+    .filter(Boolean);
 }
 
 function uniqueMentors(...values) {
-  return Array.from(new Set(values.flatMap(parseMentorNames)));
+  const mentorsByKey = new Map();
+  values.flatMap(parseMentorNames).forEach(name => {
+    const key = mentorNameKey(name);
+    if (key && !mentorsByKey.has(key)) {
+      mentorsByKey.set(key, name);
+    }
+  });
+  return Array.from(mentorsByKey.values()).sort((a, b) => a.localeCompare(b));
 }
 
 function buildMentorAssignment(lmsId, savedScorecard = {}) {
@@ -943,11 +973,12 @@ function getAssignedMentorStaffMembers() {
   const existingNames = new Set(
     staffMembers
       .filter(member => member.type === "Mentor")
-      .map(member => member.name.toLowerCase())
+      .map(member => mentorNameKey(canonicalMentorName(member.name)))
+      .filter(Boolean)
   );
   const mentorNames = Array.from(new Set(
     students.flatMap(student => student.mentors || uniqueMentors(student.assignedMentor, student.reassignedMentor))
-  )).filter(name => !existingNames.has(name.toLowerCase()));
+  )).filter(name => !existingNames.has(mentorNameKey(name)));
 
   return mentorNames.map((name, index) => ({
     id: `ASSIGNED-MENTOR-${index + 1}`,
@@ -959,6 +990,19 @@ function getAssignedMentorStaffMembers() {
     source: "Student Assignment",
     locked: true
   }));
+}
+
+function getStaffList() {
+  const membersByKey = new Map();
+  [...staffMembers, ...getAssignedMentorStaffMembers()].forEach(member => {
+    const name = member.type === "Mentor" ? canonicalMentorName(member.name) : String(member.name || '').trim();
+    if (!name) return;
+    const key = `${member.type}:${mentorNameKey(name)}`;
+    if (!membersByKey.has(key) || (!member.locked && membersByKey.get(key).locked)) {
+      membersByKey.set(key, { ...member, name });
+    }
+  });
+  return Array.from(membersByKey.values());
 }
 
 function createDefaultModules() {
@@ -1286,8 +1330,8 @@ app.put('/api/students/:id', async (req, res) => {
   await refreshStudents();
   const index = rawStudents.findIndex(s => s.id === id);
   if (index !== -1) {
-    const assignedMentor = req.body.assignedMentor !== undefined ? String(req.body.assignedMentor || '').trim() : rawStudents[index].assignedMentor || '';
-    const reassignedMentor = req.body.reassignedMentor !== undefined ? String(req.body.reassignedMentor || '').trim() : rawStudents[index].reassignedMentor || '';
+    const assignedMentor = req.body.assignedMentor !== undefined ? uniqueMentors(req.body.assignedMentor).join(' / ') : rawStudents[index].assignedMentor || '';
+    const reassignedMentor = req.body.reassignedMentor !== undefined ? uniqueMentors(req.body.reassignedMentor).join(' / ') : rawStudents[index].reassignedMentor || '';
     rawStudents[index] = {
       ...rawStudents[index],
       ...req.body,
@@ -1437,7 +1481,7 @@ app.get('/api/feedback', (req, res) => {
 app.get('/api/staff', async (req, res) => {
   await refreshStudents();
   const { type } = req.query;
-  let list = [...staffMembers, ...getAssignedMentorStaffMembers()];
+  let list = getStaffList();
   if (type && type !== "All") {
     list = list.filter(member => member.type.toLowerCase() === String(type).toLowerCase());
   }
@@ -1447,12 +1491,20 @@ app.get('/api/staff', async (req, res) => {
 app.post('/api/staff', (req, res) => {
   const data = req.body;
   const type = String(data.type || "").trim();
-  const name = String(data.name || "").trim();
+  const name = type === "Mentor" ? canonicalMentorName(data.name) : String(data.name || "").trim();
   if (!["Faculty", "Mentor", "Student Coordinator"].includes(type)) {
     return res.status(400).json({ error: "Staff type must be Faculty, Mentor, or Student Coordinator" });
   }
   if (!name) {
     return res.status(400).json({ error: "Staff name is required" });
+  }
+  if (type === "Mentor") {
+    const duplicateMentor = getStaffList().find(member =>
+      member.type === "Mentor" && mentorNameKey(member.name) === mentorNameKey(name)
+    );
+    if (duplicateMentor) {
+      return res.status(409).json({ error: `${name} is already listed as a mentor.` });
+    }
   }
 
   let prefix = "FAC";
