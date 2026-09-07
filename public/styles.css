@@ -1915,6 +1915,10 @@ html[data-theme="dark"] .alert-item {
   width: 100%;
 }
 
+.feedback-wide-modal .student-select-search {
+  margin-bottom: 6px;
+}
+
 .feedback-wide-modal .form-group[style*="grid-column"] {
   grid-column: span 2 !important;
 }

@@ -109,11 +109,11 @@
             </div>
             <div class="form-group">
               <label for="assignedMentor">Assigned Mentor</label>
-              <input id="assignedMentor" class="form-control" placeholder="Enter assigned mentor">
+              <select id="assignedMentor" class="form-control"></select>
             </div>
             <div class="form-group">
               <label for="reassignedMentor">Reassigned Mentor</label>
-              <input id="reassignedMentor" class="form-control" placeholder="Enter reassigned mentor">
+              <select id="reassignedMentor" class="form-control"></select>
             </div>
             <button type="submit" class="btn-primary">Save Mentor</button>
           </form>
@@ -207,6 +207,7 @@
     import { apiFetch } from './app.js';
 
     let student = null;
+    let availableMentors = [];
     const studentId = new URLSearchParams(window.location.search).get("id");
     // Application LMS score: MCQ, Practical Test, and Attendance %
     const assessmentScore = m => Math.round((m.mcq + m.test + m.attendancePct) / 3);
@@ -234,6 +235,19 @@
         ...mentorParts(student.assignedMentor),
         ...mentorParts(student.reassignedMentor)
       ]));
+    }
+
+    function mentorOptions(selectedValue) {
+      const selected = String(selectedValue || "").trim();
+      const names = Array.from(new Set([
+        "",
+        ...availableMentors,
+        ...(selected ? [selected] : [])
+      ]));
+      return names.map(name => {
+        const label = name || "Select mentor";
+        return `<option value="${escapeHtml(name)}" ${name === selected ? "selected" : ""}>${escapeHtml(label)}</option>`;
+      }).join("");
     }
 
     function badge(text, type = "completed") {
@@ -265,8 +279,8 @@
       document.title = `i-SMS | Update Details - ${student.name}`;
       document.getElementById("pageTitle").textContent = `${student.name} Details`;
       document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch}`;
-      document.getElementById("assignedMentor").value = student.assignedMentor || "";
-      document.getElementById("reassignedMentor").value = student.reassignedMentor || "";
+      document.getElementById("assignedMentor").innerHTML = mentorOptions(student.assignedMentor);
+      document.getElementById("reassignedMentor").innerHTML = mentorOptions(student.reassignedMentor);
       renderMentorChips();
 
       if (!student.modules || !student.modules.length) {
@@ -346,6 +360,14 @@
       render();
     }
 
+    async function loadAvailableMentors() {
+      const mentors = await apiFetch('/api/staff?type=Mentor');
+      availableMentors = mentors
+        .map(mentor => mentor.name)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
+    }
+
     const editModal = document.getElementById("editRowModal");
     const closeModal = () => editModal.classList.remove("is-open");
     document.getElementById("closeRowModal").addEventListener("click", closeModal);
@@ -407,8 +429,13 @@
       );
     });
 
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadStudent);
-    else loadStudent();
+    async function init() {
+      await loadAvailableMentors();
+      await loadStudent();
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
   </script>
 </body>
 </html>

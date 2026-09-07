@@ -939,6 +939,28 @@ function resolveStudentMentorName(student, requestedName) {
   return mentors.find(name => name.toLowerCase() === requested.toLowerCase()) || null;
 }
 
+function getAssignedMentorStaffMembers() {
+  const existingNames = new Set(
+    staffMembers
+      .filter(member => member.type === "Mentor")
+      .map(member => member.name.toLowerCase())
+  );
+  const mentorNames = Array.from(new Set(
+    students.flatMap(student => student.mentors || uniqueMentors(student.assignedMentor, student.reassignedMentor))
+  )).filter(name => !existingNames.has(name.toLowerCase()));
+
+  return mentorNames.map((name, index) => ({
+    id: `ASSIGNED-MENTOR-${index + 1}`,
+    type: "Mentor",
+    name,
+    email: "",
+    phone: "",
+    status: "Active",
+    source: "Student Assignment",
+    locked: true
+  }));
+}
+
 function createDefaultModules() {
   return CURRICULUM_MODULES.map(name => ({
     name,
@@ -1412,9 +1434,10 @@ app.get('/api/feedback', (req, res) => {
   res.json(combined.sort((a, b) => new Date(b.callDate) - new Date(a.callDate)));
 });
 
-app.get('/api/staff', (req, res) => {
+app.get('/api/staff', async (req, res) => {
+  await refreshStudents();
   const { type } = req.query;
-  let list = [...staffMembers];
+  let list = [...staffMembers, ...getAssignedMentorStaffMembers()];
   if (type && type !== "All") {
     list = list.filter(member => member.type.toLowerCase() === String(type).toLowerCase());
   }
@@ -1449,6 +1472,9 @@ app.post('/api/staff', (req, res) => {
 });
 
 app.delete('/api/staff/:id', (req, res) => {
+  if (String(req.params.id || "").startsWith("ASSIGNED-MENTOR-")) {
+    return res.status(400).json({ error: "Assigned mentors are removed from the student mentor assignment." });
+  }
   const index = staffMembers.findIndex(member => member.id === req.params.id);
   if (index === -1) {
     return res.status(404).json({ error: "Staff member not found" });

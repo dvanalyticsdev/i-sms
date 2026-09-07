@@ -182,7 +182,11 @@
       <div class="modal-header"><h3 class="modal-title">Add Faculty Feedback</h3><button class="modal-close" data-close="facultyModal">&times;</button></div>
       <form id="facultyForm">
         <div class="modal-body feedback-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Student</label><select id="facStudent" class="form-control" required></select></div>
+          <div class="form-group">
+            <label>Student</label>
+            <input id="facStudentSearch" class="form-control student-select-search" placeholder="Search student name or LMS ID">
+            <select id="facStudent" class="form-control" required></select>
+          </div>
           <div class="form-group"><label>Call Date</label><input id="facCallDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Session Date</label><input id="facDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="facStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
@@ -210,7 +214,11 @@
       <div class="modal-header"><h3 class="modal-title">Add Mentor Feedback</h3><button class="modal-close" data-close="mentorModal">&times;</button></div>
       <form id="mentorForm">
         <div class="modal-body feedback-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Student</label><select id="menStudent" class="form-control" required></select></div>
+          <div class="form-group">
+            <label>Student</label>
+            <input id="menStudentSearch" class="form-control student-select-search" placeholder="Search student name or LMS ID">
+            <select id="menStudent" class="form-control" required></select>
+          </div>
           <div class="form-group"><label>Call Date</label><input id="menCallDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Session Date</label><input id="menDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="menStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
@@ -237,7 +245,11 @@
       <div class="modal-header"><h3 class="modal-title">Add Student Evaluation</h3><button class="modal-close" data-close="evalModal">&times;</button></div>
       <form id="evalForm">
         <div class="modal-body feedback-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Student</label><select id="evalStudent" class="form-control" required></select></div>
+          <div class="form-group">
+            <label>Student</label>
+            <input id="evalStudentSearch" class="form-control student-select-search" placeholder="Search student name or LMS ID">
+            <select id="evalStudent" class="form-control" required></select>
+          </div>
           <div class="form-group"><label>Call Date</label><input id="evalCallDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Session Date</label><input id="evalDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="evalStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
@@ -493,6 +505,9 @@
     }
 
     function renderStaffRow(item) {
+      const removeButton = item.locked
+        ? `<span class="student-meta">From assignment</span>`
+        : `<button class="btn-ghost" style="color:var(--danger); padding:4px 8px; font-size:12px;" onclick="removeStaff('${item.id}', '${item.name}')">Remove</button>`;
       return `
         <tr>
           <td><strong>${item.name}</strong></td>
@@ -501,7 +516,7 @@
           <td>${item.phone || "--"}</td>
           <td><span class="badge ${item.status === "Active" ? "badge-completed" : "badge-risk"}">${item.status}</span></td>
           <td style="text-align:right;">
-            <button class="btn-ghost" style="color:var(--danger); padding:4px 8px; font-size:12px;" onclick="removeStaff('${item.id}', '${item.name}')">Remove</button>
+            ${removeButton}
           </td>
         </tr>
       `;
@@ -594,6 +609,47 @@
       return students.find(s => s.id === studentId || s.studentId === studentId);
     }
 
+    function studentMatchesSearch(student, query) {
+      const q = String(query || "").trim().toLowerCase();
+      if (!q) return true;
+      return String(student.name || "").toLowerCase().includes(q) ||
+        String(student.id || student.studentId || "").toLowerCase().includes(q);
+    }
+
+    function renderStudentSelect(selectId, query = "") {
+      const select = el(selectId);
+      if (!select) return;
+      const previous = select.value;
+      let matches = students.filter(student => studentMatchesSearch(student, query));
+      if (!matches.length && previous) {
+        const selectedStudent = students.find(student => student.id === previous || student.studentId === previous);
+        if (selectedStudent) matches = [selectedStudent];
+      }
+
+      select.innerHTML = matches.length
+        ? matches.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`).join("")
+        : `<option value="">No students found</option>`;
+
+      if (matches.some(student => student.id === previous || student.studentId === previous)) {
+        select.value = previous;
+      }
+    }
+
+    function setupStudentSearch(searchId, selectId, onChange = null) {
+      const search = el(searchId);
+      const select = el(selectId);
+      if (!search || !select) return;
+      search.addEventListener("input", () => {
+        renderStudentSelect(selectId, search.value);
+        if (onChange) onChange();
+      });
+      select.addEventListener("change", () => {
+        const selectedStudent = getSelectedStudent(selectId);
+        search.value = selectedStudent ? `${selectedStudent.name} (${selectedStudent.id})` : "";
+        if (onChange) onChange();
+      });
+    }
+
     function populateStudentMentorDropdown(studentSelectId, mentorSelectId) {
       const mentorSelect = el(mentorSelectId);
       if (!mentorSelect) return;
@@ -637,13 +693,19 @@
       staff = await apiFetch('/api/staff');
       const studentOptions = students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`).join("");
       const moduleOptions = modules.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
-      ["facStudent", "menStudent", "evalStudent"].forEach(id => el(id).innerHTML = studentOptions);
+      ["facStudent", "menStudent", "evalStudent"].forEach(id => renderStudentSelect(id));
       ["facApp", "menApp", "evalApp"].forEach(id => el(id).innerHTML = moduleOptions);
       populateStaffDropdowns();
+      ["facStudent", "menStudent", "evalStudent"].forEach(selectId => {
+        const selectedStudent = getSelectedStudent(selectId);
+        const searchId = selectId === "facStudent" ? "facStudentSearch" : selectId === "menStudent" ? "menStudentSearch" : "evalStudentSearch";
+        if (el(searchId) && selectedStudent) el(searchId).value = `${selectedStudent.name} (${selectedStudent.id})`;
+      });
       el("studentFilter").innerHTML = `<option value="All">All students</option>${studentOptions}`;
       el("applicationFilter").innerHTML = `<option value="All">All applications</option>${moduleOptions}`;
-      el("menStudent").addEventListener("change", () => populateStudentMentorDropdown("menStudent", "menMentor"));
-      el("evalStudent").addEventListener("change", () => populateStudentMentorDropdown("evalStudent", "evalMentor"));
+      setupStudentSearch("facStudentSearch", "facStudent");
+      setupStudentSearch("menStudentSearch", "menStudent", () => populateStudentMentorDropdown("menStudent", "menMentor"));
+      setupStudentSearch("evalStudentSearch", "evalStudent", () => populateStudentMentorDropdown("evalStudent", "evalMentor"));
       ["facCallDate", "facDate", "menCallDate", "menDate", "evalCallDate", "evalDate"].forEach(id => {
         if (el(id)) el(id).value = today();
       });
