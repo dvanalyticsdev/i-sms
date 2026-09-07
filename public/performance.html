@@ -98,7 +98,7 @@
             <p>Find a student and open their dashboard in a separate tab.</p>
           </div>
           <div class="toolbar-group">
-            <input type="search" class="filter-input" id="searchInput" placeholder="Search name, LMS ID, phone, email, course, batch">
+            <input type="search" class="filter-input" id="searchInput" placeholder="Search name, LMS ID, phone, email, course, batch, mentor">
             <select class="filter-select" id="batchFilter"><option value="All">All batches</option></select>
             <select class="filter-select" id="courseFilter"><option value="All">All courses</option></select>
           </div>
@@ -128,6 +128,7 @@
                   <th>Email</th>
                   <th>Course</th>
                   <th>Batch</th>
+                  <th>Mentor</th>
                   <th></th>
                 </tr>
               </thead>
@@ -208,12 +209,13 @@
             <td>${escapeHtml(student.email || "No email")}</td>
             <td>${tags(student.courses || student.course)}</td>
             <td>${tags(student.batches || student.batch)}</td>
+            <td>${tags(student.mentors || [student.assignedMentor, student.reassignedMentor])}</td>
             <td class="table-actions">
               <a class="btn-primary btn-sm" href="student-dashboard.html?id=${encodeURIComponent(student.id)}" target="_blank" rel="noopener">Update details</a>
             </td>
           </tr>
         `;
-      }).join("") : `<tr><td colspan="7"><div class="empty-state">No students match the current filters.</div></td></tr>`;
+      }).join("") : `<tr><td colspan="8"><div class="empty-state">No students match the current filters.</div></td></tr>`;
     }
 
     async function loadStudents(page = 1) {

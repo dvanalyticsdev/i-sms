@@ -92,6 +92,26 @@
       </header>
 
       <main class="page-container">
+        <section class="card" style="margin-bottom:16px;">
+          <div class="card-head">
+            <div>
+              <h3>Mentor Assignment</h3>
+              <p>Mentors are matched by LMS ID and can be changed by the administrator.</p>
+            </div>
+          </div>
+          <form id="mentorAssignmentForm" class="mentor-assignment-form">
+            <div class="form-group">
+              <label for="assignedMentor">Assigned Mentor</label>
+              <input id="assignedMentor" class="form-control" placeholder="Enter assigned mentor">
+            </div>
+            <div class="form-group">
+              <label for="reassignedMentor">Reassigned Mentor</label>
+              <input id="reassignedMentor" class="form-control" placeholder="Enter reassigned mentor">
+            </div>
+            <button type="submit" class="btn-primary">Save Mentor</button>
+          </form>
+        </section>
+
         <section class="card">
           <div class="card-head">
             <div>
@@ -215,6 +235,8 @@
       document.title = `i-SMS | Update Details - ${student.name}`;
       document.getElementById("pageTitle").textContent = `${student.name} Details`;
       document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch}`;
+      document.getElementById("assignedMentor").value = student.assignedMentor || "";
+      document.getElementById("reassignedMentor").value = student.reassignedMentor || "";
 
       if (!student.modules || !student.modules.length) {
         document.getElementById("scorecardBody").innerHTML = `<tr><td colspan="7"><div class="empty-state">No scorecard data available for this student yet.</div></td></tr>`;
@@ -298,6 +320,18 @@
         body: JSON.stringify(payload)
       });
       closeModal();
+      render();
+    });
+
+    document.getElementById("mentorAssignmentForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      student = await apiFetch(`/api/students/${encodeURIComponent(student.id)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          assignedMentor: document.getElementById("assignedMentor").value.trim(),
+          reassignedMentor: document.getElementById("reassignedMentor").value.trim()
+        })
+      });
       render();
     });
 

@@ -2680,6 +2680,14 @@ html[data-theme="dark"] .assignment-dot.pending {
   justify-content: center;
 }
 
+.mentor-assignment-form {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
 .feedback-tabs-card {
   min-height: 460px;
 }
@@ -4766,6 +4774,15 @@ html[data-theme="dark"] .sr-footer-text strong {
 }
 
 @media (max-width: 768px) {
+  .mentor-assignment-form {
+    grid-template-columns: 1fr;
+  }
+
+  .mentor-assignment-form .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
   .sp-kpis-grid, .sr-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }

@@ -329,6 +329,12 @@
     const closeModal = id => el(id).classList.remove("is-open");
     const openModal = id => el(id).classList.add("is-open");
     const up = value => String(value || "").toUpperCase();
+    const escapeHtml = value => String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
 
     const matchesFilters = item => {
       const student = el("studentFilter").value;
@@ -571,17 +577,38 @@
     }
 
     function populateStaffDropdowns() {
-      const faculties = staff.filter(m => m.type === "Faculty").map(m => `<option value="${m.name}">${m.name}</option>`).join("");
-      const mentors = staff.filter(m => m.type === "Mentor").map(m => `<option value="${m.name}">${m.name}</option>`).join("");
-      const coordinators = staff.filter(m => m.type === "Student Coordinator").map(m => `<option value="${m.name}">${m.name}</option>`).join("");
+      const faculties = staff.filter(m => m.type === "Faculty").map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
+      const coordinators = staff.filter(m => m.type === "Student Coordinator").map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
 
       if (el("facFaculty")) el("facFaculty").innerHTML = faculties || `<option value="">No faculty added</option>`;
-      if (el("menMentor")) el("menMentor").innerHTML = mentors || `<option value="">No mentors added</option>`;
-      if (el("evalMentor")) el("evalMentor").innerHTML = mentors || `<option value="">No mentors added</option>`;
+      populateStudentMentorDropdown("menStudent", "menMentor");
+      populateStudentMentorDropdown("evalStudent", "evalMentor");
 
       if (el("facCallBy")) el("facCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
       if (el("menCallBy")) el("menCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
       if (el("evalCallBy")) el("evalCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
+    }
+
+    function getSelectedStudent(studentSelectId) {
+      const studentId = el(studentSelectId)?.value;
+      return students.find(s => s.id === studentId || s.studentId === studentId);
+    }
+
+    function populateStudentMentorDropdown(studentSelectId, mentorSelectId) {
+      const mentorSelect = el(mentorSelectId);
+      if (!mentorSelect) return;
+
+      const selectedStudent = getSelectedStudent(studentSelectId);
+      const mentorNames = [...new Set([
+        ...((selectedStudent && selectedStudent.mentors) || []),
+        selectedStudent?.assignedMentor,
+        selectedStudent?.reassignedMentor
+      ].map(name => String(name || "").trim()).filter(Boolean))];
+
+      mentorSelect.innerHTML = mentorNames.length
+        ? mentorNames.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")
+        : `<option value="">No mentor assigned</option>`;
+      mentorSelect.required = true;
     }
 
     async function loadStaff() {
@@ -608,13 +635,15 @@
       students = await apiFetch('/api/students');
       modules = await apiFetch('/api/modules');
       staff = await apiFetch('/api/staff');
-      const studentOptions = students.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join("");
-      const moduleOptions = modules.map(m => `<option value="${m}">${m}</option>`).join("");
+      const studentOptions = students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`).join("");
+      const moduleOptions = modules.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
       ["facStudent", "menStudent", "evalStudent"].forEach(id => el(id).innerHTML = studentOptions);
       ["facApp", "menApp", "evalApp"].forEach(id => el(id).innerHTML = moduleOptions);
       populateStaffDropdowns();
       el("studentFilter").innerHTML = `<option value="All">All students</option>${studentOptions}`;
       el("applicationFilter").innerHTML = `<option value="All">All applications</option>${moduleOptions}`;
+      el("menStudent").addEventListener("change", () => populateStudentMentorDropdown("menStudent", "menMentor"));
+      el("evalStudent").addEventListener("change", () => populateStudentMentorDropdown("evalStudent", "evalMentor"));
       ["facCallDate", "facDate", "menCallDate", "menDate", "evalCallDate", "evalDate"].forEach(id => {
         if (el(id)) el(id).value = today();
       });

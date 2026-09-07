@@ -7,6 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const CMS_MONGODB_URI = process.env.CMS_MONGODB_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/i-cms';
 const SCORECARD_DATA_FILE = process.env.SMS_SCORECARD_DATA_FILE || path.join(__dirname, 'data', 'sms-scorecards.json');
+const MENTOR_ALLOCATION_FILE = process.env.SMS_MENTOR_ALLOCATION_FILE || path.join(__dirname, 'data', 'mentor-allocations.json');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -818,6 +819,16 @@ function loadScorecardStore() {
   }
 }
 
+function loadMentorAllocations() {
+  try {
+    if (!fs.existsSync(MENTOR_ALLOCATION_FILE)) return {};
+    return JSON.parse(fs.readFileSync(MENTOR_ALLOCATION_FILE, 'utf8'));
+  } catch (error) {
+    console.error('Unable to load SMS mentor allocations:', error.message);
+    return {};
+  }
+}
+
 function saveScorecardStore() {
   fs.mkdirSync(path.dirname(SCORECARD_DATA_FILE), { recursive: true });
   const tempFile = `${SCORECARD_DATA_FILE}.tmp`;
@@ -826,6 +837,7 @@ function saveScorecardStore() {
 }
 
 const scorecardStore = loadScorecardStore();
+const mentorAllocations = loadMentorAllocations();
 
 const cmsStudentSchema = new mongoose.Schema(
   {
@@ -854,6 +866,79 @@ function normalizeTags(value) {
   ));
 }
 
+const NON_MENTOR_PATTERNS = [
+  /not opting/i,
+  /need to reach/i,
+  /assigned in batch/i,
+  /already assigned/i,
+  /^tbd$/i,
+  /dropped?/i,
+  /got plac?ed/i,
+  /will rejoin/i,
+  /lms issue/i,
+  /^not assigned$/i,
+  /yet to assign/i,
+  /part of dv/i,
+  /job holder/i,
+  /duplicate/i,
+  /repeat/i,
+  /batch change/i,
+  /delete/i,
+  /continuing with/i
+];
+
+function isMentorName(value) {
+  const text = String(value || '').trim();
+  return text && !NON_MENTOR_PATTERNS.some(pattern => pattern.test(text));
+}
+
+function parseMentorNames(value) {
+  return String(value || '')
+    .split(/\s*(?:\/| - )\s*/)
+    .map(name => name.trim())
+    .filter(isMentorName);
+}
+
+function uniqueMentors(...values) {
+  return Array.from(new Set(values.flatMap(parseMentorNames)));
+}
+
+function buildMentorAssignment(lmsId, savedScorecard = {}) {
+  const allocation = mentorAllocations[String(lmsId || '').trim().toUpperCase()] || {};
+  const hasSavedMentorFields = Object.prototype.hasOwnProperty.call(savedScorecard, 'assignedMentor') ||
+    Object.prototype.hasOwnProperty.call(savedScorecard, 'reassignedMentor');
+
+  const source = hasSavedMentorFields ? savedScorecard : allocation;
+  const assignedMentor = uniqueMentors(source.assignedMentor).join(' / ');
+  const reassignedMentor = uniqueMentors(source.reassignedMentor).join(' / ');
+
+  return {
+    assignedMentor,
+    reassignedMentor,
+    mentors: uniqueMentors(assignedMentor, reassignedMentor)
+  };
+}
+
+function persistStudentScorecard(student) {
+  scorecardStore[student.id] = {
+    ...(scorecardStore[student.id] || {}),
+    modules: student.modules,
+    notes: student.notes || '',
+    timeline: student.timeline || [],
+    assignedMentor: student.assignedMentor || '',
+    reassignedMentor: student.reassignedMentor || ''
+  };
+  saveScorecardStore();
+}
+
+function resolveStudentMentorName(student, requestedName) {
+  const mentors = student.mentors || uniqueMentors(student.assignedMentor, student.reassignedMentor);
+  const requested = String(requestedName || '').trim();
+  if (!mentors.length) return null;
+  if (!requested) return mentors[0];
+  return mentors.find(name => name.toLowerCase() === requested.toLowerCase()) || null;
+}
+
 function createDefaultModules() {
   return CURRICULUM_MODULES.map(name => ({
     name,
@@ -880,6 +965,7 @@ function mapCmsStudent(student) {
   const savedModules = Array.isArray(savedScorecard.modules) && savedScorecard.modules.length
     ? savedScorecard.modules
     : createDefaultModules();
+  const mentorAssignment = buildMentorAssignment(student.lmsId, savedScorecard);
 
   return {
     id: student.lmsId,
@@ -898,7 +984,10 @@ function mapCmsStudent(student) {
     courseDisplay: displayCourse,
     session: 'SESSION-1',
     faculty: '',
-    counselor: '',
+    counselor: mentorAssignment.assignedMentor || mentorAssignment.reassignedMentor || '',
+    assignedMentor: mentorAssignment.assignedMentor,
+    reassignedMentor: mentorAssignment.reassignedMentor,
+    mentors: mentorAssignment.mentors,
     status: 'Active',
     enrollmentDate: '',
     notes: savedScorecard.notes || '',
@@ -977,7 +1066,10 @@ function toStudentDirectoryRecord(student) {
     batches: student.batches || [],
     course: student.courseDisplay || student.course || '',
     courses: student.courses || [],
-    program: student.program || student.courseDisplay || student.course || ''
+    program: student.program || student.courseDisplay || student.course || '',
+    assignedMentor: student.assignedMentor || '',
+    reassignedMentor: student.reassignedMentor || '',
+    mentors: student.mentors || uniqueMentors(student.assignedMentor, student.reassignedMentor)
   };
 }
 
@@ -1036,7 +1128,9 @@ app.get('/api/students', async (req, res) => {
       s.email.toLowerCase().includes(q) ||
       s.mobile.includes(q) ||
       (s.batchDisplay || s.batch || '').toLowerCase().includes(q) ||
-      (s.courseDisplay || s.course || '').toLowerCase().includes(q)
+      (s.courseDisplay || s.course || '').toLowerCase().includes(q) ||
+      (s.assignedMentor || '').toLowerCase().includes(q) ||
+      (s.reassignedMentor || '').toLowerCase().includes(q)
     );
   }
   if (status && status !== 'All') {
@@ -1145,7 +1239,10 @@ app.post('/api/students', (req, res) => {
     batch: newStudent.batch || "",
     session: newStudent.session || "SESSION-1",
     faculty: newStudent.faculty || "",
-    counselor: newStudent.counselor || "",
+    counselor: newStudent.counselor || newStudent.assignedMentor || "",
+    assignedMentor: newStudent.assignedMentor || "",
+    reassignedMentor: newStudent.reassignedMentor || "",
+    mentors: uniqueMentors(newStudent.assignedMentor, newStudent.reassignedMentor),
     status: newStudent.status || "Active",
     enrollmentDate: newStudent.enrollmentDate || new Date().toISOString().split('T')[0],
     notes: newStudent.notes || "",
@@ -1162,12 +1259,25 @@ app.post('/api/students', (req, res) => {
   res.status(201).json(created);
 });
 
-app.put('/api/students/:id', (req, res) => {
+app.put('/api/students/:id', async (req, res) => {
   const id = req.params.id;
+  await refreshStudents();
   const index = rawStudents.findIndex(s => s.id === id);
   if (index !== -1) {
-    rawStudents[index] = { ...rawStudents[index], ...req.body };
-    refreshStudents();
+    const assignedMentor = req.body.assignedMentor !== undefined ? String(req.body.assignedMentor || '').trim() : rawStudents[index].assignedMentor || '';
+    const reassignedMentor = req.body.reassignedMentor !== undefined ? String(req.body.reassignedMentor || '').trim() : rawStudents[index].reassignedMentor || '';
+    rawStudents[index] = {
+      ...rawStudents[index],
+      ...req.body,
+      assignedMentor,
+      reassignedMentor,
+      mentors: uniqueMentors(assignedMentor, reassignedMentor),
+      counselor: assignedMentor || reassignedMentor || rawStudents[index].counselor || ''
+    };
+    if (req.body.assignedMentor !== undefined || req.body.reassignedMentor !== undefined) {
+      persistStudentScorecard(rawStudents[index]);
+    }
+    await refreshStudents();
     res.json(students.find(s => s.id === id));
   } else {
     res.status(404).json({ error: "Student not found" });
@@ -1242,12 +1352,7 @@ app.put('/api/performance/:id/module/:moduleName', async (req, res) => {
     event: `Scorecard updated for ${student.modules[modIndex].name}`
   });
 
-  scorecardStore[id] = {
-    modules: student.modules,
-    notes: student.notes || '',
-    timeline: student.timeline || []
-  };
-  saveScorecardStore();
+  persistStudentScorecard(student);
   await refreshStudents();
   res.json(students.find(s => s.id === id));
 });
@@ -1273,12 +1378,7 @@ app.put('/api/performance/:id', async (req, res) => {
     event: "Academic performance scorecard synchronized."
   });
 
-  scorecardStore[id] = {
-    modules: student.modules,
-    notes: student.notes || '',
-    timeline: student.timeline || []
-  };
-  saveScorecardStore();
+  persistStudentScorecard(student);
   await refreshStudents();
   res.json(students.find(s => s.id === id));
 });
@@ -1358,8 +1458,9 @@ app.delete('/api/staff/:id', (req, res) => {
 });
 
 // Student -> Faculty Feedback
-app.post('/api/feedback/faculty', (req, res) => {
+app.post('/api/feedback/faculty', async (req, res) => {
   const data = req.body;
+  await refreshStudents();
   const student = students.find(s => s.id === data.studentId);
   if (!student) return res.status(404).json({ error: "Student not found" });
 
@@ -1413,10 +1514,15 @@ app.post('/api/feedback/faculty', (req, res) => {
 });
 
 // Student -> Mentor Feedback
-app.post('/api/feedback/mentor', (req, res) => {
+app.post('/api/feedback/mentor', async (req, res) => {
   const data = req.body;
+  await refreshStudents();
   const student = students.find(s => s.id === data.studentId);
   if (!student) return res.status(404).json({ error: "Student not found" });
+  const mentorName = resolveStudentMentorName(student, data.mentorName);
+  if (mentorName === null) {
+    return res.status(400).json({ error: "Select only the assigned or reassigned mentor for this student." });
+  }
 
   const nextId = "MF" + String(mentorFeedbackLogs.length + 1).padStart(3, '0');
   const entry = {
@@ -1432,7 +1538,7 @@ app.post('/api/feedback/mentor', (req, res) => {
     application: data.application || "EXCEL AI",
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
-    mentorName: data.mentorName || student.counselor || "Not assigned",
+    mentorName: mentorName || "Not assigned",
     mentorRating: Math.max(0, Math.min(5, parseFloat(data.mentorRating) || 5)),
     doubtClearing: Math.max(0, Math.min(5, parseFloat(data.doubtClearing) || 5)),
     behaviour: Math.max(0, Math.min(5, parseFloat(data.behaviour) || 5)),
@@ -1446,10 +1552,15 @@ app.post('/api/feedback/mentor', (req, res) => {
 });
 
 // Mentor -> Student Evaluation Log
-app.post('/api/feedback/mentor-evaluation', (req, res) => {
+app.post('/api/feedback/mentor-evaluation', async (req, res) => {
   const data = req.body;
+  await refreshStudents();
   const student = students.find(s => s.id === data.studentId);
   if (!student) return res.status(404).json({ error: "Student not found" });
+  const mentorName = resolveStudentMentorName(student, data.mentorName);
+  if (mentorName === null) {
+    return res.status(400).json({ error: "Select only the assigned or reassigned mentor for this student." });
+  }
 
   const nextId = "ME" + String(mentorEvaluationLogs.length + 1).padStart(3, '0');
   const entry = {
@@ -1465,7 +1576,7 @@ app.post('/api/feedback/mentor-evaluation', (req, res) => {
     application: data.application || "EXCEL AI",
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
-    mentorName: data.mentorName || student.counselor || "Not assigned",
+    mentorName: mentorName || "Not assigned",
     assignmentStatus: data.assignmentStatus || "Completed", // Completed / In Progress / Not Started
     applicationKnowledge: data.applicationKnowledge || "Good", // Low / Average / Good / Best
     overallFeedback: data.overallFeedback || ""
@@ -2128,7 +2239,10 @@ app.get('/api/dashboard/performance-view', async (req, res) => {
     batch: s.batchDisplay || s.batch,
     batches: s.batches || [],
     course: s.courseDisplay || s.course,
-    courses: s.courses || []
+    courses: s.courses || [],
+    assignedMentor: s.assignedMentor || '',
+    reassignedMentor: s.reassignedMentor || '',
+    mentors: s.mentors || uniqueMentors(s.assignedMentor, s.reassignedMentor)
   }));
   const batchNames = [...new Set(students.flatMap(s => s.batches || [s.batch]).filter(Boolean))].sort();
 
@@ -2178,6 +2292,9 @@ app.get('/api/dashboard/performance-view', async (req, res) => {
       batches: targetStudent.batches || [],
       course: targetStudent.courseDisplay || targetStudent.course,
       courses: targetStudent.courses || [],
+      assignedMentor: targetStudent.assignedMentor || '',
+      reassignedMentor: targetStudent.reassignedMentor || '',
+      mentors: targetStudent.mentors || uniqueMentors(targetStudent.assignedMentor, targetStudent.reassignedMentor),
       avatar: targetStudent.avatar || "",
       attendancePct: targetStudent.attendancePct || 0,
       attendanceDays: `${targetStudent.totalAttended || 0} / ${targetStudent.totalClasses || 0}`,
