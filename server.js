@@ -872,7 +872,7 @@ const NON_MENTOR_PATTERNS = [
   /assigned in batch/i,
   /already assigned/i,
   /^tbd$/i,
-  /dropped?/i,
+  /drop/i,
   /got plac?ed/i,
   /will rejoin/i,
   /lms issue/i,
