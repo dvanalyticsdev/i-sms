@@ -26,6 +26,20 @@ const CURRICULUM_MODULES = [
   "INTERVIEW PREP"
 ];
 
+function normalizeApplicationsInput(value) {
+  const raw = Array.isArray(value) ? value : String(value || '').split(',');
+  const allowedByKey = new Map(CURRICULUM_MODULES.map(name => [name.toUpperCase(), name]));
+  const selected = [];
+  raw.forEach(item => {
+    const appName = String(item || '').trim();
+    const canonical = allowedByKey.get(appName.toUpperCase());
+    if (canonical && !selected.includes(canonical)) {
+      selected.push(canonical);
+    }
+  });
+  return selected.length ? selected : [CURRICULUM_MODULES[0]];
+}
+
 // Helper to compute module stats
 function computeModuleMetrics(m) {
   const classes = Math.max(0, parseInt(m.classes, 10) || 0);
@@ -981,7 +995,7 @@ function getAssignedMentorStaffMembers() {
   )).filter(name => !existingNames.has(mentorNameKey(name)));
 
   return mentorNames.map((name, index) => ({
-    id: `ASSIGNED-MENTOR-${index + 1}`,
+    id: `ASSIGNED-MENTOR-${mentorNameKey(name) || index + 1}`,
     type: "Mentor",
     name,
     email: "",
@@ -990,6 +1004,35 @@ function getAssignedMentorStaffMembers() {
     source: "Student Assignment",
     locked: true
   }));
+}
+
+function removeMentorNameFromAssignment(value, mentorName) {
+  const removeKey = mentorNameKey(mentorName);
+  return uniqueMentors(value)
+    .filter(name => mentorNameKey(name) !== removeKey)
+    .join(' / ');
+}
+
+function removeAssignedMentorFromStudents(mentorName) {
+  const removeKey = mentorNameKey(mentorName);
+  if (!removeKey) return 0;
+  let changedCount = 0;
+
+  rawStudents.forEach(student => {
+    const assignedMentor = removeMentorNameFromAssignment(student.assignedMentor, mentorName);
+    const reassignedMentor = removeMentorNameFromAssignment(student.reassignedMentor, mentorName);
+    const changed = assignedMentor !== (student.assignedMentor || '') || reassignedMentor !== (student.reassignedMentor || '');
+    if (!changed) return;
+
+    student.assignedMentor = assignedMentor;
+    student.reassignedMentor = reassignedMentor;
+    student.mentors = uniqueMentors(assignedMentor, reassignedMentor);
+    student.counselor = assignedMentor || reassignedMentor || '';
+    persistStudentScorecard(student);
+    changedCount += 1;
+  });
+
+  return changedCount;
 }
 
 function getStaffList() {
@@ -1523,16 +1566,66 @@ app.post('/api/staff', (req, res) => {
   res.status(201).json(entry);
 });
 
-app.delete('/api/staff/:id', (req, res) => {
+app.put('/api/staff/:id/status', async (req, res) => {
+  await refreshStudents();
+  const nextStatus = String(req.body.status || "").trim();
+  if (!["Active", "Inactive"].includes(nextStatus)) {
+    return res.status(400).json({ error: "Status must be Active or Inactive" });
+  }
+
+  const member = getStaffList().find(item => item.id === req.params.id);
+  if (!member) {
+    return res.status(404).json({ error: "Staff member not found" });
+  }
+
+  const existingIndex = staffMembers.findIndex(item => item.id === req.params.id);
+  if (existingIndex !== -1) {
+    staffMembers[existingIndex].status = nextStatus;
+    return res.json(staffMembers[existingIndex]);
+  }
+
+  if (member.type === "Mentor") {
+    const override = {
+      id: `MENOVR-${mentorNameKey(member.name)}`,
+      type: "Mentor",
+      name: member.name,
+      email: member.email || "",
+      phone: member.phone || "",
+      status: nextStatus
+    };
+    staffMembers.push(override);
+    return res.json(override);
+  }
+
+  res.status(400).json({ error: "This staff member cannot be updated." });
+});
+
+app.delete('/api/staff/:id', async (req, res) => {
+  await refreshStudents();
   if (String(req.params.id || "").startsWith("ASSIGNED-MENTOR-")) {
-    return res.status(400).json({ error: "Assigned mentors are removed from the student mentor assignment." });
+    const member = getStaffList().find(item => item.id === req.params.id);
+    if (!member) {
+      return res.status(404).json({ error: "Mentor not found" });
+    }
+    const affectedStudents = removeAssignedMentorFromStudents(member.name);
+    const overrideIndex = staffMembers.findIndex(item => item.type === "Mentor" && mentorNameKey(item.name) === mentorNameKey(member.name));
+    if (overrideIndex !== -1) {
+      staffMembers.splice(overrideIndex, 1);
+    }
+    await refreshStudents();
+    return res.json({ message: "Mentor removed from student assignments", removed: member, affectedStudents });
   }
   const index = staffMembers.findIndex(member => member.id === req.params.id);
   if (index === -1) {
     return res.status(404).json({ error: "Staff member not found" });
   }
   const [removed] = staffMembers.splice(index, 1);
-  res.json({ message: "Staff member removed", removed });
+  let affectedStudents = 0;
+  if (removed.type === "Mentor") {
+    affectedStudents = removeAssignedMentorFromStudents(removed.name);
+    await refreshStudents();
+  }
+  res.json({ message: "Staff member removed", removed, affectedStudents });
 });
 
 // Student -> Faculty Feedback
@@ -1602,9 +1695,9 @@ app.post('/api/feedback/mentor', async (req, res) => {
     return res.status(400).json({ error: "Select only the assigned or reassigned mentor for this student." });
   }
 
-  const nextId = "MF" + String(mentorFeedbackLogs.length + 1).padStart(3, '0');
-  const entry = {
-    id: nextId,
+  const applications = normalizeApplicationsInput(data.applications || data.application);
+  const entries = applications.map((application, index) => ({
+    id: "MF" + String(mentorFeedbackLogs.length + index + 1).padStart(3, '0'),
     studentId: student.id,
     studentName: student.name,
     course: student.course,
@@ -1613,7 +1706,7 @@ app.post('/api/feedback/mentor', async (req, res) => {
     sessionDate: data.sessionDate || data.session_date || data.callDate || new Date().toISOString().split('T')[0],
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Mentor Feedback",
-    application: data.application || "EXCEL AI",
+    application,
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
     mentorName: mentorName || "Not assigned",
@@ -1623,10 +1716,10 @@ app.post('/api/feedback/mentor', async (req, res) => {
     attention: Math.max(0, Math.min(5, parseFloat(data.attention) || 5)),
     overallSatisfaction: Math.max(0, Math.min(5, parseFloat(data.overallSatisfaction) || 5)),
     comments: data.comments || ""
-  };
+  }));
 
-  mentorFeedbackLogs.push(entry);
-  res.status(201).json(entry);
+  mentorFeedbackLogs.push(...entries);
+  res.status(201).json(entries.length === 1 ? entries[0] : entries);
 });
 
 // Mentor -> Student Evaluation Log
@@ -1640,9 +1733,9 @@ app.post('/api/feedback/mentor-evaluation', async (req, res) => {
     return res.status(400).json({ error: "Select only the assigned or reassigned mentor for this student." });
   }
 
-  const nextId = "ME" + String(mentorEvaluationLogs.length + 1).padStart(3, '0');
-  const entry = {
-    id: nextId,
+  const applications = normalizeApplicationsInput(data.applications || data.application);
+  const entries = applications.map((application, index) => ({
+    id: "ME" + String(mentorEvaluationLogs.length + index + 1).padStart(3, '0'),
     studentId: student.id,
     studentName: student.name,
     course: student.course,
@@ -1651,26 +1744,28 @@ app.post('/api/feedback/mentor-evaluation', async (req, res) => {
     sessionDate: data.sessionDate || data.session_date || data.callDate || new Date().toISOString().split('T')[0],
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Mentor Evaluation",
-    application: data.application || "EXCEL AI",
+    application,
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
     mentorName: mentorName || "Not assigned",
     assignmentStatus: data.assignmentStatus || "Completed", // Completed / In Progress / Not Started
     applicationKnowledge: data.applicationKnowledge || "Good", // Low / Average / Good / Best
     overallFeedback: data.overallFeedback || ""
-  };
+  }));
 
-  mentorEvaluationLogs.push(entry);
+  mentorEvaluationLogs.push(...entries);
 
   const rawStu = rawStudents.find(s => s.id === student.id);
   if (rawStu) {
-    rawStu.timeline.push({
-      date: entry.callDate,
-      event: `Mentor Evaluation Call Logged (${entry.application} - Knowledge: ${entry.applicationKnowledge})`
+    entries.forEach(entry => {
+      rawStu.timeline.push({
+        date: entry.callDate,
+        event: `Mentor Evaluation Call Logged (${entry.application} - Knowledge: ${entry.applicationKnowledge})`
+      });
     });
   }
 
-  res.status(201).json(entry);
+  res.status(201).json(entries.length === 1 ? entries[0] : entries);
 });
 
 // Helper to get ISO week string and label

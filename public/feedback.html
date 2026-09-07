@@ -61,6 +61,52 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
+    .multi-select-hint {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    .application-checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 154px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+    .application-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 28px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .application-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      flex: 0 0 auto;
+    }
+    .staff-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .staff-action-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -222,7 +268,7 @@
           <div class="form-group"><label>Call Date</label><input id="menCallDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Session Date</label><input id="menDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="menStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
-          <div class="form-group"><label>Application</label><select id="menApp" class="form-control" required></select></div>
+          <div class="form-group"><label>Application</label><div id="menApp" class="application-checklist" role="group" aria-label="Mentor feedback applications"></div><span class="multi-select-hint">Select one or more applications.</span></div>
           <div class="form-group"><label>Session</label><input id="menSession" class="form-control" value="SESSION-1" required></div>
           <div class="form-group"><label>Call By (Student Coordinator)</label><select id="menCallBy" class="form-control" required></select></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Mentor Name</label><select id="menMentor" class="form-control" required></select></div>
@@ -253,7 +299,7 @@
           <div class="form-group"><label>Call Date</label><input id="evalCallDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Session Date</label><input id="evalDate" type="date" class="form-control" required></div>
           <div class="form-group"><label>Connection</label><select id="evalStatus" class="form-control"><option>YES</option><option>NO</option></select></div>
-          <div class="form-group"><label>Application</label><select id="evalApp" class="form-control" required></select></div>
+          <div class="form-group"><label>Application</label><div id="evalApp" class="application-checklist" role="group" aria-label="Student evaluation applications"></div><span class="multi-select-hint">Select one or more applications.</span></div>
           <div class="form-group"><label>Session</label><input id="evalSession" class="form-control" value="SESSION-1" required></div>
           <div class="form-group"><label>Call By (Student Coordinator)</label><select id="evalCallBy" class="form-control" required></select></div>
           <div class="form-group" style="grid-column:1/-1;"><label>Mentor Name</label><select id="evalMentor" class="form-control" required></select></div>
@@ -341,6 +387,8 @@
     const closeModal = id => el(id).classList.remove("is-open");
     const openModal = id => el(id).classList.add("is-open");
     const up = value => String(value || "").toUpperCase();
+    const selectedValues = container => Array.from(container?.querySelectorAll("input[type='checkbox']:checked") || []).map(input => input.value).filter(Boolean);
+    const jsString = value => JSON.stringify(String(value ?? ""));
     const escapeHtml = value => String(value ?? "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -355,7 +403,8 @@
       const query = (searchInput ? searchInput.value.trim().toLowerCase() : "");
 
       const matchesStudent = (student === "All" || item.studentId === student || item.batch === student);
-      const matchesApp = (application === "All" || up(item.application) === up(application));
+      const itemApps = String(item.application || "").split(",").map(app => up(app.trim())).filter(Boolean);
+      const matchesApp = (application === "All" || itemApps.includes(up(application)));
       const matchesQuery = !query ||
         String(item.studentName || "").toLowerCase().includes(query) ||
         String(item.studentId || "").toLowerCase().includes(query) ||
@@ -415,6 +464,22 @@
         return `<span class="badge badge-risk" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5;">Delay</span>`;
       }
       return `<span class="badge badge-completed" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#dcfce7; color:#16a34a; border:1px solid #86efac;">On Time</span>`;
+    }
+
+    function renderApplicationChecklist(containerId, selected = []) {
+      const container = el(containerId);
+      if (!container) return;
+      const selectedSet = new Set(selected.length ? selected : [modules[0]].filter(Boolean));
+      container.innerHTML = modules.map(moduleName => {
+        const inputId = `${containerId}-${moduleName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+        const checked = selectedSet.has(moduleName) ? "checked" : "";
+        return `
+          <label class="application-option" for="${inputId}">
+            <input id="${inputId}" type="checkbox" value="${escapeHtml(moduleName)}" ${checked}>
+            <span>${escapeHtml(moduleName)}</span>
+          </label>
+        `;
+      }).join("");
     }
 
     function renderFacultyRow(item, idx) {
@@ -505,9 +570,14 @@
     }
 
     function renderStaffRow(item) {
-      const removeButton = item.locked
-        ? `<span class="student-meta">From assignment</span>`
-        : `<button class="btn-ghost" style="color:var(--danger); padding:4px 8px; font-size:12px;" onclick="removeStaff('${item.id}', '${item.name}')">Remove</button>`;
+      const isActive = item.status !== "Inactive";
+      const toggleLabel = isActive ? "Inactive" : "Active";
+      const toggleButton = item.type === "Mentor"
+        ? `<button class="btn-secondary staff-action-btn" onclick="toggleStaffStatus(${jsString(item.id)}, ${jsString(item.name)}, ${jsString(isActive ? "Inactive" : "Active")})">${toggleLabel}</button>`
+        : "";
+      const removeButton = item.type === "Mentor" || !item.locked
+        ? `<button class="btn-ghost staff-action-btn" style="color:var(--danger);" onclick="removeStaff(${jsString(item.id)}, ${jsString(item.name)})">Remove</button>`
+        : `<span class="student-meta">From assignment</span>`;
       return `
         <tr>
           <td><strong>${item.name}</strong></td>
@@ -515,9 +585,10 @@
           <td>${item.email || "--"}</td>
           <td>${item.phone || "--"}</td>
           <td><span class="badge ${item.status === "Active" ? "badge-completed" : "badge-risk"}">${item.status}</span></td>
-          <td style="text-align:right;">
+          <td style="text-align:right;"><div class="staff-actions">
+            ${toggleButton}
             ${removeButton}
-          </td>
+          </div></td>
         </tr>
       `;
     }
@@ -592,8 +663,9 @@
     }
 
     function populateStaffDropdowns() {
-      const faculties = staff.filter(m => m.type === "Faculty").map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
-      const coordinators = staff.filter(m => m.type === "Student Coordinator").map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
+      const activeOnly = member => member.status !== "Inactive";
+      const faculties = staff.filter(m => m.type === "Faculty" && activeOnly(m)).map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
+      const coordinators = staff.filter(m => m.type === "Student Coordinator" && activeOnly(m)).map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
 
       if (el("facFaculty")) el("facFaculty").innerHTML = faculties || `<option value="">No faculty added</option>`;
       populateStudentMentorDropdown("menStudent", "menMentor");
@@ -655,11 +727,15 @@
       if (!mentorSelect) return;
 
       const selectedStudent = getSelectedStudent(studentSelectId);
+      const inactiveMentorKeys = new Set(staff
+        .filter(member => member.type === "Mentor" && member.status === "Inactive")
+        .map(member => up(member.name)));
       const mentorNames = [...new Set([
         ...((selectedStudent && selectedStudent.mentors) || []),
         selectedStudent?.assignedMentor,
         selectedStudent?.reassignedMentor
-      ].map(name => String(name || "").trim()).filter(Boolean))];
+      ].map(name => String(name || "").trim()).filter(Boolean))]
+        .filter(name => !inactiveMentorKeys.has(up(name)));
 
       mentorSelect.innerHTML = mentorNames.length
         ? mentorNames.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")
@@ -674,11 +750,23 @@
     }
 
     async function removeStaff(id, name) {
-      if (!confirm(`Remove ${name} from directory? Existing feedback records will keep the saved name.`)) return;
+      const message = String(id || "").startsWith("ASSIGNED-MENTOR-")
+        ? `Remove ${name} from all student mentor assignments? Existing feedback records will keep the saved name.`
+        : `Remove ${name} from directory? Existing feedback records will keep the saved name.`;
+      if (!confirm(message)) return;
       await apiFetch(`/api/staff/${encodeURIComponent(id)}`, { method: "DELETE" });
       await loadStaff();
     }
     window.removeStaff = removeStaff;
+
+    async function toggleStaffStatus(id, name, status) {
+      await apiFetch(`/api/staff/${encodeURIComponent(id)}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status })
+      });
+      await loadStaff();
+    }
+    window.toggleStaffStatus = toggleStaffStatus;
 
     async function loadFeedback() {
       faculty = await apiFetch('/api/feedback?type=Faculty');
@@ -694,7 +782,9 @@
       const studentOptions = students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`).join("");
       const moduleOptions = modules.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
       ["facStudent", "menStudent", "evalStudent"].forEach(id => renderStudentSelect(id));
-      ["facApp", "menApp", "evalApp"].forEach(id => el(id).innerHTML = moduleOptions);
+      el("facApp").innerHTML = moduleOptions;
+      renderApplicationChecklist("menApp");
+      renderApplicationChecklist("evalApp");
       populateStaffDropdowns();
       ["facStudent", "menStudent", "evalStudent"].forEach(selectId => {
         const selectedStudent = getSelectedStudent(selectId);
@@ -777,7 +867,7 @@
         callDate: el("menCallDate").value,
         sessionDate: el("menDate").value,
         connectionStatus: el("menStatus").value,
-        application: el("menApp").value,
+        applications: selectedValues(el("menApp")),
         session: el("menSession").value,
         calledBy: el("menCallBy").value,
         mentorName: el("menMentor").value,
@@ -799,7 +889,7 @@
         callDate: el("evalCallDate").value,
         sessionDate: el("evalDate").value,
         connectionStatus: el("evalStatus").value,
-        application: el("evalApp").value,
+        applications: selectedValues(el("evalApp")),
         session: el("evalSession").value,
         calledBy: el("evalCallBy").value,
         mentorName: el("evalMentor").value,
