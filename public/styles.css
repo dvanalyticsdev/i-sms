@@ -2688,6 +2688,73 @@ html[data-theme="dark"] .assignment-dot.pending {
   align-items: end;
 }
 
+.mentor-chip-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+
+.mentor-chip-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mentor-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 30px;
+  align-items: center;
+}
+
+.mentor-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 4px 5px 4px 10px;
+  border: 1px solid rgba(22, 163, 74, 0.34);
+  border-radius: 8px;
+  background: rgba(22, 163, 74, 0.12);
+  color: var(--heading);
+  font-size: 12px;
+}
+
+.mentor-chip__role {
+  color: #16a34a;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mentor-chip__remove {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mentor-chip__remove:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
 .feedback-tabs-card {
   min-height: 460px;
 }

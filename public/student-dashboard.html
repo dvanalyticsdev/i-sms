@@ -100,6 +100,13 @@
             </div>
           </div>
           <form id="mentorAssignmentForm" class="mentor-assignment-form">
+            <div class="mentor-chip-panel">
+              <div class="mentor-chip-head">
+                <span>Assigned Mentors</span>
+                <span id="mentorCountText">0 mentors</span>
+              </div>
+              <div class="mentor-chip-list" id="mentorChipList"></div>
+            </div>
             <div class="form-group">
               <label for="assignedMentor">Assigned Mentor</label>
               <input id="assignedMentor" class="form-control" placeholder="Enter assigned mentor">
@@ -206,6 +213,29 @@
     const pctClass = value => value >= 75 ? "good" : value < 60 ? "risk" : "";
     const scoreClass = value => value >= 70 ? "good" : "risk";
 
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function mentorParts(value) {
+      return String(value || "")
+        .split(/\s*(?:\/| - )\s*/)
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
+    function uniqueMentorParts() {
+      return Array.from(new Set([
+        ...mentorParts(student.assignedMentor),
+        ...mentorParts(student.reassignedMentor)
+      ]));
+    }
+
     function badge(text, type = "completed") {
       const isPass = type === "elite" || type === "placement" || type === "completed";
       return `<span class="badge ${isPass ? "badge-completed" : "badge-risk"}">${text}</span>`;
@@ -237,6 +267,7 @@
       document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch}`;
       document.getElementById("assignedMentor").value = student.assignedMentor || "";
       document.getElementById("reassignedMentor").value = student.reassignedMentor || "";
+      renderMentorChips();
 
       if (!student.modules || !student.modules.length) {
         document.getElementById("scorecardBody").innerHTML = `<tr><td colspan="7"><div class="empty-state">No scorecard data available for this student yet.</div></td></tr>`;
@@ -259,6 +290,51 @@
       }).join("");
 
       document.querySelectorAll(".btn-edit-row").forEach(btn => btn.addEventListener("click", () => openEditModal(btn.dataset.mod)));
+    }
+
+    function renderMentorChips() {
+      const chipList = document.getElementById("mentorChipList");
+      const countText = document.getElementById("mentorCountText");
+      const mentors = [
+        ...mentorParts(student.assignedMentor).map(name => ({ name, field: "assignedMentor", label: "Assigned" })),
+        ...mentorParts(student.reassignedMentor).map(name => ({ name, field: "reassignedMentor", label: "Reassigned" }))
+      ];
+
+      countText.textContent = `${uniqueMentorParts().length} mentor${uniqueMentorParts().length === 1 ? "" : "s"}`;
+      chipList.innerHTML = mentors.length
+        ? mentors.map(mentor => `
+            <span class="mentor-chip">
+              <span class="mentor-chip__role">${escapeHtml(mentor.label)}</span>
+              <strong>${escapeHtml(mentor.name)}</strong>
+              <button type="button" class="mentor-chip__remove" data-field="${mentor.field}" data-name="${escapeHtml(mentor.name)}" title="Remove ${escapeHtml(mentor.name)}" aria-label="Remove ${escapeHtml(mentor.name)}">×</button>
+            </span>
+          `).join("")
+        : `<span class="student-meta">No mentor assigned yet.</span>`;
+
+      chipList.querySelectorAll(".mentor-chip__remove").forEach(button => {
+        button.addEventListener("click", () => removeMentor(button.dataset.field, button.dataset.name));
+      });
+    }
+
+    async function saveMentorAssignment(assignedMentor, reassignedMentor) {
+      student = await apiFetch(`/api/students/${encodeURIComponent(student.id)}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          assignedMentor: assignedMentor.trim(),
+          reassignedMentor: reassignedMentor.trim()
+        })
+      });
+      render();
+    }
+
+    async function removeMentor(field, name) {
+      const assignedMentor = field === "assignedMentor"
+        ? mentorParts(student.assignedMentor).filter(item => item !== name).join(" / ")
+        : document.getElementById("assignedMentor").value;
+      const reassignedMentor = field === "reassignedMentor"
+        ? mentorParts(student.reassignedMentor).filter(item => item !== name).join(" / ")
+        : document.getElementById("reassignedMentor").value;
+      await saveMentorAssignment(assignedMentor, reassignedMentor);
     }
 
     async function loadStudent() {
@@ -325,14 +401,10 @@
 
     document.getElementById("mentorAssignmentForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      student = await apiFetch(`/api/students/${encodeURIComponent(student.id)}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          assignedMentor: document.getElementById("assignedMentor").value.trim(),
-          reassignedMentor: document.getElementById("reassignedMentor").value.trim()
-        })
-      });
-      render();
+      await saveMentorAssignment(
+        document.getElementById("assignedMentor").value,
+        document.getElementById("reassignedMentor").value
+      );
     });
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadStudent);
