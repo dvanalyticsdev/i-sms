@@ -40,31 +40,45 @@ function normalizeApplicationsInput(value) {
   return selected.length ? selected : [CURRICULUM_MODULES[0]];
 }
 
+function asNumber(value, fallback = 0) {
+  const num = Number.parseFloat(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function clampNumber(value, min, max, fallback = 0) {
+  return Math.max(min, Math.min(max, asNumber(value, fallback)));
+}
+
+function roundMetric(value, decimals = 2) {
+  const factor = 10 ** decimals;
+  return Math.round((asNumber(value) + Number.EPSILON) * factor) / factor;
+}
+
 // Helper to compute module stats
 function computeModuleMetrics(m) {
-  const classes = Math.max(0, parseInt(m.classes, 10) || 0);
-  const attended = Math.min(classes, Math.max(0, parseInt(m.attended, 10) || 0));
-  const attendancePct = classes > 0 ? Math.round((attended / classes) * 100) : 0;
+  const classes = Math.max(0, asNumber(m.classes, 0));
+  const attended = Math.min(classes, Math.max(0, asNumber(m.attended, 0)));
+  const attendancePct = classes > 0 ? roundMetric((attended / classes) * 100) : 0;
   
   const classHours = classes * 2;
   const hoursAttended = attended * 2;
   
   const classDuration = classes * 120; // 120 mins per class
-  const classAttention = Math.min(classDuration, Math.max(0, parseInt(m.classAttention, 10) || 0));
-  const attentionPct = classDuration > 0 ? Math.round((classAttention / classDuration) * 100) : 0;
+  const classAttention = Math.min(classDuration, Math.max(0, asNumber(m.classAttention, 0)));
+  const attentionPct = classDuration > 0 ? roundMetric((classAttention / classDuration) * 100) : 0;
   
   const assignments = m.assignments || { s1: false, s2: false, s3: false, s4: false, s5: false, s6: false };
   const assignmentTotal = Object.values(assignments).filter(Boolean).length;
   const assignmentTarget = m.assignmentTarget || 6;
-  const assignmentPct = m.assignmentPct !== undefined ? m.assignmentPct : (assignmentTarget > 0 ? Math.round((assignmentTotal / assignmentTarget) * 100) : 0);
+  const assignmentPct = m.assignmentPct !== undefined ? asNumber(m.assignmentPct) : (assignmentTarget > 0 ? roundMetric((assignmentTotal / assignmentTarget) * 100) : 0);
   
-  const mcq = Math.max(0, Math.min(100, Math.round(m.mcq ?? 0)));
-  const test = Math.max(0, Math.min(100, Math.round(m.testScore ?? m.test ?? 0)));
-  const penAndPaper = Math.max(0, Math.min(100, Math.round(m.penAndPaper ?? 0)));
-  const mockInterview = Math.max(0, Math.min(100, Math.round(m.mockInterview ?? 0)));
+  const mcq = clampNumber(m.mcq ?? 0, 0, 100);
+  const test = clampNumber(m.testScore ?? m.test ?? 0, 0, 100);
+  const penAndPaper = clampNumber(m.penAndPaper ?? 0, 0, 100);
+  const mockInterview = clampNumber(m.mockInterview ?? 0, 0, 100);
   
   // Overall score: weighted 30% attendance + 30% assignments + 40% test score
-  const overallScore = Math.round(0.30 * attendancePct + 0.30 * assignmentPct + 0.40 * test);
+  const overallScore = roundMetric(0.30 * attendancePct + 0.30 * assignmentPct + 0.40 * test);
   
   let performanceLevel = m.level || m.performanceLevel;
   if (!performanceLevel) {
@@ -104,32 +118,32 @@ function computeStudentAggregates(student) {
   
   const totalClasses = modules.reduce((a, b) => a + b.classes, 0);
   const totalAttended = modules.reduce((a, b) => a + b.attended, 0);
-  const overallAttendance = totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0;
+  const overallAttendance = totalClasses > 0 ? roundMetric((totalAttended / totalClasses) * 100) : 0;
 
   const totalHours = modules.reduce((a, b) => a + b.classHours, 0) || (totalClasses * 2);
   const totalHoursAttended = modules.reduce((a, b) => a + b.hoursAttended, 0);
 
   const totalDuration = modules.reduce((a, b) => a + b.classDuration, 0);
   const totalAttention = modules.reduce((a, b) => a + b.classAttention, 0);
-  const overallAttention = totalDuration > 0 ? Math.round((totalAttention / totalDuration) * 100) : 0;
+  const overallAttention = totalDuration > 0 ? roundMetric((totalAttention / totalDuration) * 100) : 0;
 
   const totalAssignments = modules.reduce((a, b) => a + b.assignmentTotal, 0);
   const totalTargetAssignments = modules.reduce((a, b) => a + b.assignmentTarget, 0);
-  const overallAssignmentPct = modules.length ? Math.round(modules.reduce((a, b) => a + b.assignmentPct, 0) / modules.length) : 0;
+  const overallAssignmentPct = modules.length ? roundMetric(modules.reduce((a, b) => a + b.assignmentPct, 0) / modules.length) : 0;
 
-  const avgMcq = modules.length ? Math.round(modules.reduce((a, b) => a + b.mcq, 0) / modules.length) : 0;
-  const avgTest = modules.length ? Math.round(modules.reduce((a, b) => a + b.test, 0) / modules.length) : 0;
-  const avgPenPaper = modules.length ? Math.round(modules.reduce((a, b) => a + b.penAndPaper, 0) / modules.length) : 0;
-  const avgMock = modules.length ? Math.round(modules.reduce((a, b) => a + b.mockInterview, 0) / modules.length) : 0;
+  const avgMcq = modules.length ? roundMetric(modules.reduce((a, b) => a + b.mcq, 0) / modules.length) : 0;
+  const avgTest = modules.length ? roundMetric(modules.reduce((a, b) => a + b.test, 0) / modules.length) : 0;
+  const avgPenPaper = modules.length ? roundMetric(modules.reduce((a, b) => a + b.penAndPaper, 0) / modules.length) : 0;
+  const avgMock = modules.length ? roundMetric(modules.reduce((a, b) => a + b.mockInterview, 0) / modules.length) : 0;
   
   // Weighted Overall Score: 30% Attendance + 30% Assignment + 40% Test Score
-  const weightedScore = Math.round(0.30 * overallAttendance + 0.30 * overallAssignmentPct + 0.40 * avgTest);
-  const lmsScore = Math.round((avgMcq + avgTest + overallAttendance) / 3);
+  const weightedScore = roundMetric(0.30 * overallAttendance + 0.30 * overallAssignmentPct + 0.40 * avgTest);
+  const lmsScore = roundMetric((avgMcq + avgTest + overallAttendance) / 3);
 
   // Dedicated Readiness & Placement Evaluations
   const dvEliteEligible = weightedScore >= 85 && overallAttendance >= 85 && overallAssignmentPct >= 80 && avgTest >= 80;
   const placementSupportEligible = weightedScore >= 75 && overallAttendance >= 75;
-  const placementReadiness = Math.round(0.4 * weightedScore + 0.3 * overallAttendance + 0.3 * avgTest);
+  const placementReadiness = roundMetric(0.4 * weightedScore + 0.3 * overallAttendance + 0.3 * avgTest);
 
   let overallLevel = "Good";
   if (weightedScore >= 85) overallLevel = "Excellent";
@@ -1566,38 +1580,88 @@ app.post('/api/staff', (req, res) => {
   res.status(201).json(entry);
 });
 
-app.put('/api/staff/:id/status', async (req, res) => {
-  await refreshStudents();
-  const nextStatus = String(req.body.status || "").trim();
-  if (!["Active", "Inactive"].includes(nextStatus)) {
-    return res.status(400).json({ error: "Status must be Active or Inactive" });
+function validateStaffPayload(data, existing = null) {
+  const type = String(data.type || existing?.type || "").trim();
+  const rawName = data.name ?? existing?.name ?? "";
+  const name = type === "Mentor" ? canonicalMentorName(rawName) : String(rawName).trim();
+  const status = String(data.status ?? existing?.status ?? "Active").trim();
+
+  if (!["Faculty", "Mentor", "Student Coordinator"].includes(type)) {
+    return { error: "Staff type must be Faculty, Mentor, or Student Coordinator" };
+  }
+  if (!name) {
+    return { error: "Staff name is required" };
+  }
+  if (!["Active", "Inactive"].includes(status)) {
+    return { error: "Status must be Active or Inactive" };
   }
 
+  const duplicate = getStaffList().find(member => {
+    if (existing && member.id === existing.id) return false;
+    return member.type === type && mentorNameKey(member.name) === mentorNameKey(name);
+  });
+  if (duplicate) {
+    return { error: `${name} is already listed as ${type.toLowerCase()}.`, statusCode: 409 };
+  }
+
+  return {
+    value: {
+      type,
+      name,
+      email: data.email ?? existing?.email ?? "",
+      phone: data.phone ?? existing?.phone ?? "",
+      status
+    }
+  };
+}
+
+function staffPrefix(type) {
+  if (type === "Mentor") return "MEN";
+  if (type === "Student Coordinator") return "SCO";
+  return "FAC";
+}
+
+function createStaffOverrideId(member) {
+  return `${staffPrefix(member.type)}OVR-${mentorNameKey(member.name)}`;
+}
+
+async function updateStaffMember(req, res, changes = req.body) {
+  await refreshStudents();
   const member = getStaffList().find(item => item.id === req.params.id);
   if (!member) {
     return res.status(404).json({ error: "Staff member not found" });
   }
 
-  const existingIndex = staffMembers.findIndex(item => item.id === req.params.id);
+  const existingIndex = staffMembers.findIndex(item => item.id === member.id);
+  const existing = existingIndex !== -1 ? staffMembers[existingIndex] : member;
+  const validation = validateStaffPayload({ ...existing, ...changes }, existing);
+  if (validation.error) {
+    return res.status(validation.statusCode || 400).json({ error: validation.error });
+  }
+
+  const updated = {
+    ...existing,
+    ...validation.value
+  };
+
   if (existingIndex !== -1) {
-    staffMembers[existingIndex].status = nextStatus;
+    staffMembers[existingIndex] = updated;
     return res.json(staffMembers[existingIndex]);
   }
 
-  if (member.type === "Mentor") {
-    const override = {
-      id: `MENOVR-${mentorNameKey(member.name)}`,
-      type: "Mentor",
-      name: member.name,
-      email: member.email || "",
-      phone: member.phone || "",
-      status: nextStatus
-    };
-    staffMembers.push(override);
-    return res.json(override);
-  }
+  const override = {
+    id: createStaffOverrideId(member),
+    ...updated
+  };
+  staffMembers.push(override);
+  return res.json(override);
+}
 
-  res.status(400).json({ error: "This staff member cannot be updated." });
+app.put('/api/staff/:id', (req, res) => updateStaffMember(req, res));
+
+app.put('/api/staff/:id/status', async (req, res) => {
+  const nextStatus = String(req.body.status || "").trim();
+  return updateStaffMember(req, res, { status: nextStatus });
 });
 
 app.delete('/api/staff/:id', async (req, res) => {

@@ -164,11 +164,11 @@
               <span style="font-size:10px; color:var(--text-muted); text-transform:none;">(Counts towards Application LMS Score: MCQ + Practical + Attendance)</span>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-              <div class="form-group"><label for="rowAttended">Classes Attended</label><input type="number" id="rowAttended" class="form-control" min="0" required></div>
-              <div class="form-group"><label for="rowClasses">Total Classes</label><input type="number" id="rowClasses" class="form-control" min="1" required></div>
-              <div class="form-group"><label for="rowAttention">Focused Minutes</label><input type="number" id="rowAttention" class="form-control" min="0" required></div>
-              <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" required></div>
-              <div class="form-group" style="grid-column: 1 / -1;"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" required></div>
+              <div class="form-group"><label for="rowAttended">Classes Attended</label><input type="number" id="rowAttended" class="form-control" min="0" step="0.01" required></div>
+              <div class="form-group"><label for="rowClasses">Total Classes</label><input type="number" id="rowClasses" class="form-control" min="1" step="0.01" required></div>
+              <div class="form-group"><label for="rowAttention">Focused Minutes</label><input type="number" id="rowAttention" class="form-control" min="0" step="0.01" required></div>
+              <div class="form-group"><label for="rowMcq">MCQ Score %</label><input type="number" id="rowMcq" class="form-control" min="0" max="100" step="0.01" required></div>
+              <div class="form-group" style="grid-column: 1 / -1;"><label for="rowTest">Practical Test %</label><input type="number" id="rowTest" class="form-control" min="0" max="100" step="0.01" required></div>
               <div class="form-group" style="grid-column: 1 / -1;">
                 <label>Assignments S1 to S6</label>
                 <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
@@ -190,8 +190,8 @@
               <span style="font-size:10px; color:var(--text-muted); text-transform:none;">(Counts towards DV Elite & Placement Eligibility)</span>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-              <div class="form-group"><label for="rowPaper">Pen and Paper %</label><input type="number" id="rowPaper" class="form-control" min="0" max="100" required></div>
-              <div class="form-group"><label for="rowMock">Mock Interview %</label><input type="number" id="rowMock" class="form-control" min="0" max="100" required></div>
+              <div class="form-group"><label for="rowPaper">Pen and Paper %</label><input type="number" id="rowPaper" class="form-control" min="0" max="100" step="0.01" required></div>
+              <div class="form-group"><label for="rowMock">Mock Interview %</label><input type="number" id="rowMock" class="form-control" min="0" max="100" step="0.01" required></div>
             </div>
           </div>
         </div>
@@ -210,7 +210,9 @@
     let availableMentors = [];
     const studentId = new URLSearchParams(window.location.search).get("id");
     // Application LMS score: MCQ, Practical Test, and Attendance %
-    const assessmentScore = m => Math.round((m.mcq + m.test + m.attendancePct) / 3);
+    const numberValue = id => Number.parseFloat(document.getElementById(id).value) || 0;
+    const roundDisplay = value => Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
+    const assessmentScore = m => roundDisplay((m.mcq + m.test + m.attendancePct) / 3);
     const pctClass = value => value >= 75 ? "good" : value < 60 ? "risk" : "";
     const scoreClass = value => value >= 70 ? "good" : "risk";
 
@@ -363,6 +365,7 @@
     async function loadAvailableMentors() {
       const mentors = await apiFetch('/api/staff?type=Mentor');
       availableMentors = mentors
+        .filter(mentor => mentor.status !== "Inactive")
         .map(mentor => mentor.name)
         .filter(Boolean)
         .sort((a, b) => a.localeCompare(b));
@@ -396,9 +399,9 @@
       e.preventDefault();
       const modName = document.getElementById("editModName").value;
       const payload = {
-        attended: parseInt(document.getElementById("rowAttended").value, 10) || 0,
-        classes: parseInt(document.getElementById("rowClasses").value, 10) || 10,
-        classAttention: parseInt(document.getElementById("rowAttention").value, 10) || 0,
+        attended: numberValue("rowAttended"),
+        classes: numberValue("rowClasses") || 10,
+        classAttention: numberValue("rowAttention"),
         assignments: {
           s1: document.getElementById("rowS1").checked,
           s2: document.getElementById("rowS2").checked,
@@ -407,10 +410,10 @@
           s5: document.getElementById("rowS5").checked,
           s6: document.getElementById("rowS6").checked
         },
-        mcq: parseInt(document.getElementById("rowMcq").value, 10) || 0,
-        test: parseInt(document.getElementById("rowTest").value, 10) || 0,
-        penAndPaper: parseInt(document.getElementById("rowPaper").value, 10) || 0,
-        mockInterview: parseInt(document.getElementById("rowMock").value, 10) || 0
+        mcq: numberValue("rowMcq"),
+        test: numberValue("rowTest"),
+        penAndPaper: numberValue("rowPaper"),
+        mockInterview: numberValue("rowMock")
       };
 
       student = await apiFetch(`/api/performance/${student.id}/module/${encodeURIComponent(modName)}`, {

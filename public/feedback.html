@@ -318,6 +318,7 @@
     <div class="modal-container">
       <div class="modal-header"><h3 class="modal-title" id="staffModalTitle">Add Staff Member</h3><button class="modal-close" data-close="staffModal">&times;</button></div>
       <form id="staffForm">
+        <input type="hidden" id="staffEditId">
         <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
           <div class="form-group"><label>Type</label><select id="staffType" class="form-control" required><option value="Faculty">Faculty</option><option value="Mentor">Mentor</option><option value="Student Coordinator">Student Coordinator</option></select></div>
           <div class="form-group"><label>Name</label><input id="staffName" class="form-control" required placeholder="Enter name"></div>
@@ -572,11 +573,10 @@
     function renderStaffRow(item) {
       const isActive = item.status !== "Inactive";
       const toggleLabel = isActive ? "Inactive" : "Active";
-      const toggleButton = item.type === "Mentor"
-        ? `<button class="btn-secondary staff-action-btn" onclick="toggleStaffStatus(${jsString(item.id)}, ${jsString(item.name)}, ${jsString(isActive ? "Inactive" : "Active")})">${toggleLabel}</button>`
-        : "";
+      const editButton = `<button type="button" class="btn-secondary staff-action-btn" data-staff-action="edit" data-staff-id="${escapeHtml(item.id)}">Edit</button>`;
+      const toggleButton = `<button type="button" class="btn-secondary staff-action-btn" data-staff-action="toggle" data-staff-id="${escapeHtml(item.id)}" data-staff-status="${escapeHtml(isActive ? "Inactive" : "Active")}">${toggleLabel}</button>`;
       const removeButton = item.type === "Mentor" || !item.locked
-        ? `<button class="btn-ghost staff-action-btn" style="color:var(--danger);" onclick="removeStaff(${jsString(item.id)}, ${jsString(item.name)})">Remove</button>`
+        ? `<button type="button" class="btn-ghost staff-action-btn" style="color:var(--danger);" data-staff-action="remove" data-staff-id="${escapeHtml(item.id)}">Remove</button>`
         : `<span class="student-meta">From assignment</span>`;
       return `
         <tr>
@@ -586,6 +586,7 @@
           <td>${item.phone || "--"}</td>
           <td><span class="badge ${item.status === "Active" ? "badge-completed" : "badge-risk"}">${item.status}</span></td>
           <td style="text-align:right;"><div class="staff-actions">
+            ${editButton}
             ${toggleButton}
             ${removeButton}
           </div></td>
@@ -628,9 +629,26 @@
         el("feedbackBody").innerHTML = pageSlice.map((item, idx) => renderEvaluationRow(item, idx)).join("");
       } else {
         el("feedbackBody").innerHTML = pageSlice.map(item => renderStaffRow(item)).join("");
+        bindStaffActionButtons();
       }
 
       renderPaginationControls(rows.length, totalPages);
+    }
+
+    function bindStaffActionButtons() {
+      el("feedbackBody").querySelectorAll("[data-staff-action]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const item = staff.find(member => member.id === button.dataset.staffId);
+          if (!item) return;
+          if (button.dataset.staffAction === "edit") {
+            editStaff(item.id);
+          } else if (button.dataset.staffAction === "toggle") {
+            await toggleStaffStatus(item.id, item.name, button.dataset.staffStatus);
+          } else if (button.dataset.staffAction === "remove") {
+            await removeStaff(item.id, item.name);
+          }
+        });
+      });
     }
 
     function renderPaginationControls(totalCount, totalPages) {
@@ -675,6 +693,27 @@
       if (el("menCallBy")) el("menCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
       if (el("evalCallBy")) el("evalCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
     }
+
+    function setStaffFormMode(item = null) {
+      const isEdit = !!item;
+      el("staffEditId").value = isEdit ? item.id : "";
+      el("staffType").value = item?.type || "Faculty";
+      el("staffName").value = item?.name || "";
+      el("staffEmail").value = item?.email || "";
+      el("staffPhone").value = item?.phone || "";
+      el("staffStatus").value = item?.status || "Active";
+      el("staffType").disabled = isEdit;
+      el("staffName").disabled = !!item?.locked;
+    }
+
+    function editStaff(id) {
+      const item = staff.find(member => member.id === id);
+      if (!item) return;
+      setStaffFormMode(item);
+      el("staffModalTitle").textContent = `Edit ${item.type}`;
+      openModal("staffModal");
+    }
+    window.editStaff = editStaff;
 
     function getSelectedStudent(studentSelectId) {
       const studentId = el(studentSelectId)?.value;
@@ -808,6 +847,7 @@
         });
       });
       el("activeAddBtn").addEventListener("click", () => {
+        setStaffFormMode();
         if (activeTab === "facultyStaff") {
           el("staffType").value = "Faculty";
           el("staffModalTitle").textContent = "Add Faculty";
@@ -903,14 +943,20 @@
 
     el("staffForm").addEventListener("submit", async e => {
       e.preventDefault();
-      await apiFetch('/api/staff', { method: "POST", body: JSON.stringify({
+      const editId = el("staffEditId").value;
+      const payload = {
         type: el("staffType").value,
         name: el("staffName").value,
         email: el("staffEmail").value,
         phone: el("staffPhone").value,
         status: el("staffStatus").value
-      }) });
+      };
+      await apiFetch(editId ? `/api/staff/${encodeURIComponent(editId)}` : '/api/staff', {
+        method: editId ? "PUT" : "POST",
+        body: JSON.stringify(payload)
+      });
       closeModal("staffModal");
+      setStaffFormMode();
       await loadStaff();
     });
 

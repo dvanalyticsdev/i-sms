@@ -84,9 +84,38 @@ function initSidebar() {
   });
 }
 
+function initUniversalBackButton() {
+  const topbarActions = document.querySelector(".topbar-actions");
+  if (!topbarActions || document.querySelector("[data-sms-back]")) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn-secondary btn-sm";
+  button.setAttribute("data-sms-back", "");
+  button.setAttribute("title", "Go back");
+  button.setAttribute("aria-label", "Go back");
+  button.innerHTML = `
+    <svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M19 12H5"></path>
+      <path d="M12 19l-7-7 7-7"></path>
+    </svg>
+    <span>Back</span>
+  `;
+  button.addEventListener("click", () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "performance.html";
+    }
+  });
+
+  topbarActions.prepend(button);
+}
+
 function bootApp() {
   initThemeSystem();
   initSidebar();
+  initUniversalBackButton();
 
   let userStr = localStorage.getItem("smsUser");
   if (!userStr) {
