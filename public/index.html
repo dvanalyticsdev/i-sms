@@ -63,7 +63,15 @@
       <div class="modal-body">
         <form id="loginForm">
           <div class="form-group">
-            <label for="username">Username *</label>
+            <label for="loginRole">Login As *</label>
+            <select id="loginRole" class="form-control" required>
+              <option value="Administrator">Admin</option>
+              <option value="Student Coordinator">Student Coordinator</option>
+              <option value="Performance Manager">Performance Manager</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="username" id="loginIdentityLabel">Username *</label>
             <input type="text" id="username" class="form-control" placeholder="Enter username" required autocomplete="username">
           </div>
           <div class="form-group" style="margin-bottom: 20px;">
@@ -106,7 +114,7 @@
 
   <script type="module">
     import { initThemeSystem } from './theme.js';
-    import { apiFetch } from './app.js';
+    import { apiFetch, getRoleHome } from './app.js';
     
     // Modal controls
     const loginModal = document.getElementById("loginModal");
@@ -126,20 +134,35 @@
     document.getElementById("issueOverlay").addEventListener("click", closeIssue);
     document.getElementById("cancelIssueBtn").addEventListener("click", closeIssue);
 
+    const loginRole = document.getElementById("loginRole");
+    const usernameInput = document.getElementById("username");
+    const identityLabel = document.getElementById("loginIdentityLabel");
+    function updateLoginMode() {
+      const isAdmin = loginRole.value === "Administrator";
+      identityLabel.textContent = isAdmin ? "Username *" : "Email *";
+      usernameInput.type = isAdmin ? "text" : "email";
+      usernameInput.placeholder = isAdmin ? "Enter username" : "name@example.com";
+      usernameInput.autocomplete = isAdmin ? "username" : "email";
+      usernameInput.value = "";
+    }
+    loginRole.addEventListener("change", updateLoginMode);
+    updateLoginMode();
+
     // Bind login form
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+      const role = document.getElementById("loginRole").value;
 
       try {
         const data = await apiFetch('/api/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ role, username, email: username, password })
         });
         
         localStorage.setItem("smsUser", JSON.stringify(data.user));
-        window.location.href = "student-performance-dashboard.html";
+        window.location.href = getRoleHome(data.user.role);
       } catch (err) {
         // apiFetch handles standard errors
       }

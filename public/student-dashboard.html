@@ -92,7 +92,7 @@
       </header>
 
       <main class="page-container">
-        <section class="card" style="margin-bottom:16px;">
+        <section class="card" id="mentorAssignmentSection" style="margin-bottom:16px;">
           <div class="card-head">
             <div>
               <h3>Mentor Assignment</h3>
@@ -204,10 +204,11 @@
   </div>
 
   <script type="module">
-    import { apiFetch } from './app.js';
+    import { apiFetch, getSmsUser } from './app.js';
 
     let student = null;
     let availableMentors = [];
+    const currentUser = getSmsUser();
     const studentId = new URLSearchParams(window.location.search).get("id");
     // Application LMS score: MCQ, Practical Test, and Attendance %
     const numberValue = id => Number.parseFloat(document.getElementById(id).value) || 0;
@@ -281,9 +282,11 @@
       document.title = `i-SMS | Update Details - ${student.name}`;
       document.getElementById("pageTitle").textContent = `${student.name} Details`;
       document.getElementById("pageSubtitle").textContent = `${student.id} / ${student.program} / ${student.batch}`;
-      document.getElementById("assignedMentor").innerHTML = mentorOptions(student.assignedMentor);
-      document.getElementById("reassignedMentor").innerHTML = mentorOptions(student.reassignedMentor);
-      renderMentorChips();
+      if (currentUser?.role === "Administrator") {
+        document.getElementById("assignedMentor").innerHTML = mentorOptions(student.assignedMentor);
+        document.getElementById("reassignedMentor").innerHTML = mentorOptions(student.reassignedMentor);
+        renderMentorChips();
+      }
 
       if (!student.modules || !student.modules.length) {
         document.getElementById("scorecardBody").innerHTML = `<tr><td colspan="7"><div class="empty-state">No scorecard data available for this student yet.</div></td></tr>`;
@@ -424,16 +427,20 @@
       render();
     });
 
-    document.getElementById("mentorAssignmentForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      await saveMentorAssignment(
-        document.getElementById("assignedMentor").value,
-        document.getElementById("reassignedMentor").value
-      );
-    });
+    if (currentUser?.role !== "Administrator") {
+      document.getElementById("mentorAssignmentSection").style.display = "none";
+    } else {
+      document.getElementById("mentorAssignmentForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await saveMentorAssignment(
+          document.getElementById("assignedMentor").value,
+          document.getElementById("reassignedMentor").value
+        );
+      });
+    }
 
     async function init() {
-      await loadAvailableMentors();
+      if (currentUser?.role === "Administrator") await loadAvailableMentors();
       await loadStudent();
     }
 

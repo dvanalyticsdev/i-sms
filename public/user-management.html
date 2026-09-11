@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>i-SMS | User Management</title>
+  <script src="theme-bootstrap.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .application-checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      max-height: 160px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+    .application-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 28px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .application-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary);
+      flex: 0 0 auto;
+    }
+    .multi-select-hint {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      line-height: 1.3;
+    }
+    .staff-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .staff-action-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .staff-app-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      max-width: 420px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout-root">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sms-logo-wrap">
+          <div class="sms-text-wrap"><span class="sms-logo-text">i-SMS</span></div>
+          <div class="sms-dv-badge"><span class="sms-dv-by">by</span><img src="Logos/DV-Logo.png" alt="DV Analytics" class="sms-dv-img"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav"></nav>
+      <div class="sidebar-bottom-links">
+        <button data-logout class="sidebar-link sidebar-link-bottom btn-ghost" style="border:none; cursor:pointer;"></button>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>User Management</h1>
+          <p>Maintain access accounts, staff status, and application expertise.</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+            <span class="theme-toggle__stack" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path></svg></span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.2 14.7A8.2 8.2 0 0 1 9.3 3.8a8.5 8.5 0 1 0 10.9 10.9Z"></path></svg></span>
+            </span>
+          </button>
+          <div class="topbar-profile"></div>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <section class="card" style="padding:12px 16px 0; margin-bottom:16px;">
+          <div class="tablist feedback-tablist" style="margin:0;">
+            <button class="tab is-active" data-staff-tab="Faculty">Faculty</button>
+            <button class="tab" data-staff-tab="Mentor">Mentor</button>
+            <button class="tab" data-staff-tab="Student Coordinator">Student Coordinator</button>
+            <button class="tab" data-staff-tab="Performance Manager">Performance Manager</button>
+          </div>
+        </section>
+
+        <section class="metric-grid" id="staffMetrics"></section>
+
+        <section class="card" style="margin-top:16px;">
+          <div class="toolbar" style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+            <input type="search" id="searchInput" class="form-control" style="width:260px;" placeholder="Search users...">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+              <button class="btn-primary" id="addStaffBtn">+ Add Faculty</button>
+              <div style="font-size:12px; color:var(--text-muted);" id="rowCountInfo"></div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Applications</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="staffBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="staffModal">
+    <div class="modal-overlay" data-close="staffModal"></div>
+    <div class="modal-container">
+      <div class="modal-header"><h3 class="modal-title" id="staffModalTitle">Add Staff Member</h3><button class="modal-close" data-close="staffModal">&times;</button></div>
+      <form id="staffForm">
+        <input type="hidden" id="staffEditId">
+        <div class="modal-body" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Type</label><select id="staffType" class="form-control" required><option value="Faculty">Faculty</option><option value="Mentor">Mentor</option><option value="Student Coordinator">Student Coordinator</option><option value="Performance Manager">Performance Manager</option></select></div>
+          <div class="form-group"><label>Name</label><input id="staffName" class="form-control" required placeholder="Enter name"></div>
+          <div class="form-group"><label>Email</label><input id="staffEmail" type="email" class="form-control" placeholder="name@example.com"></div>
+          <div class="form-group"><label>Phone</label><input id="staffPhone" class="form-control" placeholder="+91 XXXXX XXXXX"></div>
+          <div class="form-group" id="passwordGroup"><label>Password</label><input id="staffPassword" type="password" class="form-control" placeholder="Set login password" autocomplete="new-password"></div>
+          <div class="form-group"><label>Status</label><select id="staffStatus" class="form-control"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+          <div class="form-group" id="applicationsGroup" style="grid-column:1/-1;">
+            <label>Good In Applications</label>
+            <div id="staffApplications" class="application-checklist" role="group" aria-label="Applications"></div>
+            <span class="multi-select-hint">Select one or more applications for faculty and mentors.</span>
+          </div>
+        </div>
+        <div class="modal-foot"><button type="button" class="btn-secondary" data-close="staffModal">Cancel</button><button class="btn-primary" type="submit">Save User</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiFetch } from './app.js';
+
+    let activeType = "Faculty";
+    let staff = [];
+    let modules = [];
+
+    const el = id => document.getElementById(id);
+    const closeModal = id => el(id).classList.remove("is-open");
+    const openModal = id => el(id).classList.add("is-open");
+    const escapeHtml = value => String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+    const selectedValues = container => Array.from(container?.querySelectorAll("input[type='checkbox']:checked") || []).map(input => input.value).filter(Boolean);
+
+    function renderApplicationChecklist(selected = []) {
+      const selectedSet = new Set(selected);
+      el("staffApplications").innerHTML = modules.map(moduleName => {
+        const inputId = `staff-app-${moduleName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+        const checked = selectedSet.has(moduleName) ? "checked" : "";
+        return `
+          <label class="application-option" for="${inputId}">
+            <input id="${inputId}" type="checkbox" value="${escapeHtml(moduleName)}" ${checked}>
+            <span>${escapeHtml(moduleName)}</span>
+          </label>
+        `;
+      }).join("");
+    }
+
+    function renderMetrics() {
+      el("staffMetrics").innerHTML = [
+        ["Faculty", staff.filter(member => member.type === "Faculty").length, "Application experts"],
+        ["Mentors", staff.filter(member => member.type === "Mentor").length, "Assigned support"],
+        ["Coordinators", staff.filter(member => member.type === "Student Coordinator").length, "Feedback access"],
+        ["Performance Managers", staff.filter(member => member.type === "Performance Manager").length, "Performance access"]
+      ].map(m => `<div class="metric-card"><p class="metric-label">${m[0]}</p><p class="metric-value">${m[1]}</p><p class="metric-note">${m[2]}</p></div>`).join("");
+    }
+
+    function appTags(applications) {
+      const list = Array.isArray(applications) ? applications : [];
+      return list.length
+        ? `<div class="staff-app-tags">${list.map(app => `<span class="badge badge-neutral">${escapeHtml(app)}</span>`).join("")}</div>`
+        : `<span class="student-meta">Not required</span>`;
+    }
+
+    function filteredStaff() {
+      const q = el("searchInput").value.trim().toLowerCase();
+      return staff.filter(member => {
+        if (member.type !== activeType) return false;
+        if (!q) return true;
+        return String(member.name || "").toLowerCase().includes(q) ||
+          String(member.email || "").toLowerCase().includes(q) ||
+          String(member.phone || "").toLowerCase().includes(q) ||
+          String(member.status || "").toLowerCase().includes(q) ||
+          String(member.applications || "").toLowerCase().includes(q);
+      });
+    }
+
+    function renderRows() {
+      const rows = filteredStaff();
+      el("addStaffBtn").textContent = `+ Add ${activeType}`;
+      el("rowCountInfo").textContent = `Showing ${rows.length} records`;
+      el("staffBody").innerHTML = rows.length ? rows.map(item => {
+        const isActive = item.status !== "Inactive";
+        const toggleLabel = isActive ? "Inactive" : "Active";
+        const removeButton = item.type === "Mentor" || !item.locked
+          ? `<button type="button" class="btn-ghost staff-action-btn" style="color:var(--danger);" data-staff-action="remove" data-staff-id="${escapeHtml(item.id)}">Remove</button>`
+          : `<span class="student-meta">From assignment</span>`;
+        return `
+          <tr>
+            <td><strong>${escapeHtml(item.name)}</strong>${item.locked ? `<div class="student-meta">From student assignment</div>` : ""}</td>
+            <td><span class="badge ${item.type === "Faculty" ? "badge-completed" : "badge-neutral"}">${escapeHtml(item.type)}</span></td>
+            <td>${escapeHtml(item.email || "--")}</td>
+            <td>${escapeHtml(item.phone || "--")}</td>
+            <td>${appTags(item.applications)}</td>
+            <td><span class="badge ${isActive ? "badge-completed" : "badge-risk"}">${escapeHtml(item.status || "Active")}</span></td>
+            <td style="text-align:right;"><div class="staff-actions">
+              <button type="button" class="btn-secondary staff-action-btn" data-staff-action="edit" data-staff-id="${escapeHtml(item.id)}">Edit</button>
+              <button type="button" class="btn-secondary staff-action-btn" data-staff-action="toggle" data-staff-id="${escapeHtml(item.id)}" data-staff-status="${escapeHtml(isActive ? "Inactive" : "Active")}">${toggleLabel}</button>
+              ${removeButton}
+            </div></td>
+          </tr>
+        `;
+      }).join("") : `<tr><td colspan="7"><div class="empty-state">No ${escapeHtml(activeType.toLowerCase())} records found.</div></td></tr>`;
+
+      el("staffBody").querySelectorAll("[data-staff-action]").forEach(button => {
+        button.addEventListener("click", async () => {
+          const item = staff.find(member => member.id === button.dataset.staffId);
+          if (!item) return;
+          if (button.dataset.staffAction === "edit") editStaff(item.id);
+          if (button.dataset.staffAction === "toggle") await toggleStaffStatus(item.id, button.dataset.staffStatus);
+          if (button.dataset.staffAction === "remove") await removeStaff(item.id, item.name);
+        });
+      });
+    }
+
+    function updateConditionalFields() {
+      const type = el("staffType").value;
+      const needsLogin = ["Student Coordinator", "Performance Manager"].includes(type);
+      const needsApplications = ["Faculty", "Mentor"].includes(type);
+      el("passwordGroup").style.display = needsLogin ? "" : "none";
+      el("staffPassword").required = needsLogin && !el("staffEditId").value;
+      el("staffEmail").required = needsLogin;
+      el("applicationsGroup").style.display = needsApplications ? "" : "none";
+    }
+
+    function setStaffFormMode(item = null) {
+      const isEdit = !!item;
+      el("staffEditId").value = isEdit ? item.id : "";
+      el("staffType").value = item?.type || activeType;
+      el("staffName").value = item?.name || "";
+      el("staffEmail").value = item?.email || "";
+      el("staffPhone").value = item?.phone || "";
+      el("staffPassword").value = "";
+      el("staffStatus").value = item?.status || "Active";
+      el("staffType").disabled = isEdit;
+      el("staffName").disabled = !!item?.locked;
+      renderApplicationChecklist(item?.applications || []);
+      updateConditionalFields();
+    }
+
+    function editStaff(id) {
+      const item = staff.find(member => member.id === id);
+      if (!item) return;
+      setStaffFormMode(item);
+      el("staffModalTitle").textContent = `Edit ${item.type}`;
+      openModal("staffModal");
+    }
+
+    async function removeStaff(id, name) {
+      const message = String(id || "").startsWith("ASSIGNED-MENTOR-")
+        ? `Remove ${name} from all student mentor assignments? Existing feedback records will keep the saved name.`
+        : `Remove ${name} from directory? Existing feedback records will keep the saved name.`;
+      if (!confirm(message)) return;
+      await apiFetch(`/api/staff/${encodeURIComponent(id)}`, { method: "DELETE" });
+      await loadStaff();
+    }
+
+    async function toggleStaffStatus(id, status) {
+      await apiFetch(`/api/staff/${encodeURIComponent(id)}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status })
+      });
+      await loadStaff();
+    }
+
+    async function loadStaff() {
+      staff = await apiFetch('/api/staff');
+      renderMetrics();
+      renderRows();
+    }
+
+    async function init() {
+      modules = await apiFetch('/api/modules');
+      await loadStaff();
+      document.querySelectorAll("[data-close]").forEach(btn => btn.addEventListener("click", () => closeModal(btn.dataset.close)));
+      document.querySelectorAll("[data-staff-tab]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeType = btn.dataset.staffTab;
+          document.querySelectorAll("[data-staff-tab]").forEach(tab => tab.classList.toggle("is-active", tab.dataset.staffTab === activeType));
+          renderRows();
+        });
+      });
+      el("searchInput").addEventListener("input", renderRows);
+      el("staffType").addEventListener("change", updateConditionalFields);
+      el("addStaffBtn").addEventListener("click", () => {
+        setStaffFormMode();
+        el("staffModalTitle").textContent = `Add ${activeType}`;
+        openModal("staffModal");
+      });
+      el("staffForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const editId = el("staffEditId").value;
+        const payload = {
+          type: el("staffType").value,
+          name: el("staffName").value,
+          email: el("staffEmail").value,
+          phone: el("staffPhone").value,
+          status: el("staffStatus").value,
+          applications: selectedValues(el("staffApplications"))
+        };
+        if (el("staffPassword").value) payload.password = el("staffPassword").value;
+
+        await apiFetch(editId ? `/api/staff/${encodeURIComponent(editId)}` : '/api/staff', {
+          method: editId ? "PUT" : "POST",
+          body: JSON.stringify(payload)
+        });
+        closeModal("staffModal");
+        setStaffFormMode();
+        await loadStaff();
+      });
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+  </script>
+</body>
+</html>

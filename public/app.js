@@ -21,57 +21,90 @@ export async function apiFetch(endpoint, options = {}) {
   }
 }
 
-const SIDEBAR_CONFIG = {
-  "student-performance-dashboard.html": {
-    name: "Performance Dashboard",
-    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`
-  },
-  "student-review-dashboard.html": {
-    name: "Review Dashboard",
-    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`
-  },
-  "performance.html": {
-    name: "Performance Management",
-    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`
-  },
-  "feedback.html": {
-    name: "Review Management",
-    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`
-  },
-  "logout": {
-    name: "Log out",
-    icon: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
-  }
+const ICONS = {
+  performanceDashboard: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
+  reviewDashboard: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
+  performanceManagement: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+  reviewManagement: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`,
+  userManagement: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-8 0v2"></path><circle cx="12" cy="7" r="4"></circle><path d="M22 21v-2a3 3 0 0 0-2-2.83"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M2 21v-2a3 3 0 0 1 2-2.83"></path><path d="M8 3.13a4 4 0 0 0 0 7.75"></path></svg>`,
+  logout: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
 };
 
-function initSidebar() {
+const NAV_ITEMS = [
+  { href: "student-performance-dashboard.html", name: "Performance Dashboard", icon: ICONS.performanceDashboard, roles: ["Administrator"] },
+  { href: "student-review-dashboard.html", name: "Review Dashboard", icon: ICONS.reviewDashboard, roles: ["Administrator"] },
+  { href: "performance.html", name: "Performance Management", icon: ICONS.performanceManagement, roles: ["Administrator", "Performance Manager"] },
+  { href: "feedback.html", name: "Review Management", icon: ICONS.reviewManagement, roles: ["Administrator", "Student Coordinator"] },
+  { href: "user-management.html", name: "User Management", icon: ICONS.userManagement, roles: ["Administrator"] }
+];
+
+const ROLE_HOME = {
+  "Administrator": "student-performance-dashboard.html",
+  "Student Coordinator": "feedback.html",
+  "Performance Manager": "performance.html"
+};
+
+const ROLE_ALLOWED_PAGES = {
+  "Administrator": new Set(["student-performance-dashboard.html", "student-review-dashboard.html", "performance.html", "feedback.html", "user-management.html", "student-dashboard.html"]),
+  "Student Coordinator": new Set(["feedback.html"]),
+  "Performance Manager": new Set(["performance.html", "student-dashboard.html"])
+};
+
+function getCurrentPage() {
+  const currentPath = decodeURIComponent(window.location.pathname);
+  return currentPath.split("/").pop() || "index.html";
+}
+
+function getStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("smsUser") || "null");
+  } catch {
+    return null;
+  }
+}
+
+export function getSmsUser() {
+  return getStoredUser();
+}
+
+export function getRoleHome(role) {
+  return ROLE_HOME[role] || ROLE_HOME.Administrator;
+}
+
+function iconLink(item, currentPage) {
+  const isActive = item.href === currentPage;
+  return `
+    <a href="${item.href}" class="sidebar-link ${isActive ? "is-active" : ""}" data-tooltip="${item.name}" aria-label="${item.name}">
+      <div class="sidebar-icon-wrap">${item.icon}</div>
+      <span class="sidebar-link-text">${item.name}</span>
+    </a>
+  `;
+}
+
+function initSidebar(user) {
   const layoutRoot = document.querySelector(".layout-root");
   const sidebarBrand = document.querySelector(".sidebar-brand");
-  if (!layoutRoot || !sidebarBrand) return;
+  const sidebarNav = document.querySelector(".sidebar-nav");
+  if (!layoutRoot || !sidebarBrand || !sidebarNav) return;
 
   if (localStorage.getItem("smsSidebarCollapsed") === "true") {
     layoutRoot.classList.add("sidebar-collapsed");
   }
 
-  document.querySelectorAll(".sidebar-nav .sidebar-link").forEach(link => {
-    const href = link.getAttribute("href") || "";
-    const cfg = SIDEBAR_CONFIG[href] || SIDEBAR_CONFIG["performance.html"];
-    link.setAttribute("data-tooltip", cfg.name);
-    link.setAttribute("aria-label", cfg.name);
-    link.innerHTML = `
-      <div class="sidebar-icon-wrap">${cfg.icon}</div>
-      <span class="sidebar-link-text">${cfg.name}</span>
-    `;
-  });
+  const currentPage = getCurrentPage();
+  const role = user?.role || "Administrator";
+  sidebarNav.innerHTML = NAV_ITEMS
+    .filter(item => item.roles.includes(role))
+    .map(item => iconLink(item, currentPage))
+    .join("");
 
   const logoutBtn = document.querySelector("[data-logout]");
   if (logoutBtn) {
-    const cfg = SIDEBAR_CONFIG["logout"];
-    logoutBtn.setAttribute("data-tooltip", cfg.name);
-    logoutBtn.setAttribute("aria-label", cfg.name);
+    logoutBtn.setAttribute("data-tooltip", "Log out");
+    logoutBtn.setAttribute("aria-label", "Log out");
     logoutBtn.innerHTML = `
-      <div class="sidebar-icon-wrap">${cfg.icon}</div>
-      <span class="sidebar-link-text">${cfg.name}</span>
+      <div class="sidebar-icon-wrap">${ICONS.logout}</div>
+      <span class="sidebar-link-text">Log out</span>
     `;
   }
 
@@ -84,7 +117,7 @@ function initSidebar() {
   });
 }
 
-function initUniversalBackButton() {
+function initUniversalBackButton(user) {
   const topbarActions = document.querySelector(".topbar-actions");
   if (!topbarActions || document.querySelector("[data-sms-back]")) return;
 
@@ -102,29 +135,44 @@ function initUniversalBackButton() {
     <span>Back</span>
   `;
   button.addEventListener("click", () => {
+    const home = getRoleHome(user?.role);
     if (window.history.length > 1) {
       window.history.back();
     } else {
-      window.location.href = "performance.html";
+      window.location.href = home;
     }
   });
 
   topbarActions.prepend(button);
 }
 
-function bootApp() {
-  initThemeSystem();
-  initSidebar();
-  initUniversalBackButton();
+function enforceAccess(user) {
+  const currentPage = getCurrentPage();
+  if (currentPage === "index.html") return null;
 
-  let userStr = localStorage.getItem("smsUser");
-  if (!userStr) {
-    const defaultUser = { username: "admin", role: "Administrator", name: "Admin Officer" };
-    localStorage.setItem("smsUser", JSON.stringify(defaultUser));
-    userStr = JSON.stringify(defaultUser);
+  if (!user) {
+    window.location.replace("index.html");
+    return null;
   }
 
-  const user = JSON.parse(userStr);
+  const allowed = ROLE_ALLOWED_PAGES[user.role] || new Set();
+  if (!allowed.has(currentPage)) {
+    window.location.replace(getRoleHome(user.role));
+    return null;
+  }
+
+  return user;
+}
+
+function bootApp() {
+  initThemeSystem();
+
+  const user = enforceAccess(getStoredUser());
+  if (!user) return;
+
+  initSidebar(user);
+  initUniversalBackButton(user);
+
   const profileContainer = document.querySelector(".topbar-profile");
   if (profileContainer) {
     profileContainer.innerHTML = `
@@ -137,17 +185,6 @@ function bootApp() {
       </span>
     `;
   }
-
-  const currentPath = decodeURIComponent(window.location.pathname);
-  const currentPage = currentPath.split("/").pop() || "performance.html";
-  document.querySelectorAll(".sidebar-link").forEach(link => {
-    const href = link.getAttribute("href");
-    if (href === currentPage) {
-      link.classList.add("is-active");
-    } else {
-      link.classList.remove("is-active");
-    }
-  });
 
   const logoutBtn = document.querySelector("[data-logout]");
   if (logoutBtn) {

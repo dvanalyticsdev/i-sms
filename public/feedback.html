@@ -191,9 +191,6 @@
             <button class="tab is-active" data-feedback-tab="faculty">Faculty Feedback</button>
             <button class="tab" data-feedback-tab="mentor">Mentor Feedback</button>
             <button class="tab" data-feedback-tab="evaluation">Student Evaluation</button>
-            <button class="tab" data-feedback-tab="facultyStaff">Faculty</button>
-            <button class="tab" data-feedback-tab="mentorStaff">Mentor</button>
-            <button class="tab" data-feedback-tab="coordinatorStaff">Student Coordinator</button>
           </div>
         </div>
 
@@ -332,7 +329,7 @@
   </div>
 
   <script type="module">
-    import { apiFetch } from './app.js';
+    import { apiFetch, getSmsUser } from './app.js';
 
     let activeTab = "faculty";
     let faculty = [];
@@ -362,24 +359,6 @@
         description: "Mentor records assignment status, knowledge level, and call note.",
         modal: "evalModal",
         headers: ["#", "Call Date", "Session Date", "Student ID", "Student Name", "Batch", "Course", "Application", "Session", "Call By", "Mentor", "Assignment Status", "Knowledge", "Overall Feedback"]
-      },
-      facultyStaff: {
-        title: "Faculty",
-        description: "Maintain faculty members list used inside feedback forms.",
-        modal: "staffModal",
-        headers: ["Name", "Type", "Email", "Phone", "Status", ""]
-      },
-      mentorStaff: {
-        title: "Mentor",
-        description: "Maintain mentor members list used inside feedback forms.",
-        modal: "staffModal",
-        headers: ["Name", "Type", "Email", "Phone", "Status", ""]
-      },
-      coordinatorStaff: {
-        title: "Student Coordinator",
-        description: "Maintain student coordinators directory.",
-        modal: "staffModal",
-        headers: ["Name", "Type", "Email", "Phone", "Status", ""]
       }
     };
 
@@ -430,16 +409,6 @@
       const all = [...faculty, ...mentor, ...evals].filter(matchesFilters);
       const connected = all.filter(i => up(i.connectionStatus) === "YES").length;
       const avgRating = arr => arr.length ? (arr.reduce((a, b) => a + Number(b.overallFeedback || b.facultyRating || b.mentorRating || 0), 0) / arr.length).toFixed(1) : "0.0";
-      if (["facultyStaff", "mentorStaff", "coordinatorStaff"].includes(activeTab)) {
-        el("feedbackMetrics").innerHTML = [
-          ["Faculty", staff.filter(member => member.type === "Faculty").length, "Active faculty members"],
-          ["Mentors", staff.filter(member => member.type === "Mentor").length, "Active mentor members"],
-          ["Coordinators", staff.filter(member => member.type === "Student Coordinator").length, "Active student coordinators"],
-          ["Total Directory", staff.length, "Combined staff count"]
-        ].map(m => `<div class="metric-card"><p class="metric-label">${m[0]}</p><p class="metric-value">${m[1]}</p><p class="metric-note">${m[2]}</p></div>`).join("");
-        return;
-      }
-
       el("feedbackMetrics").innerHTML = [
         ["Total Reviews", all.length, "Across the selected filters"],
         ["Reachability", `${all.length ? Math.round((connected / all.length) * 100) : 0}%`, "Connected calls"],
@@ -452,9 +421,6 @@
       if (activeTab === "faculty") return faculty.filter(matchesFilters);
       if (activeTab === "mentor") return mentor.filter(matchesFilters);
       if (activeTab === "evaluation") return evals.filter(matchesFilters);
-      if (activeTab === "facultyStaff") return staff.filter(member => member.type === "Faculty");
-      if (activeTab === "mentorStaff") return staff.filter(member => member.type === "Mentor");
-      if (activeTab === "coordinatorStaff") return staff.filter(member => member.type === "Student Coordinator");
       return [];
     }
 
@@ -467,11 +433,12 @@
       return `<span class="badge badge-completed" style="display:inline-block; padding:2px 8px; font-weight:700; font-size:11px; border-radius:10px; background:#dcfce7; color:#16a34a; border:1px solid #86efac;">On Time</span>`;
     }
 
-    function renderApplicationChecklist(containerId, selected = []) {
+    function renderApplicationChecklist(containerId, selected = [], allowedModules = modules) {
       const container = el(containerId);
       if (!container) return;
-      const selectedSet = new Set(selected.length ? selected : [modules[0]].filter(Boolean));
-      container.innerHTML = modules.map(moduleName => {
+      const available = allowedModules.length ? allowedModules : modules;
+      const selectedSet = new Set(selected.length ? selected : [available[0]].filter(Boolean));
+      container.innerHTML = available.map(moduleName => {
         const inputId = `${containerId}-${moduleName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
         const checked = selectedSet.has(moduleName) ? "checked" : "";
         return `
@@ -481,6 +448,28 @@
           </label>
         `;
       }).join("");
+    }
+
+    function findStaffByName(type, name) {
+      const key = up(name).replace(/[^A-Z0-9]/g, "");
+      return staff.find(member => member.type === type && up(member.name).replace(/[^A-Z0-9]/g, "") === key) || null;
+    }
+
+    function staffApplications(member) {
+      return Array.isArray(member?.applications) && member.applications.length ? member.applications : modules;
+    }
+
+    function staffOptionLabel(member) {
+      const apps = staffApplications(member).join(", ");
+      return `${member.name} - ${member.status || "Active"}${apps ? ` (${apps})` : ""}`;
+    }
+
+    function selectFirstEnabled(select) {
+      if (!select) return;
+      const firstEnabled = Array.from(select.options).find(option => !option.disabled && option.value);
+      if (firstEnabled && (!select.value || select.selectedOptions[0]?.disabled)) {
+        select.value = firstEnabled.value;
+      }
     }
 
     function renderFacultyRow(item, idx) {
@@ -597,7 +586,7 @@
     function renderActiveTab() {
       const config = tabConfig[activeTab];
       el("tabDesc").textContent = config.description;
-      el("activeAddBtn").textContent = ["facultyStaff", "mentorStaff", "coordinatorStaff"].includes(activeTab) ? `+ Add ${config.title}` : `+ Add ${config.title}`;
+      el("activeAddBtn").textContent = `+ Add ${config.title}`;
       document.querySelectorAll("[data-feedback-tab]").forEach(btn => btn.classList.toggle("is-active", btn.dataset.feedbackTab === activeTab));
 
       el("feedbackHead").innerHTML = `<tr>${config.headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
@@ -627,9 +616,6 @@
         el("feedbackBody").innerHTML = pageSlice.map((item, idx) => renderMentorRow(item, idx)).join("");
       } else if (activeTab === "evaluation") {
         el("feedbackBody").innerHTML = pageSlice.map((item, idx) => renderEvaluationRow(item, idx)).join("");
-      } else {
-        el("feedbackBody").innerHTML = pageSlice.map(item => renderStaffRow(item)).join("");
-        bindStaffActionButtons();
       }
 
       renderPaginationControls(rows.length, totalPages);
@@ -681,17 +667,41 @@
     }
 
     function populateStaffDropdowns() {
-      const activeOnly = member => member.status !== "Inactive";
-      const faculties = staff.filter(m => m.type === "Faculty" && activeOnly(m)).map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
-      const coordinators = staff.filter(m => m.type === "Student Coordinator" && activeOnly(m)).map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
+      const currentUser = getSmsUser();
+      const faculties = staff
+        .filter(m => m.type === "Faculty")
+        .map(m => `<option value="${escapeHtml(m.name)}" ${m.status === "Inactive" ? "disabled" : ""}>${escapeHtml(staffOptionLabel(m))}</option>`)
+        .join("");
+      const coordinators = staff.filter(m => m.type === "Student Coordinator" && m.status !== "Inactive");
+      const coordinatorOptions = coordinators.map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`).join("");
 
       if (el("facFaculty")) el("facFaculty").innerHTML = faculties || `<option value="">No faculty added</option>`;
+      selectFirstEnabled(el("facFaculty"));
+      updateFacultyApplications();
       populateStudentMentorDropdown("menStudent", "menMentor");
       populateStudentMentorDropdown("evalStudent", "evalMentor");
 
-      if (el("facCallBy")) el("facCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
-      if (el("menCallBy")) el("menCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
-      if (el("evalCallBy")) el("evalCallBy").innerHTML = coordinators || `<option value="">No coordinators added</option>`;
+      ["facCallBy", "menCallBy", "evalCallBy"].forEach(id => {
+        if (!el(id)) return;
+        el(id).innerHTML = coordinatorOptions || `<option value="">No coordinators added</option>`;
+        if (currentUser?.role === "Student Coordinator") {
+          el(id).innerHTML = `<option value="${escapeHtml(currentUser.name)}">${escapeHtml(currentUser.name)}</option>`;
+          el(id).disabled = true;
+        }
+      });
+    }
+
+    function updateFacultyApplications() {
+      const faculty = findStaffByName("Faculty", el("facFaculty")?.value);
+      const apps = staffApplications(faculty);
+      if (el("facApp")) {
+        el("facApp").innerHTML = apps.map(app => `<option value="${escapeHtml(app)}">${escapeHtml(app)}</option>`).join("");
+      }
+    }
+
+    function updateMentorApplications(mentorSelectId, appContainerId) {
+      const mentor = findStaffByName("Mentor", el(mentorSelectId)?.value);
+      renderApplicationChecklist(appContainerId, [], staffApplications(mentor));
     }
 
     function setStaffFormMode(item = null) {
@@ -766,26 +776,26 @@
       if (!mentorSelect) return;
 
       const selectedStudent = getSelectedStudent(studentSelectId);
-      const inactiveMentorKeys = new Set(staff
-        .filter(member => member.type === "Mentor" && member.status === "Inactive")
-        .map(member => up(member.name)));
       const mentorNames = [...new Set([
         ...((selectedStudent && selectedStudent.mentors) || []),
         selectedStudent?.assignedMentor,
         selectedStudent?.reassignedMentor
-      ].map(name => String(name || "").trim()).filter(Boolean))]
-        .filter(name => !inactiveMentorKeys.has(up(name)));
+      ].map(name => String(name || "").trim()).filter(Boolean))];
 
       mentorSelect.innerHTML = mentorNames.length
-        ? mentorNames.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")
+        ? mentorNames.map(name => {
+          const member = findStaffByName("Mentor", name) || { name, status: "Active", applications: modules };
+          return `<option value="${escapeHtml(member.name)}" ${member.status === "Inactive" ? "disabled" : ""}>${escapeHtml(staffOptionLabel(member))}</option>`;
+        }).join("")
         : `<option value="">No mentor assigned</option>`;
+      selectFirstEnabled(mentorSelect);
       mentorSelect.required = true;
+      updateMentorApplications(mentorSelectId, mentorSelectId === "menMentor" ? "menApp" : "evalApp");
     }
 
     async function loadStaff() {
       staff = await apiFetch('/api/staff');
       populateStaffDropdowns();
-      if (["facultyStaff", "mentorStaff", "coordinatorStaff"].includes(activeTab)) renderActiveTab();
     }
 
     async function removeStaff(id, name) {
@@ -835,6 +845,9 @@
       setupStudentSearch("facStudentSearch", "facStudent");
       setupStudentSearch("menStudentSearch", "menStudent", () => populateStudentMentorDropdown("menStudent", "menMentor"));
       setupStudentSearch("evalStudentSearch", "evalStudent", () => populateStudentMentorDropdown("evalStudent", "evalMentor"));
+      if (el("facFaculty")) el("facFaculty").addEventListener("change", updateFacultyApplications);
+      if (el("menMentor")) el("menMentor").addEventListener("change", () => updateMentorApplications("menMentor", "menApp"));
+      if (el("evalMentor")) el("evalMentor").addEventListener("change", () => updateMentorApplications("evalMentor", "evalApp"));
       ["facCallDate", "facDate", "menCallDate", "menDate", "evalCallDate", "evalDate"].forEach(id => {
         if (el(id)) el(id).value = today();
       });
@@ -847,19 +860,6 @@
         });
       });
       el("activeAddBtn").addEventListener("click", () => {
-        setStaffFormMode();
-        if (activeTab === "facultyStaff") {
-          el("staffType").value = "Faculty";
-          el("staffModalTitle").textContent = "Add Faculty";
-        } else if (activeTab === "mentorStaff") {
-          el("staffType").value = "Mentor";
-          el("staffModalTitle").textContent = "Add Mentor";
-        } else if (activeTab === "coordinatorStaff") {
-          el("staffType").value = "Student Coordinator";
-          el("staffModalTitle").textContent = "Add Student Coordinator";
-        } else {
-          el("staffModalTitle").textContent = "Add Staff Member";
-        }
         openModal(tabConfig[activeTab].modal);
       });
       if (el("searchInput")) el("searchInput").addEventListener("input", () => {

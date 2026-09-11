@@ -8,11 +8,12 @@ const PORT = process.env.PORT || 3000;
 const CMS_MONGODB_URI = process.env.CMS_MONGODB_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/i-cms';
 const SCORECARD_DATA_FILE = process.env.SMS_SCORECARD_DATA_FILE || path.join(__dirname, 'data', 'sms-scorecards.json');
 const MENTOR_ALLOCATION_FILE = process.env.SMS_MENTOR_ALLOCATION_FILE || path.join(__dirname, 'data', 'mentor-allocations.json');
+const STAFF_DATA_FILE = process.env.SMS_STAFF_DATA_FILE || path.join(__dirname, 'data', 'sms-staff.json');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Standard 10 Technical Applications List from I-SMS.xlsx
+// Standard technical applications used for faculty and mentor skill mapping.
 const CURRICULUM_MODULES = [
   "EXCEL AI",
   "SQL",
@@ -22,8 +23,7 @@ const CURRICULUM_MODULES = [
   "ML",
   "GEN AI & AGENTIC AI",
   "DATA ENGINEERING",
-  "MLOPS & LLMOPS",
-  "INTERVIEW PREP"
+  "MLOPS & LLMOPS"
 ];
 
 function normalizeApplicationsInput(value) {
@@ -38,6 +38,20 @@ function normalizeApplicationsInput(value) {
     }
   });
   return selected.length ? selected : [CURRICULUM_MODULES[0]];
+}
+
+function normalizeStaffApplications(value) {
+  const raw = Array.isArray(value) ? value : String(value || '').split(',');
+  const allowedByKey = new Map(CURRICULUM_MODULES.map(name => [name.toUpperCase(), name]));
+  const selected = [];
+  raw.forEach(item => {
+    const appName = String(item || '').trim();
+    const canonical = allowedByKey.get(appName.toUpperCase());
+    if (canonical && !selected.includes(canonical)) {
+      selected.push(canonical);
+    }
+  });
+  return selected;
 }
 
 function asNumber(value, fallback = 0) {
@@ -824,7 +838,7 @@ let batches = [];
 
 let sessions = [];
 
-let staffMembers = [];
+let staffMembers = loadStaffMembers();
 
 // Feedback Triad Collections based on Sheet 2 (STUDENT FEEDBACK)
 let facultyFeedbackLogs = [];
@@ -857,11 +871,34 @@ function loadMentorAllocations() {
   }
 }
 
+function loadStaffMembers() {
+  try {
+    if (!fs.existsSync(STAFF_DATA_FILE)) return [];
+    const stored = JSON.parse(fs.readFileSync(STAFF_DATA_FILE, 'utf8'));
+    if (!Array.isArray(stored)) return [];
+    return stored.map(member => ({
+      ...member,
+      applications: normalizeStaffApplications(member.applications || []),
+      status: ["Active", "Inactive"].includes(member.status) ? member.status : "Active"
+    }));
+  } catch (error) {
+    console.error('Unable to load SMS staff data:', error.message);
+    return [];
+  }
+}
+
 function saveScorecardStore() {
   fs.mkdirSync(path.dirname(SCORECARD_DATA_FILE), { recursive: true });
   const tempFile = `${SCORECARD_DATA_FILE}.tmp`;
   fs.writeFileSync(tempFile, JSON.stringify(scorecardStore, null, 2));
   fs.renameSync(tempFile, SCORECARD_DATA_FILE);
+}
+
+function saveStaffMembers() {
+  fs.mkdirSync(path.dirname(STAFF_DATA_FILE), { recursive: true });
+  const tempFile = `${STAFF_DATA_FILE}.tmp`;
+  fs.writeFileSync(tempFile, JSON.stringify(staffMembers, null, 2));
+  fs.renameSync(tempFile, STAFF_DATA_FILE);
 }
 
 const scorecardStore = loadScorecardStore();
@@ -997,6 +1034,50 @@ function resolveStudentMentorName(student, requestedName) {
   return mentors.find(name => name.toLowerCase() === requested.toLowerCase()) || null;
 }
 
+function findStaffMember(type, name) {
+  const key = mentorNameKey(name);
+  if (!key) return null;
+  return getStaffList().find(member =>
+    member.type === type && mentorNameKey(member.name) === key
+  ) || null;
+}
+
+function staffAllowedApplications(member) {
+  const apps = normalizeStaffApplications(member?.applications || []);
+  return apps.length ? apps : CURRICULUM_MODULES;
+}
+
+function validateStaffApplication(type, name, applications) {
+  const member = findStaffMember(type, name);
+  if (!member) {
+    return { error: `${type} is not in User Management.` };
+  }
+  if (member.status === "Inactive") {
+    return { error: `${member.name} is marked inactive.` };
+  }
+
+  const allowed = staffAllowedApplications(member);
+  const requested = normalizeApplicationsInput(applications);
+  const invalid = requested.filter(app => !allowed.includes(app));
+  if (invalid.length) {
+    return { error: `${member.name} is not marked for ${invalid.join(", ")}.` };
+  }
+  return { applications: requested, member };
+}
+
+function findLoginStaff(role, email, password) {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedPassword = String(password || '');
+  if (!normalizedEmail || !normalizedPassword) return null;
+
+  return staffMembers.find(member =>
+    member.type === role &&
+    member.status !== "Inactive" &&
+    String(member.email || '').trim().toLowerCase() === normalizedEmail &&
+    String(member.password || '') === normalizedPassword
+  ) || null;
+}
+
 function getAssignedMentorStaffMembers() {
   const existingNames = new Set(
     staffMembers
@@ -1015,6 +1096,7 @@ function getAssignedMentorStaffMembers() {
     email: "",
     phone: "",
     status: "Active",
+    applications: CURRICULUM_MODULES,
     source: "Student Assignment",
     locked: true
   }));
@@ -1060,6 +1142,12 @@ function getStaffList() {
     }
   });
   return Array.from(membersByKey.values());
+}
+
+function toPublicStaffMember(member) {
+  const { password, ...publicMember } = member;
+  publicMember.applications = normalizeStaffApplications(publicMember.applications || []);
+  return publicMember;
 }
 
 function createDefaultModules() {
@@ -1202,8 +1290,10 @@ function toStudentDirectoryRecord(student) {
 
 // 1. Auth Endpoint
 app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body;
-  if (username === 'dvadmin' && password === 'DVA-SMS-2026!xQ7#R9vL') {
+  const { username, email, password, role } = req.body;
+  const loginRole = String(role || "Administrator").trim();
+
+  if (loginRole === "Administrator" && username === 'dvadmin' && password === 'DVA-SMS-2026!xQ7#R9vL') {
     res.json({
       message: "Login successful",
       user: {
@@ -1212,9 +1302,26 @@ app.post('/api/auth/login', (req, res) => {
         name: 'Admin Officer'
       }
     });
-  } else {
-    res.status(401).json({ error: "Invalid credentials." });
+    return;
   }
+
+  if (["Student Coordinator", "Performance Manager"].includes(loginRole)) {
+    const member = findLoginStaff(loginRole, email || username, password);
+    if (member) {
+      res.json({
+        message: "Login successful",
+        user: {
+          username: member.email,
+          role: member.type,
+          name: member.name,
+          staffId: member.id
+        }
+      });
+      return;
+    }
+  }
+
+  res.status(401).json({ error: "Invalid credentials." });
 });
 
 // 2. Curriculum Modules Reference
@@ -1542,18 +1649,28 @@ app.get('/api/staff', async (req, res) => {
   if (type && type !== "All") {
     list = list.filter(member => member.type.toLowerCase() === String(type).toLowerCase());
   }
-  res.json(list.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name)));
+  res.json(list.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name)).map(toPublicStaffMember));
 });
 
 app.post('/api/staff', (req, res) => {
   const data = req.body;
   const type = String(data.type || "").trim();
   const name = type === "Mentor" ? canonicalMentorName(data.name) : String(data.name || "").trim();
-  if (!["Faculty", "Mentor", "Student Coordinator"].includes(type)) {
-    return res.status(400).json({ error: "Staff type must be Faculty, Mentor, or Student Coordinator" });
+  if (!["Faculty", "Mentor", "Student Coordinator", "Performance Manager"].includes(type)) {
+    return res.status(400).json({ error: "Staff type must be Faculty, Mentor, Student Coordinator, or Performance Manager" });
   }
   if (!name) {
     return res.status(400).json({ error: "Staff name is required" });
+  }
+  const applications = normalizeStaffApplications(data.applications);
+  if (["Faculty", "Mentor"].includes(type) && !applications.length) {
+    return res.status(400).json({ error: `Select at least one application for ${type.toLowerCase()}.` });
+  }
+  const email = String(data.email || "").trim();
+  const password = String(data.password || "");
+  if (["Student Coordinator", "Performance Manager"].includes(type)) {
+    if (!email) return res.status(400).json({ error: `${type} email is required for login.` });
+    if (!password) return res.status(400).json({ error: `${type} password is required for login.` });
   }
   if (type === "Mentor") {
     const duplicateMentor = getStaffList().find(member =>
@@ -1567,17 +1684,21 @@ app.post('/api/staff', (req, res) => {
   let prefix = "FAC";
   if (type === "Mentor") prefix = "MEN";
   else if (type === "Student Coordinator") prefix = "SCO";
+  else if (type === "Performance Manager") prefix = "PM";
   const nextNumber = staffMembers.filter(member => member.type === type).length + 1;
   const entry = {
     id: prefix + String(nextNumber).padStart(3, "0"),
     type,
     name,
-    email: data.email || "",
+    email,
     phone: data.phone || "",
-    status: data.status || "Active"
+    status: data.status || "Active",
+    applications,
+    password
   };
   staffMembers.push(entry);
-  res.status(201).json(entry);
+  saveStaffMembers();
+  res.status(201).json(toPublicStaffMember(entry));
 });
 
 function validateStaffPayload(data, existing = null) {
@@ -1586,8 +1707,8 @@ function validateStaffPayload(data, existing = null) {
   const name = type === "Mentor" ? canonicalMentorName(rawName) : String(rawName).trim();
   const status = String(data.status ?? existing?.status ?? "Active").trim();
 
-  if (!["Faculty", "Mentor", "Student Coordinator"].includes(type)) {
-    return { error: "Staff type must be Faculty, Mentor, or Student Coordinator" };
+  if (!["Faculty", "Mentor", "Student Coordinator", "Performance Manager"].includes(type)) {
+    return { error: "Staff type must be Faculty, Mentor, Student Coordinator, or Performance Manager" };
   }
   if (!name) {
     return { error: "Staff name is required" };
@@ -1604,13 +1725,27 @@ function validateStaffPayload(data, existing = null) {
     return { error: `${name} is already listed as ${type.toLowerCase()}.`, statusCode: 409 };
   }
 
+  const applications = normalizeStaffApplications(data.applications ?? existing?.applications ?? []);
+  if (["Faculty", "Mentor"].includes(type) && !applications.length) {
+    return { error: `Select at least one application for ${type.toLowerCase()}.` };
+  }
+
+  const email = String(data.email ?? existing?.email ?? "").trim();
+  const password = data.password !== undefined ? String(data.password || "") : String(existing?.password || "");
+  if (["Student Coordinator", "Performance Manager"].includes(type)) {
+    if (!email) return { error: `${type} email is required for login.` };
+    if (!password) return { error: `${type} password is required for login.` };
+  }
+
   return {
     value: {
       type,
       name,
-      email: data.email ?? existing?.email ?? "",
+      email,
       phone: data.phone ?? existing?.phone ?? "",
-      status
+      status,
+      applications,
+      password
     }
   };
 }
@@ -1618,6 +1753,7 @@ function validateStaffPayload(data, existing = null) {
 function staffPrefix(type) {
   if (type === "Mentor") return "MEN";
   if (type === "Student Coordinator") return "SCO";
+  if (type === "Performance Manager") return "PM";
   return "FAC";
 }
 
@@ -1646,7 +1782,8 @@ async function updateStaffMember(req, res, changes = req.body) {
 
   if (existingIndex !== -1) {
     staffMembers[existingIndex] = updated;
-    return res.json(staffMembers[existingIndex]);
+    saveStaffMembers();
+    return res.json(toPublicStaffMember(staffMembers[existingIndex]));
   }
 
   const override = {
@@ -1654,7 +1791,8 @@ async function updateStaffMember(req, res, changes = req.body) {
     ...updated
   };
   staffMembers.push(override);
-  return res.json(override);
+  saveStaffMembers();
+  return res.json(toPublicStaffMember(override));
 }
 
 app.put('/api/staff/:id', (req, res) => updateStaffMember(req, res));
@@ -1675,6 +1813,7 @@ app.delete('/api/staff/:id', async (req, res) => {
     const overrideIndex = staffMembers.findIndex(item => item.type === "Mentor" && mentorNameKey(item.name) === mentorNameKey(member.name));
     if (overrideIndex !== -1) {
       staffMembers.splice(overrideIndex, 1);
+      saveStaffMembers();
     }
     await refreshStudents();
     return res.json({ message: "Mentor removed from student assignments", removed: member, affectedStudents });
@@ -1684,6 +1823,7 @@ app.delete('/api/staff/:id', async (req, res) => {
     return res.status(404).json({ error: "Staff member not found" });
   }
   const [removed] = staffMembers.splice(index, 1);
+  saveStaffMembers();
   let affectedStudents = 0;
   if (removed.type === "Mentor") {
     affectedStudents = removeAssignedMentorFromStudents(removed.name);
@@ -1698,6 +1838,9 @@ app.post('/api/feedback/faculty', async (req, res) => {
   await refreshStudents();
   const student = students.find(s => s.id === data.studentId);
   if (!student) return res.status(404).json({ error: "Student not found" });
+  const facultyCheck = validateStaffApplication("Faculty", data.facultyName || student.faculty, data.application);
+  if (facultyCheck.error) return res.status(400).json({ error: facultyCheck.error });
+  const application = facultyCheck.applications[0];
 
   const nextId = "FF" + String(facultyFeedbackLogs.length + 1).padStart(3, '0');
   const entry = {
@@ -1710,10 +1853,10 @@ app.post('/api/feedback/faculty', async (req, res) => {
     sessionDate: data.sessionDate || data.session_date || data.callDate || new Date().toISOString().split('T')[0],
     connectionStatus: data.connectionStatus || "Yes",
     feedbackType: "Faculty Feedback",
-    application: data.application || "EXCEL AI",
+    application,
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
-    facultyName: data.facultyName || student.faculty || "Not assigned",
+    facultyName: facultyCheck.member.name,
     facultyRating: Math.max(0, Math.min(5, parseFloat(data.facultyRating) || 5)),
     assignmentRating: Math.max(0, Math.min(5, parseFloat(data.assignmentRating) || 5)),
     videoUploaded: String(data.videoUploaded || "On Time").trim() === "Delay" ? "Delay" : "On Time",
@@ -1759,7 +1902,9 @@ app.post('/api/feedback/mentor', async (req, res) => {
     return res.status(400).json({ error: "Select only the assigned or reassigned mentor for this student." });
   }
 
-  const applications = normalizeApplicationsInput(data.applications || data.application);
+  const mentorCheck = validateStaffApplication("Mentor", mentorName, data.applications || data.application);
+  if (mentorCheck.error) return res.status(400).json({ error: mentorCheck.error });
+  const applications = mentorCheck.applications;
   const entries = applications.map((application, index) => ({
     id: "MF" + String(mentorFeedbackLogs.length + index + 1).padStart(3, '0'),
     studentId: student.id,
@@ -1773,7 +1918,7 @@ app.post('/api/feedback/mentor', async (req, res) => {
     application,
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
-    mentorName: mentorName || "Not assigned",
+    mentorName: mentorCheck.member.name || "Not assigned",
     mentorRating: Math.max(0, Math.min(5, parseFloat(data.mentorRating) || 5)),
     doubtClearing: Math.max(0, Math.min(5, parseFloat(data.doubtClearing) || 5)),
     behaviour: Math.max(0, Math.min(5, parseFloat(data.behaviour) || 5)),
@@ -1797,7 +1942,9 @@ app.post('/api/feedback/mentor-evaluation', async (req, res) => {
     return res.status(400).json({ error: "Select only the assigned or reassigned mentor for this student." });
   }
 
-  const applications = normalizeApplicationsInput(data.applications || data.application);
+  const mentorCheck = validateStaffApplication("Mentor", mentorName, data.applications || data.application);
+  if (mentorCheck.error) return res.status(400).json({ error: mentorCheck.error });
+  const applications = mentorCheck.applications;
   const entries = applications.map((application, index) => ({
     id: "ME" + String(mentorEvaluationLogs.length + index + 1).padStart(3, '0'),
     studentId: student.id,
@@ -1811,7 +1958,7 @@ app.post('/api/feedback/mentor-evaluation', async (req, res) => {
     application,
     session: data.session || student.session || "SESSION-1",
     calledBy: data.calledBy || data.callBy || "",
-    mentorName: mentorName || "Not assigned",
+    mentorName: mentorCheck.member.name || "Not assigned",
     assignmentStatus: data.assignmentStatus || "Completed", // Completed / In Progress / Not Started
     applicationKnowledge: data.applicationKnowledge || "Good", // Low / Average / Good / Best
     overallFeedback: data.overallFeedback || ""
@@ -2157,7 +2304,7 @@ app.get('/api/dashboard/sms', (req, res) => {
       }
     });
     const completionPct = totalTarget > 0 ? Math.round((totalSubmitted / totalTarget) * 100) : 0;
-    const shortName = name === "DATA ENGINEERING" ? "DATA ENG" : name === "INTERVIEW PREP" ? "INTERVIEW" : name;
+    const shortName = name === "DATA ENGINEERING" ? "DATA ENG" : name;
     return {
       module: name,
       shortName,
