@@ -225,6 +225,7 @@
       <div class="modal-header"><h3 class="modal-title">Add Faculty Feedback</h3><button class="modal-close" data-close="facultyModal">&times;</button></div>
       <form id="facultyForm">
         <div class="modal-body feedback-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Batch</label><select id="facBatchFilter" class="form-control feedback-batch-filter"></select></div>
           <div class="form-group">
             <label>Student</label>
             <input id="facStudentSearch" class="form-control student-select-search" placeholder="Search student name or LMS ID">
@@ -257,6 +258,7 @@
       <div class="modal-header"><h3 class="modal-title">Add Mentor Feedback</h3><button class="modal-close" data-close="mentorModal">&times;</button></div>
       <form id="mentorForm">
         <div class="modal-body feedback-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Batch</label><select id="menBatchFilter" class="form-control feedback-batch-filter"></select></div>
           <div class="form-group">
             <label>Student</label>
             <input id="menStudentSearch" class="form-control student-select-search" placeholder="Search student name or LMS ID">
@@ -288,6 +290,7 @@
       <div class="modal-header"><h3 class="modal-title">Add Student Evaluation</h3><button class="modal-close" data-close="evalModal">&times;</button></div>
       <form id="evalForm">
         <div class="modal-body feedback-form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Batch</label><select id="evalBatchFilter" class="form-control feedback-batch-filter"></select></div>
           <div class="form-group">
             <label>Student</label>
             <input id="evalStudentSearch" class="form-control student-select-search" placeholder="Search student name or LMS ID">
@@ -340,6 +343,7 @@
     let modules = [];
     let currentPage = 1;
     const pageSize = 10;
+    const batchFilterStorageKey = "smsFeedbackBatchFilter";
 
     const tabConfig = {
       faculty: {
@@ -737,14 +741,73 @@
         String(student.id || student.studentId || "").toLowerCase().includes(q);
     }
 
-    function renderStudentSelect(selectId, query = "") {
+    function studentBatchValues(student) {
+      const raw = Array.isArray(student.batches) && student.batches.length ? student.batches : [student.batch];
+      return raw.map(batch => String(batch || "").trim()).filter(Boolean);
+    }
+
+    function studentMatchesBatchFilter(student, batch) {
+      if (!batch || batch === "All") return true;
+      return studentBatchValues(student).some(item => item.toLowerCase() === batch.toLowerCase());
+    }
+
+    function batchFilterIdForStudentSelect(selectId) {
+      if (selectId === "facStudent") return "facBatchFilter";
+      if (selectId === "menStudent") return "menBatchFilter";
+      if (selectId === "evalStudent") return "evalBatchFilter";
+      return "";
+    }
+
+    function searchIdForStudentSelect(selectId) {
+      if (selectId === "facStudent") return "facStudentSearch";
+      if (selectId === "menStudent") return "menStudentSearch";
+      if (selectId === "evalStudent") return "evalStudentSearch";
+      return "";
+    }
+
+    function selectedFeedbackBatch(selectId) {
+      const batchFilterId = batchFilterIdForStudentSelect(selectId);
+      return el(batchFilterId)?.value || localStorage.getItem(batchFilterStorageKey) || "All";
+    }
+
+    function renderBatchFilters() {
+      const batches = Array.from(new Set(students.flatMap(studentBatchValues))).sort((a, b) => a.localeCompare(b));
+      const stored = localStorage.getItem(batchFilterStorageKey) || "All";
+      const selected = stored === "All" || batches.includes(stored) ? stored : "All";
+      if (selected !== stored) localStorage.setItem(batchFilterStorageKey, selected);
+      const options = `<option value="All">All batches</option>${batches.map(batch => `<option value="${escapeHtml(batch)}">${escapeHtml(batch)}</option>`).join("")}`;
+      ["facBatchFilter", "menBatchFilter", "evalBatchFilter"].forEach(id => {
+        if (!el(id)) return;
+        el(id).innerHTML = options;
+        el(id).value = selected;
+      });
+    }
+
+    function syncFeedbackBatch(value) {
+      localStorage.setItem(batchFilterStorageKey, value || "All");
+      ["facBatchFilter", "menBatchFilter", "evalBatchFilter"].forEach(id => {
+        if (el(id)) el(id).value = value || "All";
+      });
+    }
+
+    function refreshStudentDropdowns() {
+      ["facStudent", "menStudent", "evalStudent"].forEach(selectId => {
+        const searchId = searchIdForStudentSelect(selectId);
+        renderStudentSelect(selectId, el(searchId)?.value || "", true);
+      });
+      populateStudentMentorDropdown("menStudent", "menMentor");
+      populateStudentMentorDropdown("evalStudent", "evalMentor");
+    }
+
+    function renderStudentSelect(selectId, query = "", updateSearchLabel = false) {
       const select = el(selectId);
       if (!select) return;
       const previous = select.value;
-      let matches = students.filter(student => studentMatchesSearch(student, query));
+      const selectedBatch = selectedFeedbackBatch(selectId);
+      let matches = students.filter(student => studentMatchesBatchFilter(student, selectedBatch) && studentMatchesSearch(student, query));
       if (!matches.length && previous) {
         const selectedStudent = students.find(student => student.id === previous || student.studentId === previous);
-        if (selectedStudent) matches = [selectedStudent];
+        if (selectedStudent && studentMatchesBatchFilter(selectedStudent, selectedBatch)) matches = [selectedStudent];
       }
 
       select.innerHTML = matches.length
@@ -753,6 +816,11 @@
 
       if (matches.some(student => student.id === previous || student.studentId === previous)) {
         select.value = previous;
+      }
+      if (updateSearchLabel) {
+        const selectedStudent = getSelectedStudent(selectId);
+        const searchId = searchIdForStudentSelect(selectId);
+        if (el(searchId)) el(searchId).value = selectedStudent ? `${selectedStudent.name} (${selectedStudent.id})` : "";
       }
     }
 
@@ -830,6 +898,7 @@
       staff = await apiFetch('/api/staff');
       const studentOptions = students.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.id)})</option>`).join("");
       const moduleOptions = modules.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("");
+      renderBatchFilters();
       ["facStudent", "menStudent", "evalStudent"].forEach(id => renderStudentSelect(id));
       el("facApp").innerHTML = moduleOptions;
       renderApplicationChecklist("menApp");
@@ -842,6 +911,16 @@
       });
       el("studentFilter").innerHTML = `<option value="All">All students</option>${studentOptions}`;
       el("applicationFilter").innerHTML = `<option value="All">All applications</option>${moduleOptions}`;
+      ["facBatchFilter", "menBatchFilter", "evalBatchFilter"].forEach(id => {
+        if (!el(id)) return;
+        el(id).addEventListener("change", () => {
+          syncFeedbackBatch(el(id).value);
+          ["facStudentSearch", "menStudentSearch", "evalStudentSearch"].forEach(searchId => {
+            if (el(searchId)) el(searchId).value = "";
+          });
+          refreshStudentDropdowns();
+        });
+      });
       setupStudentSearch("facStudentSearch", "facStudent");
       setupStudentSearch("menStudentSearch", "menStudent", () => populateStudentMentorDropdown("menStudent", "menMentor"));
       setupStudentSearch("evalStudentSearch", "evalStudent", () => populateStudentMentorDropdown("evalStudent", "evalMentor"));

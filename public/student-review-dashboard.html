@@ -246,6 +246,24 @@
     const el = id => document.getElementById(id);
     const up = val => String(val || "").toUpperCase();
 
+    function scoreForActiveTab(item) {
+      if (activeTab === "evaluation") {
+        const knowledge = up(item.applicationKnowledge);
+        if (knowledge === "BEST") return 5;
+        if (knowledge === "GOOD") return 4;
+        if (knowledge === "AVERAGE") return 3;
+        if (knowledge === "LOW") return 2;
+        return 0;
+      }
+      return Number(item.overallFeedback || item.facultyRating || item.mentorRating || item.overallSatisfaction || 0);
+    }
+
+    function activeTrendTitle() {
+      if (activeTab === "faculty") return "FACULTY AVERAGE SCORE TREND";
+      if (activeTab === "mentor") return "MENTOR AVERAGE SCORE TREND";
+      return "STUDENT FEEDBACK AVERAGE SCORE TREND";
+    }
+
     function getFilteredLogs() {
       let logs = activeTab === "faculty" ? facultyLogs : activeTab === "mentor" ? mentorLogs : evalLogs;
       const batch = el("srBatchFilter") ? el("srBatchFilter").value : "All";
@@ -470,51 +488,87 @@
         </div>
       `).join("") + `<div class="sr-batch-axis"><span>0</span><span>${Math.round(maxCount/2)}</span><span>${maxCount}</span></div>`;
 
-      // 4. Trend Chart
-      el("trendTitle").textContent = activeTab === "faculty" ? "FACULTY SATISFACTION TREND" : activeTab === "mentor" ? "MENTOR RATING TREND" : "MASTERY & PROGRESS TREND";
+      // 4. Average Score Trendline Chart
+      el("trendTitle").textContent = activeTrendTitle();
       
       const datesMap = {};
       filtered.forEach(i => {
         const d = i.callDate || i.date || "2026-08-25";
         if (!datesMap[d]) datesMap[d] = [];
-        const score = activeTab === "evaluation" ? (up(i.applicationKnowledge) === "BEST" ? 5 : up(i.applicationKnowledge) === "GOOD" ? 4 : up(i.applicationKnowledge) === "AVERAGE" ? 3 : 2) : Number(i.overallFeedback || i.facultyRating || i.mentorRating || 5);
-        datesMap[d].push(score);
+        const score = scoreForActiveTab(i);
+        if (score > 0) datesMap[d].push(score);
       });
 
-      const sortedDates = Object.keys(datesMap).sort().slice(-6);
+      const sortedDates = Object.keys(datesMap).filter(d => datesMap[d].length).sort().slice(-8);
       const points = sortedDates.map(d => {
         const arr = datesMap[d];
         const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-        return { date: d.slice(5), rating: avg };
+        return { date: d.slice(5), rating: avg, count: arr.length };
       });
 
       if (!points.length) {
-        el("trendChart").innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-muted);">No trend data available</div>`;
+        el("trendChart").innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-muted);">No average score trend available</div>`;
         return;
       }
 
-      const width = 280, height = 150, padLeft = 24, padRight = 16, padTop = 16, padBottom = 28;
+      const overallAverage = points.reduce((sum, point) => sum + point.rating, 0) / points.length;
+      const delta = points.length > 1 ? points[points.length - 1].rating - points[0].rating : 0;
+      const direction = delta > 0.05 ? "Improving" : delta < -0.05 ? "Declining" : "Stable";
+      const directionColor = delta > 0.05 ? "#10b981" : delta < -0.05 ? "#ef4444" : "#94a3b8";
+      const lineColor = activeTab === "faculty" ? "#2563eb" : activeTab === "mentor" ? "#10b981" : "#f59e0b";
+      const width = 300, height = 165, padLeft = 28, padRight = 18, padTop = 30, padBottom = 34;
       const chartW = width - padLeft - padRight, chartH = height - padTop - padBottom;
       const step = points.length > 1 ? chartW / (points.length - 1) : chartW;
 
-      let pathD = "", dotsSvg = "", labelsSvg = "";
+      let pathD = "", dotsSvg = "", labelsSvg = "", gridSvg = "";
+      [5, 4, 3, 2, 1].forEach(score => {
+        const y = height - padBottom - ((score - 1) / 4) * chartH;
+        gridSvg += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="var(--border)" stroke-width="0.7" opacity="0.65"/><text x="${padLeft - 6}" y="${y + 3}" font-size="8" fill="var(--text-muted)" text-anchor="end">${score}</text>`;
+      });
+
       points.forEach((pt, idx) => {
-        const x = padLeft + idx * step;
-        const norm = (pt.rating - 1) / 4;
+        const x = points.length > 1 ? padLeft + idx * step : padLeft + chartW / 2;
+        const norm = Math.max(0, Math.min(1, (pt.rating - 1) / 4));
         const y = height - padBottom - norm * chartH;
         if (idx === 0) pathD += `M ${x} ${y}`;
         else pathD += ` L ${x} ${y}`;
 
-        dotsSvg += `<circle cx="${x}" cy="${y}" r="3.5" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"/><text x="${x}" y="${y - 6}" font-size="8" font-weight="700" fill="var(--text)" text-anchor="middle">${pt.rating.toFixed(1)}</text>`;
-        labelsSvg += `<text x="${x}" y="${height - padBottom + 13}" font-size="7.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${pt.date}</text>`;
+        dotsSvg += `
+          <g>
+            <circle cx="${x}" cy="${y}" r="4" fill="${lineColor}" stroke="#ffffff" stroke-width="1.5"/>
+            <text x="${x}" y="${y - 7}" font-size="8" font-weight="700" fill="var(--text)" text-anchor="middle">${pt.rating.toFixed(1)}</text>
+          </g>
+        `;
+        labelsSvg += `<text x="${x}" y="${height - padBottom + 14}" font-size="7.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${pt.date}</text>`;
       });
+
+      let trendlineSvg = "";
+      if (points.length > 1) {
+        const n = points.length;
+        const sumX = points.reduce((sum, _pt, idx) => sum + idx, 0);
+        const sumY = points.reduce((sum, pt) => sum + pt.rating, 0);
+        const sumXY = points.reduce((sum, pt, idx) => sum + idx * pt.rating, 0);
+        const sumXX = points.reduce((sum, _pt, idx) => sum + idx * idx, 0);
+        const slope = ((n * sumXY) - (sumX * sumY)) / ((n * sumXX) - (sumX * sumX));
+        const intercept = (sumY - slope * sumX) / n;
+        const startRating = Math.max(1, Math.min(5, intercept));
+        const endRating = Math.max(1, Math.min(5, intercept + slope * (n - 1)));
+        const x1 = padLeft;
+        const x2 = padLeft + chartW;
+        const y1 = height - padBottom - ((startRating - 1) / 4) * chartH;
+        const y2 = height - padBottom - ((endRating - 1) / 4) * chartH;
+        trendlineSvg = `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${lineColor}" stroke-width="1.6" stroke-dasharray="4 4" opacity="0.8"/>`;
+      }
 
       el("trendChart").innerHTML = `
         <svg viewBox="0 0 ${width} ${height}" class="sr-trend-svg" style="width:100%; height:100%;">
-          <text x="${padLeft - 6}" y="${padTop + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">5</text>
-          <text x="${padLeft - 6}" y="${padTop + chartH * 0.5 + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">3</text>
-          <text x="${padLeft - 6}" y="${height - padBottom + 4}" font-size="8" fill="var(--text-muted)" text-anchor="end">1</text>
-          <path d="${pathD}" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+          <text x="${padLeft}" y="12" font-size="8.5" font-weight="700" fill="var(--text-muted)">Avg: ${overallAverage.toFixed(1)} / 5</text>
+          <text x="${width - padRight}" y="12" font-size="8.5" font-weight="700" fill="${directionColor}" text-anchor="end">${direction}</text>
+          ${gridSvg}
+          <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1"/>
+          <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" stroke="var(--border)" stroke-width="1"/>
+          ${trendlineSvg}
+          <path d="${pathD}" fill="none" stroke="${lineColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
           ${dotsSvg}
           ${labelsSvg}
         </svg>
